@@ -36,7 +36,25 @@ pnpm typecheck        # tsc --noEmit in every package
 pnpm test             # vitest run
 pnpm test:e2e         # playwright test
 pnpm changeset        # describe a change for the next release
+pnpm check:package    # what npm would publish: allowed files + size budget
+pnpm ci:quick         # the CI pipeline on this machine only
+pnpm ci:local         # + Linux in Docker (Node 22, 24) + built CLI on Node 20.19
 ```
+
+## Local CI
+
+`pnpm ci:local` reproduces GitHub CI on your machine (see `scripts/ci-local.mjs`):
+
+| Stage         | Where                             | Covers                                                                            |
+| ------------- | --------------------------------- | --------------------------------------------------------------------------------- |
+| Host          | your OS, your Node                | install (frozen lockfile), format, lint, typecheck, test, build, package contents |
+| Node 20 smoke | Docker `node:20.19-bookworm-slim` | the host-built bundle runs on our minimum runtime and scans real folders          |
+| Linux         | Docker `node:22` and `node:24`    | the full check suite on a clean copy of the repo (no host `node_modules`)         |
+
+- It needs Docker running. Without it, use `pnpm ci:quick` (host only).
+- macOS can't be reproduced locally. Only GitHub CI covers it.
+- A Docker volume (`depboard-pnpm-store`) caches downloads between runs.
+- `scripts/check-package.mjs` is shared by local and GitHub CI, so the two never drift apart.
 
 To run the tool locally after building:
 

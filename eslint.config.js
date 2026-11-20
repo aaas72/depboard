@@ -34,5 +34,11 @@ export default tseslint.config(
     files: ['packages/cli/src/**/*.ts'],
     rules: { 'no-console': 'off' },
   },
+  {
+    // Repo maintenance scripts: plain Node ESM, outside any tsconfig.
+    files: ['scripts/**/*.mjs'],
+    ...tseslint.configs.disableTypeChecked,
+    rules: { ...tseslint.configs.disableTypeChecked.rules, 'no-console': 'off' },
+  },
   prettier,
 );

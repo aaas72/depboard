@@ -7,7 +7,7 @@
 3. **Plan:** for tasks spanning more than one package, write a short plan (files to change + tests to add) before coding.
 4. **Work in small steps:** type in `shared` → service → route → UI. Each step should be testable on its own.
 5. **Test:** write tests alongside the code, not after it (see [testing.md](testing.md)).
-6. **Verify:** `pnpm lint && pnpm typecheck && pnpm test`.
+6. **Verify:** `pnpm lint && pnpm typecheck && pnpm test` while iterating. Before committing a finished change, run `pnpm ci:local` (or `pnpm ci:quick` without Docker).
 7. **Document:** update `api.md` or the README, or add a changeset, if user-visible behavior changed.
 8. **Report honestly:** what was done, what wasn't, and what failed.
 
