@@ -1,11 +1,13 @@
 import type {
   Advisory,
   Insight,
+  Job,
   MatrixCell,
   MatrixResponse,
   MatrixRow,
   Project,
   ProjectsResponse,
+  UpdateRequest,
 } from '@depboard/shared';
 import type { ApiClient } from '../lib/api.js';
 
@@ -130,10 +132,42 @@ export function fakeApi(
   matrix: MatrixResponse = sampleMatrix(),
   overrides: Partial<ApiClient> = {},
 ): ApiClient {
+  const commandsFor = (request: UpdateRequest) => [
+    {
+      projectId: request.projectIds[0] ?? '',
+      display: `npm install ${request.package}@${request.version} --no-audit --no-fund`,
+    },
+  ];
   return {
     getMatrix: () => Promise.resolve(matrix),
     getProjects: () => Promise.resolve(projectsFor(matrix)),
     rescan: () => Promise.resolve(matrix),
+    previewUpdate: (request) =>
+      Promise.resolve({
+        version: request.version,
+        updateType: 'minor',
+        commands: commandsFor(request),
+      }),
+    startUpdate: (request) =>
+      Promise.resolve({ jobId: 'j_000000000001', commands: commandsFor(request) }),
+    listJobs: () => Promise.resolve({ jobs: [] }),
+    streamJob: () => Promise.resolve(),
+    ...overrides,
+  };
+}
+
+/** A finished job, as the server reports it. */
+export function job(overrides: Partial<Job> = {}): Job {
+  return {
+    id: 'j_000000000001',
+    projectId: 'b',
+    package: 'zod',
+    version: '3.23.0',
+    command: 'npm install zod@3.23.0 --no-audit --no-fund',
+    status: 'success',
+    exitCode: 0,
+    startedAt: '2026-11-20T10:00:00.000Z',
+    durationMs: 2400,
     ...overrides,
   };
 }

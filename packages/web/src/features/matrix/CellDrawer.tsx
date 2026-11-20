@@ -1,13 +1,18 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import type { MatrixRow, Project } from '@depboard/shared';
+import type { ApiClient } from '../../lib/api.js';
 import { t } from '../../lib/i18n.js';
+import type { Activity } from '../activity/useActivity.js';
 import { UpdateBadge, VulnerabilityMarker, showsUpdateBadge } from './badges.js';
 import { cellVersionText, SEVERITY_LETTER } from './model.js';
+import { UpdateSection, canUpdate } from './UpdateSection.js';
 
 export interface CellDrawerProps {
   row: MatrixRow;
   project: Project;
   projects: readonly Project[];
+  api: ApiClient;
+  activity: Activity;
   onClose: () => void;
 }
 
@@ -24,7 +29,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
  * Details for one package in one project: versions, status, and advisories.
  * A side panel, not a modal: the matrix stays visible. Esc closes it.
  */
-export function CellDrawer({ row, project, projects, onClose }: CellDrawerProps) {
+export function CellDrawer({ row, project, projects, api, activity, onClose }: CellDrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const cell = row.cells[project.id];
 
@@ -109,6 +114,22 @@ export function CellDrawer({ row, project, projects, onClose }: CellDrawerProps)
         )}
         {cell.installed === null && row.lookup === 'ok' && (
           <p className="mt-3 text-sm text-text-muted">{t('drawer.estimated')}</p>
+        )}
+
+        {canUpdate(row, cell) && (
+          <section aria-labelledby="drawer-update" className="mt-5">
+            <h3 id="drawer-update" className="mb-2 text-sm font-semibold">
+              {t('drawer.update')}
+            </h3>
+            <UpdateSection
+              key={`${row.name}:${project.id}`}
+              row={row}
+              cell={cell}
+              project={project}
+              api={api}
+              activity={activity}
+            />
+          </section>
         )}
 
         <h3 className="mt-5 mb-2 text-sm font-semibold">{t('drawer.advisories')}</h3>

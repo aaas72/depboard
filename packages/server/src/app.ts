@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { PassThrough } from 'node:stream';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 import * as z from 'zod/mini';
@@ -8,11 +9,17 @@ import {
   type ErrorResponse,
   type Matrix,
   type MatrixResponse,
+  type Job,
   type ProjectsResponse,
+  type UpdateAccepted,
+  type UpdatePreview,
 } from '@depboard/shared';
 import { analyze, type AnalyzeResult } from './analyze.js';
 import type { RegistryClient } from './registry/registry-client.js';
 import { registerGuard } from './security/guard.js';
+import { createJobManager } from './updates/jobs.js';
+import { planUpdate } from './updates/plan-update.js';
+import { runCommand, type Runner } from './updates/runner.js';
 
 export interface AppOptions {
   token: string;
@@ -27,6 +34,8 @@ export interface AppOptions {
   staticDir?: string | undefined;
   devOrigins?: readonly string[];
   logger?: boolean;
+  /** Starts install commands. Tests inject a fake, so they never run npm. */
+  runner?: Runner;
 }
 
 const STATUS: Partial<Record<ErrorCode, number>> = {
@@ -39,12 +48,24 @@ const STATUS: Partial<Record<ErrorCode, number>> = {
   NOT_FOUND: 404,
   PROJECT_BUSY: 409,
   MAJOR_NOT_CONFIRMED: 409,
+  MANAGER_NOT_SUPPORTED: 409,
+  NOT_UPDATABLE: 409,
   REGISTRY_UNAVAILABLE: 502,
 };
 
 function errorBody(code: ErrorCode, message: string): ErrorResponse {
   return { error: { code, message } };
 }
+
+const updateBody = z.object({
+  package: z.string().check(z.minLength(1), z.maxLength(214)),
+  version: z.string().check(z.minLength(1), z.maxLength(64)),
+  projectIds: z.array(z.string().check(z.maxLength(64))).check(z.minLength(1), z.maxLength(1)),
+  confirmMajor: z.optional(z.boolean()),
+  dryRun: z.optional(z.boolean()),
+});
+
+const jobParams = z.object({ id: z.string().check(z.regex(/^j_[0-9a-f]{12}$/)) });
 
 const matrixQuery = z.object({
   onlyOutdated: z.optional(z.enum(['true', 'false'])),
@@ -143,6 +164,56 @@ export async function createApp(options: AppOptions): Promise<FastifyInstance> {
   });
 
   app.post('/api/rescan', async (): Promise<MatrixResponse> => toResponse(await rescan()));
+
+  const jobs = createJobManager({
+    runner: options.runner ?? runCommand,
+    // The update changed the project: rescan so the matrix shows the new version.
+    afterSuccess: rescan,
+  });
+  // Clean exit: never leave an install running after the server stops.
+  app.addHook('onClose', (_instance, done) => {
+    jobs.stopAll();
+    done();
+  });
+
+  app.post('/api/update', async (request, reply): Promise<UpdatePreview | UpdateAccepted> => {
+    const body = updateBody.safeParse(request.body);
+    if (!body.success) throw new DepboardError('INVALID_USAGE', 'Invalid update request.');
+    const plan = planUpdate((await latest()).matrix, options.roots, body.data);
+    const commands = [{ projectId: plan.project.id, display: plan.command.display }];
+    if (body.data.dryRun === true) {
+      return { version: plan.version, updateType: plan.updateType, commands };
+    }
+    const job = jobs.start({
+      projectId: plan.project.id,
+      cwd: plan.project.path,
+      package: body.data.package,
+      version: plan.version,
+      command: plan.command,
+    });
+    void reply.code(202);
+    return { jobId: job.id, commands };
+  });
+
+  app.get('/api/jobs', (): Promise<{ jobs: Job[] }> => Promise.resolve({ jobs: jobs.list() }));
+
+  // Live install output as NDJSON over a plain streaming response: the token stays in a header,
+  // and the same guard applies as for every other request (see api.md).
+  app.get('/api/jobs/:id/stream', (request, reply) => {
+    const params = jobParams.safeParse(request.params);
+    if (!params.success) throw new DepboardError('NOT_FOUND', 'No such job.');
+    const stream = new PassThrough();
+    const unsubscribe = jobs.subscribe(params.data.id, (event) => {
+      stream.write(`${JSON.stringify(event)}
+`);
+      if (event.type === 'end') stream.end();
+    });
+    request.raw.on('close', () => {
+      unsubscribe();
+      stream.end();
+    });
+    return reply.type('application/x-ndjson; charset=utf-8').send(stream);
+  });
 
   if (options.staticDir !== undefined && fs.existsSync(options.staticDir)) {
     await app.register(fastifyStatic, { root: options.staticDir, index: 'index.html' });

@@ -23,7 +23,7 @@ function reject(reply: FastifyReply, status: 401 | 403, message: string): Fastif
 
 /** Routes that need the token. Static UI files don't: they contain no data. */
 function isProtected(url: string): boolean {
-  return url.startsWith('/api/') || url === '/api' || url.startsWith('/ws/');
+  return url.startsWith('/api/') || url === '/api';
 }
 
 /**
@@ -31,7 +31,7 @@ function isProtected(url: string): boolean {
  * - Host must be exactly 127.0.0.1:<port>  → blocks DNS rebinding
  * - Origin, when present, must be our own  → blocks other sites in the browser
  * - non-GET requests must carry an Origin  → no blind cross-site writes
- * - /api and /ws need the session token    → nothing works without the launch URL
+ * - /api needs the session token (header)  → nothing works without the launch URL
  */
 export function registerGuard(app: FastifyInstance, options: GuardOptions): void {
   const allowedOrigins = () =>
@@ -55,12 +55,8 @@ export function registerGuard(app: FastifyInstance, options: GuardOptions): void
     // like /%61pi/matrix can't slip past. Unmatched routes need the token too.
     const route = request.routeOptions.url;
     if (route === undefined || isProtected(route) || isProtected(request.url)) {
-      const fromHeader = request.headers[TOKEN_HEADER];
-      // Browsers can't set headers on a WebSocket handshake, so /ws/ takes the token in the query.
-      const fromQuery = request.url.startsWith('/ws/')
-        ? new URL(request.url, 'http://x').searchParams.get('token')
-        : null;
-      if (!tokensMatch(options.token, fromHeader ?? fromQuery)) {
+      // Header only, never the query string: a token in a URL can leak (history, logs, Referer).
+      if (!tokensMatch(options.token, request.headers[TOKEN_HEADER])) {
         return reject(
           reply,
           401,

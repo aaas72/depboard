@@ -12,6 +12,8 @@ export const ERROR_CODES = [
   'PROJECT_NOT_FOUND',
   'PROJECT_BUSY',
   'MAJOR_NOT_CONFIRMED',
+  'MANAGER_NOT_SUPPORTED',
+  'NOT_UPDATABLE',
   'REGISTRY_UNAVAILABLE',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

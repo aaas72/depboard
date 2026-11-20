@@ -23,7 +23,7 @@ function Centered({ title, body, action }: { title: string; body?: string; actio
 /** Opens directly on the matrix (docs/agent/ui-ux.md): no welcome page in front of it. */
 export function App({ api: injected }: AppProps) {
   const api = useMemo(() => injected ?? createApiClient(takeToken()), [injected]);
-  const { state, reload, rescan, rescanning, rescanError } = useMatrix(api);
+  const { state, reload, rescan, refresh, rescanning, rescanError } = useMatrix(api);
 
   if (state.status === 'loading') {
     return (
@@ -56,6 +56,8 @@ export function App({ api: injected }: AppProps) {
     <main className="h-full">
       <MatrixScreen
         data={state.data}
+        api={api}
+        refresh={refresh}
         rescan={rescan}
         rescanning={rescanning}
         rescanError={rescanError}

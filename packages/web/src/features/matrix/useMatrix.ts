@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { MatrixResponse, ProjectsResponse } from '@depboard/shared';
 import { ApiError, type ApiClient } from '../../lib/api.js';
+import { t } from '../../lib/i18n.js';
 
 export interface MatrixData {
   matrix: MatrixResponse;
@@ -63,5 +64,17 @@ export function useMatrix(api: ApiClient) {
       });
   }, [api]);
 
-  return { state, reload, rescan, rescanning, rescanError };
+  // After an update the server already rescanned: just read the fresh result, keeping the screen.
+  const refresh = useCallback(() => {
+    Promise.all([api.getMatrix(), api.getProjects()]).then(
+      ([matrix, projects]) => {
+        setState({ status: 'ready', data: { matrix, projects } });
+      },
+      () => {
+        setRescanError(new ApiError('server', t('alert.refreshFailed')));
+      },
+    );
+  }, [api]);
+
+  return { state, reload, rescan, refresh, rescanning, rescanError };
 }

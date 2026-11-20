@@ -7,6 +7,9 @@ import { RefreshIcon, ThemeIcon } from '../../components/ui/icons.js';
 import { t } from '../../lib/i18n.js';
 import { applyTheme, nextTheme, storedTheme, type Theme } from '../../lib/theme.js';
 import { UpdateBadge, VulnerabilityMarker } from './badges.js';
+import type { ApiClient } from '../../lib/api.js';
+import { ActivityPanel } from '../activity/ActivityPanel.js';
+import { useActivity } from '../activity/useActivity.js';
 import { CellDrawer } from './CellDrawer.js';
 import { DriftStrip, InsightSentence } from './DriftStrip.js';
 import { MatrixGrid, type CellRef } from './MatrixGrid.js';
@@ -15,13 +18,26 @@ import type { MatrixData } from './useMatrix.js';
 
 export interface MatrixScreenProps {
   data: MatrixData;
+  api: ApiClient;
+  /** Re-reads the matrix after an update (the server has already rescanned). */
+  refresh: () => void;
   rescan: () => void;
   rescanning: boolean;
   rescanError: Error | null;
 }
 
 /** The whole product on one screen: insights on top, the matrix below, details on the side. */
-export function MatrixScreen({ data, rescan, rescanning, rescanError }: MatrixScreenProps) {
+export function MatrixScreen({
+  data,
+  api,
+  refresh,
+  rescan,
+  rescanning,
+  rescanError,
+}: MatrixScreenProps) {
+  const activity = useActivity(api, (job) => {
+    if (job.status === 'success') refresh();
+  });
   const { matrix, projects: info } = data;
   const [query, setQuery] = useState('');
   const [outdatedOnly, setOutdatedOnly] = useState(false);
@@ -215,12 +231,15 @@ export function MatrixScreen({ data, rescan, rescanning, rescanError }: MatrixSc
                 row={openRow}
                 project={openProject}
                 projects={matrix.projects}
+                api={api}
+                activity={activity}
                 onClose={closeDrawer}
               />
             )}
           </div>
         </>
       )}
+      <ActivityPanel jobs={activity.jobs} projects={matrix.projects} />
     </div>
   );
 }

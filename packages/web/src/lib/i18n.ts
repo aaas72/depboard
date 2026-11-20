@@ -97,6 +97,32 @@ const en = {
   'drawer.noAdvisories': 'No known vulnerabilities for this version.',
   'drawer.affected': 'Affected versions: {range}',
   'drawer.npm': 'View on npm',
+  'drawer.update': 'Update',
+
+  'update.willRun': 'DepBoard will run, in this project’s folder:',
+  'update.button': 'Update to {version}',
+  'update.buttonMajor': 'Update to {version}…',
+  'update.running': 'Updating…',
+  'update.unsupported':
+    'Updating {manager} projects from DepBoard comes in a later version. You can run this in the project folder:',
+  'update.confirmTitle': 'Update {name} from {from} to {to}?',
+  'update.confirmBody':
+    'This is a major update: it may include breaking changes. DepBoard will run this command in {project}:',
+  'update.confirm': 'Run the update',
+  'update.cancel': 'Cancel',
+  'update.whatsNew': 'See what changed on npm',
+
+  'activity.title': 'Activity',
+  'activity.running': '{n} update running|{n} updates running',
+  'activity.count': '{n} update|{n} updates',
+  'activity.duration': '{s} s',
+  'activity.status.running': 'running',
+  'activity.status.success': 'done',
+  'activity.status.failed': 'failed',
+  'activity.output': 'Command output',
+  'activity.done': '✓ Done in {s} s. The matrix is up to date.',
+  'activity.failedWith': '✕ The command failed (exit code {code}). The output above says why.',
+  'alert.refreshFailed': 'The update finished, but the matrix couldn’t be refreshed. Press Rescan.',
   'drawer.otherProjects': 'Across your projects',
 } as const;
 
