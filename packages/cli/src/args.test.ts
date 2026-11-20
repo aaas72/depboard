@@ -9,6 +9,7 @@ describe('parseCliArgs', () => {
       port: undefined,
       open: true,
       yes: false,
+      summary: false,
       depth: DEFAULT_DEPTH,
       debug: false,
       help: false,
@@ -19,6 +20,10 @@ describe('parseCliArgs', () => {
   it('collects several paths, including ones with spaces and Arabic names', () => {
     const options = parseCliArgs(['~/work', 'C:\\My Projects', '/home/me/مشاريع']);
     expect(options.paths).toEqual(['~/work', 'C:\\My Projects', '/home/me/مشاريع']);
+  });
+
+  it('parses --summary', () => {
+    expect(parseCliArgs(['--summary']).summary).toBe(true);
   });
 
   it('parses flags', () => {

@@ -1,6 +1,6 @@
-/** The only interface the server may listen on. See docs/agent/security.md. */
-export const SERVER_HOST = '127.0.0.1';
-
+export { SERVER_HOST, TOKEN_HEADER } from './security/guard.js';
+export { createApp, type AppOptions } from './app.js';
+export { startServer, type RunningServer, type StartServerOptions } from './start-server.js';
 export {
   resolveRoots,
   type ResolvedRoots,

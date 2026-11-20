@@ -6,6 +6,7 @@ export interface CliOptions {
   port: number | undefined;
   open: boolean;
   yes: boolean;
+  summary: boolean;
   depth: number;
   debug: boolean;
   help: boolean;
@@ -22,6 +23,7 @@ Scans only the folders you give it (default: the current directory).
 Options:
   --port <n>      Port to use (default: random free port)
   --no-open       Don't open the browser
+  --summary       Print the summary and exit (no server, no browser): for CI and scripts
   -y, --yes       Skip confirmations (non-interactive use)
   --depth <n>     Max folder depth (default: ${DEFAULT_DEPTH})
   --debug         Verbose logs to stderr
@@ -31,7 +33,8 @@ Options:
 Examples:
   npx depboard
   npx depboard ~/projects
-  npx depboard ~/work ~/clients`;
+  npx depboard ~/work ~/clients
+  npx depboard ~/projects --summary`;
 
 function parsePositiveInt(flag: string, raw: string | undefined, max: number): number | undefined {
   if (raw === undefined) return undefined;
@@ -59,6 +62,7 @@ export function parseCliArgs(argv: readonly string[]): CliOptions {
         port: { type: 'string' },
         open: { type: 'boolean', default: true },
         yes: { type: 'boolean', short: 'y', default: false },
+        summary: { type: 'boolean', default: false },
         depth: { type: 'string' },
         debug: { type: 'boolean', default: false },
         version: { type: 'boolean', short: 'v', default: false },
@@ -76,6 +80,7 @@ export function parseCliArgs(argv: readonly string[]): CliOptions {
     port: parsePositiveInt('port', values.port, 65535),
     open: values.open,
     yes: values.yes,
+    summary: values.summary,
     depth: parsePositiveInt('depth', values.depth, 32) ?? DEFAULT_DEPTH,
     debug: values.debug,
     help: values.help,

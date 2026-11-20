@@ -3,7 +3,14 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { createRegistryClient, type RegistryClient } from '@depboard/server';
-import { EXIT_OK, EXIT_RUNTIME_ERROR, EXIT_USAGE_ERROR, run, type CliIO } from './run.js';
+import {
+  EXIT_OK,
+  EXIT_RUNTIME_ERROR,
+  EXIT_USAGE_ERROR,
+  run,
+  type CliIO,
+  type ServeOptions,
+} from './run.js';
 
 const dirs: string[] = [];
 afterEach(async () => {
@@ -49,6 +56,8 @@ function stubRegistry(
 function io(overrides: Partial<CliIO> = {}) {
   const out: string[] = [];
   const err: string[] = [];
+  const served: ServeOptions[] = [];
+  const opened: string[] = [];
   const value: CliIO = {
     stdout: (line) => out.push(line),
     stderr: (line) => err.push(line),
@@ -57,9 +66,15 @@ function io(overrides: Partial<CliIO> = {}) {
     version: '1.2.3',
     confirm: null,
     registry: stubRegistry(),
+    startServer: (options) => {
+      served.push(options);
+      return Promise.resolve({ url: 'http://127.0.0.1:4319/?token=t' });
+    },
+    openBrowser: (url) => opened.push(url),
+    staticDir: undefined,
     ...overrides,
   };
-  return { value, out, err };
+  return { value, out, err, served, opened };
 }
 
 describe('run', () => {
@@ -93,7 +108,7 @@ describe('run', () => {
       },
     );
     const t = io({ cwd: root, registry });
-    expect(await run([], t.value)).toBe(EXIT_OK);
+    expect(await run(['--summary'], t.value)).toBe(EXIT_OK);
     expect(t.out).toEqual([
       expect.stringContaining('2 projects · 2 packages'),
       '',
@@ -178,5 +193,57 @@ describe('run', () => {
     expect(await run([path.parse(process.cwd()).root], t.value)).toBe(EXIT_RUNTIME_ERROR);
     expect(t.err[0]).toContain("doesn't scan whole drives");
     expect(t.err[1]).toContain('npx depboard');
+  });
+
+  describe('server', () => {
+    async function twoProjects() {
+      return tree({
+        'web/package.json': { name: 'web', dependencies: { react: '^18.0.0' } },
+        'api/package.json': { name: 'api', dependencies: { react: '^18.0.0' } },
+      });
+    }
+
+    it('starts the server with the analysis it already ran, and prints the launch URL', async () => {
+      const root = await twoProjects();
+      const t = io({ cwd: root });
+      expect(await run(['--port', '5000', '--depth', '3'], t.value)).toBe(EXIT_OK);
+      expect(t.served).toHaveLength(1);
+      expect(t.served[0]).toMatchObject({ roots: [root], port: 5000, depth: 3 });
+      expect(t.served[0]?.initial.matrix.projects).toHaveLength(2);
+      expect(t.out).toContain('  ➜ Open: http://127.0.0.1:4319/?token=t');
+    });
+
+    it('opens the browser when the UI ships with the build', async () => {
+      const t = io({ cwd: await twoProjects(), staticDir: '/ui' });
+      await run([], t.value);
+      expect(t.opened).toEqual(['http://127.0.0.1:4319/?token=t']);
+    });
+
+    it('does not open the browser with --no-open', async () => {
+      const t = io({ cwd: await twoProjects(), staticDir: '/ui' });
+      await run(['--no-open'], t.value);
+      expect(t.served).toHaveLength(1);
+      expect(t.opened).toEqual([]);
+    });
+
+    it('does not open a browser to a page that does not exist yet', async () => {
+      const t = io({ cwd: await twoProjects(), staticDir: undefined });
+      await run([], t.value);
+      expect(t.opened).toEqual([]);
+    });
+
+    it('starts nothing with --summary', async () => {
+      const t = io({ cwd: await twoProjects(), staticDir: '/ui' });
+      await run(['--summary'], t.value);
+      expect(t.served).toEqual([]);
+      expect(t.opened).toEqual([]);
+    });
+
+    it('starts nothing when no projects were found', async () => {
+      const empty = await tree({});
+      const t = io({ cwd: empty });
+      await run([], t.value);
+      expect(t.served).toEqual([]);
+    });
   });
 });

@@ -5,6 +5,7 @@ import {
   pickHeadlines,
   resolveRoots,
   suggestRoots,
+  type AnalyzeResult,
   type RegistryClient,
 } from '@depboard/server';
 import { HELP_TEXT, parseCliArgs } from './args.js';
@@ -23,6 +24,24 @@ export interface CliIO {
   /** null when there is no interactive terminal (CI, pipes): never prompt then. */
   confirm: ((question: string) => Promise<boolean>) | null;
   registry: RegistryClient;
+  /**
+   * Starts the local server and keeps it running until the user stops it.
+   * Injected so tests never open real ports or browsers.
+   */
+  startServer: (options: ServeOptions) => Promise<{ url: string }>;
+  openBrowser: (url: string) => void;
+  /** The built UI, when it ships with this build. Without it only the API is served. */
+  staticDir: string | undefined;
+}
+
+export interface ServeOptions {
+  roots: readonly string[];
+  registry: RegistryClient;
+  depth: number;
+  port: number | undefined;
+  initial: AnalyzeResult;
+  staticDir: string | undefined;
+  debug: boolean;
 }
 
 function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
@@ -167,6 +186,21 @@ export async function run(argv: readonly string[], io: CliIO): Promise<number> {
     if (matrix.projects.length === 1) {
       io.stderr('Found 1 project. To compare projects, run: npx depboard ..');
     }
+    if (options.summary) return EXIT_OK;
+
+    const server = await io.startServer({
+      roots,
+      registry: io.registry,
+      depth: options.depth,
+      port: options.port,
+      initial: result,
+      staticDir: io.staticDir,
+      debug,
+    });
+    io.stdout('');
+    io.stdout(`  ➜ Open: ${server.url}`);
+    io.stdout('  Press Ctrl+C to stop.');
+    if (options.open && io.staticDir !== undefined) io.openBrowser(server.url);
     return EXIT_OK;
   } catch (error) {
     if (error instanceof DepboardError) {

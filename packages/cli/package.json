@@ -32,6 +32,7 @@
   "devDependencies": {
     "@depboard/server": "workspace:*",
     "@depboard/shared": "workspace:*",
+    "@depboard/web": "workspace:*",
     "tsup": "^9.0.0"
   }
 }

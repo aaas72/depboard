@@ -52,13 +52,21 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter depboard build
+      - run: pnpm build
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '20.19'
       - run: node --version
       - run: node packages/cli/dist/index.js --version
       - run: node packages/cli/dist/index.js --help
+      - name: Scan and server smoke test
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/p/a" "$RUNNER_TEMP/p/b"
+          echo '{"name":"a","dependencies":{"react":"^18.0.0"}}' > "$RUNNER_TEMP/p/a/package.json"
+          echo '{"name":"b","dependencies":{"react":"^19.0.0"}}' > "$RUNNER_TEMP/p/b/package.json"
+          node packages/cli/dist/index.js "$RUNNER_TEMP/p" --summary | grep -q "2 projects"
+          node scripts/smoke-server.mjs packages/cli/dist/index.js "$RUNNER_TEMP/p"
 
   package-contents:
     name: Package contents
@@ -71,7 +79,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter depboard build
+      - run: pnpm build
       # Same script as `pnpm ci:local`, so local and GitHub CI never drift apart.
       - name: Only dist/ and metadata may be published, within the size budget
         run: pnpm check:package

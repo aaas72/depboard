@@ -100,14 +100,17 @@ function node20Smoke() {
     'mkdir -p /tmp/p/a /tmp/p/b',
     `echo '{"name":"a","dependencies":{"react":"^18.0.0"}}' > /tmp/p/a/package.json`,
     `echo '{"name":"b","dependencies":{"react":"^19.0.0"}}' > /tmp/p/b/package.json`,
-    'node /cli/dist/index.js /tmp/p | grep -q "2 projects"',
+    'node /cli/dist/index.js /tmp/p --summary | grep -q "2 projects"',
     'echo "scan OK"',
+    'node /scripts/smoke-server.mjs /cli/dist/index.js /tmp/p',
   ].join(' && ');
   return run('Node 20.19: built CLI smoke test', 'docker', [
     'run',
     '--rm',
     '-v',
     `${path.join(repo, 'packages', 'cli')}:/cli:ro`,
+    '-v',
+    `${path.join(repo, 'scripts')}:/scripts:ro`,
     'node:20.19-bookworm-slim',
     'bash',
     '-c',
