@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Components use these names only, never raw colors.
+ * Update-type colors and severity colors are separate scales (see docs/agent/ui-ux.md).
+ */
+@theme {
+  --color-surface: oklch(99% 0 0);
+  --color-surface-raised: oklch(97% 0 0);
+  --color-text: oklch(22% 0 0);
+  --color-text-muted: oklch(50% 0 0);
+  --color-border: oklch(90% 0 0);
+
+  --color-update-none: oklch(60% 0 0);
+  --color-update-patch: oklch(55% 0.15 150);
+  --color-update-minor: oklch(65% 0.15 80);
+  --color-update-major: oklch(55% 0.2 27);
+
+  --color-severity-low: oklch(60% 0.05 250);
+  --color-severity-moderate: oklch(65% 0.15 70);
+  --color-severity-high: oklch(55% 0.2 35);
+  --color-severity-critical: oklch(45% 0.22 20);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: oklch(18% 0 0);
+    --color-surface-raised: oklch(22% 0 0);
+    --color-text: oklch(94% 0 0);
+    --color-text-muted: oklch(70% 0 0);
+    --color-border: oklch(32% 0 0);
+  }
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

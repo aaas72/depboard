@@ -1,0 +1,37 @@
+{
+  "name": "depboard",
+  "version": "0.0.0",
+  "description": "Discover what's hiding in your projects in 10 seconds.",
+  "keywords": [
+    "npm",
+    "dependencies",
+    "outdated",
+    "vulnerabilities",
+    "audit",
+    "monorepo",
+    "dashboard",
+    "cli"
+  ],
+  "author": "Abdellah Sheikh",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "depboard": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepack": "node -e \"for (const f of ['README.md','LICENSE']) require('fs').copyFileSync('../../'+f,f)\""
+  },
+  "devDependencies": {
+    "@depboard/server": "workspace:*",
+    "@depboard/shared": "workspace:*",
+    "tsup": "^9.0.0"
+  }
+}
