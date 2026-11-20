@@ -112,6 +112,19 @@ const en = {
   'update.cancel': 'Cancel',
   'update.whatsNew': 'See what changed on npm',
 
+  'project.back': 'Back to the matrix',
+  'project.notFound': 'That project isn’t in this scan anymore.',
+  'project.dependencies': 'dependencies',
+  'project.devDependencies': 'devDependencies',
+  'project.noneHere': 'None match these filters.',
+  'project.open': 'Details for {name}',
+  'project.allCurrent': 'all up to date',
+  'project.outdated': 'outdated: {major} major · {minor} minor · {patch} patch',
+  'project.vulnerable': '{n} with a known vulnerability|{n} with known vulnerabilities',
+  'project.notInstalled':
+    '{n} not installed: versions estimated from package.json, vulnerability status unknown.',
+  'project.columnLink': 'Open {name}',
+
   'activity.title': 'Activity',
   'activity.running': '{n} update running|{n} updates running',
   'activity.count': '{n} update|{n} updates',

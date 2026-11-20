@@ -11,6 +11,7 @@ import {
 import { useVirtualizer, type Rect } from '@tanstack/react-virtual';
 import type { MatrixRow, Project } from '@depboard/shared';
 import { t } from '../../lib/i18n.js';
+import { routeHref } from '../../lib/route.js';
 import { UpdateBadge, VulnerabilityMarker, cellAriaLabel, showsUpdateBadge } from './badges.js';
 import { cellVersionText, driftGroups } from './model.js';
 
@@ -376,7 +377,13 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
                 className="flex flex-none flex-col justify-end border-e border-border px-2 pb-2"
                 style={{ width: COL_W }}
               >
-                <span className="truncate text-sm font-semibold">{project.name}</span>
+                <a
+                  href={routeHref({ view: 'project', projectId: project.id })}
+                  aria-label={t('project.columnLink', { name: project.name })}
+                  className="truncate text-sm font-semibold hover:text-accent hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+                >
+                  {project.name}
+                </a>
                 <span className="text-xs text-text-muted">{project.manager}</span>
               </div>
             );

@@ -10,6 +10,8 @@ import { UpdateBadge, VulnerabilityMarker } from './badges.js';
 import type { ApiClient } from '../../lib/api.js';
 import { ActivityPanel } from '../activity/ActivityPanel.js';
 import { useActivity } from '../activity/useActivity.js';
+import { ProjectView } from '../project/ProjectView.js';
+import { routeHref, useRoute } from '../../lib/route.js';
 import { CellDrawer } from './CellDrawer.js';
 import { DriftStrip, InsightSentence } from './DriftStrip.js';
 import { MatrixGrid, type CellRef } from './MatrixGrid.js';
@@ -45,7 +47,13 @@ export function MatrixScreen({
   const [open, setOpen] = useState<{ rowName: string; projectId: string } | null>(null);
   const [theme, setTheme] = useState<Theme>(storedTheme);
   const searchRef = useRef<HTMLInputElement>(null);
-  const gridAreaRef = useRef<HTMLDivElement>(null);
+  // Where focus was when the drawer opened, so closing it goes back there (grid or table row).
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const route = useRoute();
+  const routedProject =
+    route.view === 'project'
+      ? (matrix.projects.find((p) => p.id === route.projectId) ?? null)
+      : undefined;
 
   // A rescan replaces the insight objects: drop a focus that no longer exists.
   const focus = useMemo(
@@ -79,13 +87,26 @@ export function MatrixScreen({
   const openProject = open ? matrix.projects.find((p) => p.id === open.projectId) : undefined;
 
   const onOpenCell = useCallback(({ row, project }: CellRef) => {
+    returnFocus.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setOpen({ rowName: row.name, projectId: project.id });
   }, []);
   const closeDrawer = useCallback(() => {
     setOpen(null);
     // Back to where the user was.
-    gridAreaRef.current?.querySelector<HTMLElement>('[role="grid"]')?.focus();
+    returnFocus.current?.focus();
   }, []);
+
+  const drawer = openRow && openProject && (
+    <CellDrawer
+      row={openRow}
+      project={openProject}
+      projects={matrix.projects}
+      api={api}
+      activity={activity}
+      onClose={closeDrawer}
+    />
+  );
 
   const projectCount = matrix.projects.length;
   const roots = info.roots.join(', ');
@@ -187,6 +208,34 @@ export function MatrixScreen({
             <CopyCommand command="npx depboard ~/projects" />
           </div>
         </div>
+      ) : routedProject !== undefined ? (
+        <div className="flex min-h-0 flex-1 border-t border-border">
+          <div className="min-w-0 flex-1 overflow-y-auto">
+            {routedProject === null ? (
+              <div className="p-8 text-center text-sm">
+                <p>{t('project.notFound')}</p>
+                <a
+                  href={routeHref({ view: 'matrix' })}
+                  className="mt-2 inline-block text-accent hover:underline"
+                >
+                  ← {t('project.back')}
+                </a>
+              </div>
+            ) : (
+              <ProjectView
+                project={routedProject}
+                rows={matrix.rows}
+                query={query}
+                outdatedOnly={outdatedOnly}
+                openPackage={open?.projectId === routedProject.id ? open.rowName : null}
+                onOpen={(row) => {
+                  onOpenCell({ row, project: routedProject });
+                }}
+              />
+            )}
+          </div>
+          {drawer}
+        </div>
       ) : (
         <>
           <DriftStrip
@@ -212,7 +261,7 @@ export function MatrixScreen({
             </div>
           )}
 
-          <div ref={gridAreaRef} className="flex min-h-0 flex-1 border-t border-border">
+          <div className="flex min-h-0 flex-1 border-t border-border">
             <div className="flex min-w-0 flex-1 flex-col">
               {view.rows.length === 0 ? (
                 <p className="p-8 text-center text-sm text-text-muted">{t('state.noMatches')}</p>
@@ -226,16 +275,7 @@ export function MatrixScreen({
               )}
               <Legend />
             </div>
-            {openRow && openProject && (
-              <CellDrawer
-                row={openRow}
-                project={openProject}
-                projects={matrix.projects}
-                api={api}
-                activity={activity}
-                onClose={closeDrawer}
-              />
-            )}
+            {drawer}
           </div>
         </>
       )}
