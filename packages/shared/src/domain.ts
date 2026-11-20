@@ -69,8 +69,54 @@ export interface MatrixRow {
 export interface Matrix {
   projects: Project[];
   rows: MatrixRow[];
+  /** Ranked findings across all projects, most important first. */
+  insights: Insight[];
   scannedAt: string;
 }
+
+interface InsightBase {
+  package: string;
+  /**
+   * Other packages of the same scope showing exactly the same pattern (e.g. all of
+   * `@angular/*`), folded into this insight so one story is told once. Usually empty.
+   */
+  related: string[];
+  /** Projects involved, sorted by project name. */
+  projectIds: string[];
+  /** Higher is more important. Only meaningful for ordering. */
+  score: number;
+}
+
+/** A package with a known vulnerability in one or more projects. */
+export interface VulnerableSpreadInsight extends InsightBase {
+  kind: 'vulnerable-spread';
+  /** The highest severity found. */
+  severity: Severity;
+  advisories: Pick<Advisory, 'id' | 'title' | 'url' | 'severity'>[];
+}
+
+/**
+ * The same package on different release lines across projects: different majors
+ * (17 vs 18), or for 0.x packages different minors (0.2 vs 0.3), where SemVer allows breaks.
+ */
+export interface VersionDriftInsight extends InsightBase {
+  kind: 'version-drift';
+  /** Distinct release lines, highest first: ["19", "18", "17"] or ["0.3", "0.2"]. */
+  lines: string[];
+  /** Distinct installed versions, highest first. */
+  versions: string[];
+}
+
+/** A package one or more major versions behind `latest` in two or more projects. */
+export interface MajorLagInsight extends InsightBase {
+  kind: 'major-lag';
+  latest: string;
+  /** The largest gap in major versions among the projects. */
+  majorsBehind: number;
+}
+
+export type Insight = VulnerableSpreadInsight | VersionDriftInsight | MajorLagInsight;
+export type InsightKind = Insight['kind'];
 
 export function isPackageManagerId(value: unknown): value is PackageManagerId {
   return typeof value === 'string' && (PACKAGE_MANAGERS as readonly string[]).includes(value);
