@@ -6,6 +6,7 @@ import {
   type MatrixCell,
   type MatrixRow,
 } from '@depboard/shared';
+import { computeInsights } from '../insights/compute-insights.js';
 import type { AdvisoryLookup, PackageLookup } from '../registry/registry-client.js';
 import { versionKey } from '../registry/registry-client.js';
 import type { ScannedProject } from '../scanner/scan-projects.js';
@@ -94,9 +95,17 @@ export function buildMatrix(inputs: MatrixInputs): Matrix {
     );
   }
 
+  const projects = inputs.projects.map(({ id, name, path, manager }) => ({
+    id,
+    name,
+    path,
+    manager,
+  }));
+  const sortedRows = [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
   return {
-    projects: inputs.projects.map(({ id, name, path, manager }) => ({ id, name, path, manager })),
-    rows: [...rows.values()].sort((a, b) => a.name.localeCompare(b.name)),
+    projects,
+    rows: sortedRows,
+    insights: computeInsights(projects, sortedRows),
     scannedAt: inputs.scannedAt.toISOString(),
   };
 }

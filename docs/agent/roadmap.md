@@ -26,7 +26,8 @@ The MVP exists to deliver the first-run aha moment. These capabilities only:
 - [ ] **Matrix view:** opens directly on launch, sticky columns, virtualization, P/m/M coloring, search, and "Outdated only"
 - [x] **Vulnerabilities (data):** one bulk advisory request for all projects, matched per installed version (direct dependencies only)
 - [ ] **Vulnerabilities (UI):** a severity marker per cell, advisory details in the drawer
-- [ ] **Drift insights:** `vulnerable-spread`, `version-drift`, and `major-lag` sentences at the top of the matrix, computed server-side
+- [x] **Insights (data):** `vulnerable-spread`, `version-drift`, and `major-lag`, ranked, with family grouping and diverse headlines
+- [ ] **Insights (UI):** the drift strip at the top of the matrix
 - [ ] **Performance budget:** ≤ 10 s to first insight for ~30 projects (cold cache)
 - [ ] **Single-project update:** npm adapter, major confirmation, output streamed over WebSocket
 - [ ] **Security controls:** 127.0.0.1, token, Origin/Host checks, input validation

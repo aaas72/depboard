@@ -32,7 +32,8 @@ A horizontal strip of short, plain-English insight sentences, ranked by impact. 
 | Vulnerability spread | **lodash** has a known vulnerability in **4 projects**          | MVP   |
 
 - The server computes the insights (`insights` in `GET /api/matrix`, see [api.md](api.md)). The UI only renders them.
-- Show at most 5 insights by default, with a "Show all" link.
+- Show 5 headlines by default (`pickHeadlines`: one per package, at most 3 of one kind), with a "Show all" link for the full ranked list.
+- A folded family reads as one sentence ("`@angular/*` (8 packages) are …"), and expands to list its packages.
 - Each sentence must stay readable as a **screenshot**: bold package name and number, no jargon, no truncation at 1280px width.
 - When there's no drift, say so plainly: "All 12 projects agree on every shared package. 🎉" (an honest result is still a result).
 

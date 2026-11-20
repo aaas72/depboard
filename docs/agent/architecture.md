@@ -126,11 +126,15 @@ interface PackageManagerAdapter {
 
 This service powers the core product moment: the drift sentences at the top of the matrix.
 
-- Pure functions over the matrix data, with no I/O: `computeInsights(matrix): Insight[]`.
-- Detects `version-drift` (2+ distinct installed versions of one package), `major-lag` (1+ major behind in 2+ projects),
-  and `vulnerable-spread` (a known advisory in 1+ projects). All three are in the MVP.
-- **Ranking score:** weight by number of projects affected × number of distinct versions × severity.
-  `high` / `critical` vulnerabilities always rank above drift. Otherwise major > minor > patch. Well-known core packages (react, typescript, next, vue…) get no special treatment; the data decides.
+- Pure functions over the matrix data, with no I/O: `computeInsights(projects, rows): Insight[]` (called by `buildMatrix`) and `pickHeadlines(insights, limit)`.
+- **Rules** (each reports only what the data proves):
+  - `vulnerable-spread`: a known advisory for an **installed** version in 1+ projects. Never from estimates.
+  - `version-drift`: 2+ distinct **release lines** among **installed**, non-prerelease versions. A release line is the part where SemVer allows breaks: the major (`17` vs `18`), or the minor before 1.0 (`0.2` vs `0.3`). Patch or minor differences on one major (`4.17.20` vs `4.17.21`) are not news and are not reported.
+  - `major-lag`: 1+ major behind `latest` in 2+ projects. Declared ranges count here, because `^17` can never install 19.
+- **Family grouping:** drift and lag insights from one npm scope that tell exactly the same story (same lines or gap, same projects) fold into one: "`@angular/*` (8 packages) are used at 3 different major versions…". Found by dogfooding, where eight Angular packages filled the list with one repeated sentence. Vulnerabilities are never merged: each package has its own advisories and fix.
+- **Ranking:** score bands encode priorities: critical (10 000) > high (8 000) > drift (5 000) > moderate (3 000) > low (1 000) > lag (500). Within a band, more projects, more release lines, and bigger gaps rank higher. Ties break by package name, so the order is deterministic. Well-known packages get no special treatment; the data decides.
+- **Headlines** (`pickHeadlines`): at most one insight per package, and at most 3 of one kind while other kinds have something to say, so 16 vulnerabilities can't hide the drift story (and the other way round). Leftover slots fill by importance.
+- Wording lives in `shared/src/insight-text.ts` (`describeInsight` returns parts with `strong` flags for the UI). The server sends structured data only.
 - Exhaustively unit-tested. A wrong or noisy insight damages trust more than a missing one.
 
 ### 5. Routes (`server/src/routes/`)

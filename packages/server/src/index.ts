@@ -28,3 +28,4 @@ export {
 export { analyze, type AnalyzeResult } from './analyze.js';
 export { buildMatrix } from './matrix/build-matrix.js';
 export { classifyUpdate } from './versions/classify.js';
+export { computeInsights, pickHeadlines, releaseLine } from './insights/compute-insights.js';

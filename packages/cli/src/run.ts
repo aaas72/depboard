@@ -1,7 +1,8 @@
-import { compareSeverity, DepboardError, type Matrix, type Severity } from '@depboard/shared';
+import { DepboardError, describeInsightText, type Matrix } from '@depboard/shared';
 import {
   analyze,
   displayPath,
+  pickHeadlines,
   resolveRoots,
   suggestRoots,
   type RegistryClient,
@@ -28,57 +29,54 @@ function plural(count: number, singular: string, pluralForm = `${singular}s`): s
   return `${count} ${count === 1 ? singular : pluralForm}`;
 }
 
+export const HEADLINE_LIMIT = 5;
+
 /**
- * A plain-text summary of the matrix. Temporary: the browser UI replaces it in 0.1.0,
- * but it already answers the core question in a terminal.
+ * A plain-text summary of the matrix, insights first. Temporary: the browser UI replaces it in
+ * 0.1.0, but it already answers the core question in a terminal.
  */
 function reportMatrix(matrix: Matrix, io: CliIO): void {
   const projectName = new Map(matrix.projects.map((p) => [p.id, p.name]));
 
-  const outdated = { major: 0, minor: 0, patch: 0 };
-  const vulnerable: { name: string; severity: Severity; projects: string[] }[] = [];
-  let estimated = 0;
+  const headlines = pickHeadlines(matrix.insights, HEADLINE_LIMIT);
+  if (headlines.length === 0) {
+    io.stdout('');
+    io.stdout('✔ Nothing hiding: shared packages agree and no known vulnerabilities were found.');
+  } else {
+    io.stdout('');
+    io.stdout("What's hiding in your projects:");
+    for (const insight of headlines) {
+      io.stdout(`  ● ${describeInsightText(insight)}`);
+      const names = insight.projectIds.map((id) => projectName.get(id) ?? id);
+      const shown = names.slice(0, 6).join(', ');
+      io.stdout(`      ${names.length > 6 ? `${shown}, +${names.length - 6} more` : shown}`);
+    }
+    const shownPackages = new Set(headlines.map((i) => i.package));
+    const more = matrix.insights.filter((i) => !shownPackages.has(i.package)).length;
+    if (more > 0) io.stdout(`  + ${plural(more, 'more finding')}`);
+  }
 
+  const outdated = { major: 0, minor: 0, patch: 0 };
+  let vulnerable = 0;
+  let estimated = 0;
   for (const row of matrix.rows) {
     const cells = Object.values(row.cells);
     const types = new Set(cells.map((c) => c.updateType));
     if (types.has('major')) outdated.major++;
     else if (types.has('minor')) outdated.minor++;
     else if (types.has('patch')) outdated.patch++;
-
-    let severity: Severity | null = null;
-    const affected: string[] = [];
-    for (const cell of cells) {
-      if (cell.versionSource === 'declared' && row.lookup === 'ok') estimated++;
-      if (cell.vulnerability === null || cell.vulnerability === 'unknown') continue;
-      affected.push(projectName.get(cell.projectId) ?? cell.projectId);
-      if (severity === null || compareSeverity(cell.vulnerability.severity, severity) > 0) {
-        severity = cell.vulnerability.severity;
-      }
-    }
-    if (severity !== null) vulnerable.push({ name: row.name, severity, projects: affected });
+    if (cells.some((c) => c.vulnerability !== null && c.vulnerability !== 'unknown')) vulnerable++;
+    estimated += cells.filter((c) => c.versionSource === 'declared' && row.lookup === 'ok').length;
   }
 
   const totalOutdated = outdated.major + outdated.minor + outdated.patch;
+  io.stdout('');
   io.stdout(
     totalOutdated === 0
-      ? '  ✔ Every package is up to date'
+      ? '  Every package is up to date'
       : `  ${plural(totalOutdated, 'package')} outdated: ${outdated.major} major · ${outdated.minor} minor · ${outdated.patch} patch`,
   );
-
-  if (vulnerable.length === 0) {
-    io.stdout('  ✔ No known vulnerabilities in installed versions');
-  } else {
-    vulnerable.sort(
-      (a, b) => compareSeverity(b.severity, a.severity) || b.projects.length - a.projects.length,
-    );
-    io.stdout(`  ⚠ ${plural(vulnerable.length, 'package')} with known vulnerabilities:`);
-    for (const v of vulnerable) {
-      io.stdout(
-        `    ${v.name} (${v.severity}) in ${plural(v.projects.length, 'project')}: ${v.projects.join(', ')}`,
-      );
-    }
-  }
+  io.stdout(`  ${plural(vulnerable, 'package')} with known vulnerabilities`);
 
   if (estimated > 0) {
     io.stderr(

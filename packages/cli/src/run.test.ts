@@ -96,10 +96,28 @@ describe('run', () => {
     expect(await run([], t.value)).toBe(EXIT_OK);
     expect(t.out).toEqual([
       expect.stringContaining('2 projects · 2 packages'),
+      '',
+      "What's hiding in your projects:",
+      '  ● lodash has a high vulnerability in 2 projects',
+      '      api, web',
+      '',
       '  2 packages outdated: 1 major · 0 minor · 1 patch',
-      '  ⚠ 1 package with known vulnerabilities:',
-      '    lodash (high) in 2 projects: api, web',
+      '  1 package with known vulnerabilities',
     ]);
+  });
+
+  it('says so plainly when nothing is hiding', async () => {
+    const root = await tree({
+      'web/package.json': { name: 'web', dependencies: { react: '^19.0.0' } },
+      'web/node_modules/react/package.json': { version: '19.1.0' },
+      'api/package.json': { name: 'api', dependencies: { react: '^19.0.0' } },
+      'api/node_modules/react/package.json': { version: '19.1.0' },
+    });
+    const t = io({ cwd: root, registry: stubRegistry({ react: '19.1.0' }) });
+    await run([], t.value);
+    expect(t.out).toContain(
+      '✔ Nothing hiding: shared packages agree and no known vulnerabilities were found.',
+    );
   });
 
   it('keeps working offline and says what is unknown', async () => {
