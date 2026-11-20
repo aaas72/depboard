@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  # Users may run the published CLI on Node 20.19+, even though our dev tooling needs Node 22.
+  # Build on Node 22, then run the built CLI on Node 20.
+  runtime-node20:
+    name: Runtime smoke test (${{ matrix.os }}, Node 20)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter depboard build
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '20.19'
+      - run: node --version
+      - run: node packages/cli/dist/index.js --version
+      - run: node packages/cli/dist/index.js --help
+
+  package-contents:
+    name: Package contents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter depboard build
+      - name: Only dist/ and metadata may be published
+        working-directory: packages/cli
+        run: |
+          npm pack --dry-run --json > pack.json
+          node -e '
+            const [pkg] = require("./pack.json");
+            const allowed = /^(dist\/|package\.json$|README\.md$|LICENSE$)/;
+            const bad = pkg.files.map((f) => f.path).filter((p) => !allowed.test(p));
+            if (bad.length) { console.error("Unexpected files in package:", bad); process.exit(1); }
+            const maxBytes = 5 * 1024 * 1024;
+            if (pkg.unpackedSize > maxBytes) { console.error("Package too large:", pkg.unpackedSize); process.exit(1); }
+            console.log(`OK: ${pkg.files.length} files, ${pkg.unpackedSize} bytes unpacked`);
+          '
