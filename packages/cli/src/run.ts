@@ -1,10 +1,10 @@
-import { DepboardError } from '@depboard/shared';
+import { compareSeverity, DepboardError, type Matrix, type Severity } from '@depboard/shared';
 import {
+  analyze,
   displayPath,
   resolveRoots,
-  scanProjects,
   suggestRoots,
-  type ScanResult,
+  type RegistryClient,
 } from '@depboard/server';
 import { HELP_TEXT, parseCliArgs } from './args.js';
 
@@ -21,14 +21,70 @@ export interface CliIO {
   version: string;
   /** null when there is no interactive terminal (CI, pipes): never prompt then. */
   confirm: ((question: string) => Promise<boolean>) | null;
+  registry: RegistryClient;
 }
 
 function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : pluralForm}`;
 }
 
-function uniquePackageCount(result: ScanResult): number {
-  return new Set(result.projects.flatMap((p) => p.dependencies.map((d) => d.name))).size;
+/**
+ * A plain-text summary of the matrix. Temporary: the browser UI replaces it in 0.1.0,
+ * but it already answers the core question in a terminal.
+ */
+function reportMatrix(matrix: Matrix, io: CliIO): void {
+  const projectName = new Map(matrix.projects.map((p) => [p.id, p.name]));
+
+  const outdated = { major: 0, minor: 0, patch: 0 };
+  const vulnerable: { name: string; severity: Severity; projects: string[] }[] = [];
+  let estimated = 0;
+
+  for (const row of matrix.rows) {
+    const cells = Object.values(row.cells);
+    const types = new Set(cells.map((c) => c.updateType));
+    if (types.has('major')) outdated.major++;
+    else if (types.has('minor')) outdated.minor++;
+    else if (types.has('patch')) outdated.patch++;
+
+    let severity: Severity | null = null;
+    const affected: string[] = [];
+    for (const cell of cells) {
+      if (cell.versionSource === 'declared' && row.lookup === 'ok') estimated++;
+      if (cell.vulnerability === null || cell.vulnerability === 'unknown') continue;
+      affected.push(projectName.get(cell.projectId) ?? cell.projectId);
+      if (severity === null || compareSeverity(cell.vulnerability.severity, severity) > 0) {
+        severity = cell.vulnerability.severity;
+      }
+    }
+    if (severity !== null) vulnerable.push({ name: row.name, severity, projects: affected });
+  }
+
+  const totalOutdated = outdated.major + outdated.minor + outdated.patch;
+  io.stdout(
+    totalOutdated === 0
+      ? '  ✔ Every package is up to date'
+      : `  ${plural(totalOutdated, 'package')} outdated: ${outdated.major} major · ${outdated.minor} minor · ${outdated.patch} patch`,
+  );
+
+  if (vulnerable.length === 0) {
+    io.stdout('  ✔ No known vulnerabilities in installed versions');
+  } else {
+    vulnerable.sort(
+      (a, b) => compareSeverity(b.severity, a.severity) || b.projects.length - a.projects.length,
+    );
+    io.stdout(`  ⚠ ${plural(vulnerable.length, 'package')} with known vulnerabilities:`);
+    for (const v of vulnerable) {
+      io.stdout(
+        `    ${v.name} (${v.severity}) in ${plural(v.projects.length, 'project')}: ${v.projects.join(', ')}`,
+      );
+    }
+  }
+
+  if (estimated > 0) {
+    io.stderr(
+      `ℹ ${plural(estimated, 'dependency', 'dependencies')} not installed: versions estimated from package.json, vulnerability status unknown.`,
+    );
+  }
 }
 
 async function reportEmpty(roots: string[], io: CliIO): Promise<void> {
@@ -80,29 +136,37 @@ export async function run(argv: readonly string[], io: CliIO): Promise<number> {
       }
     }
 
-    const result = await scanProjects(roots, { depth: options.depth });
+    const result = await analyze(roots, io.registry, { depth: options.depth });
+    const { matrix } = result;
     const shownRoots = roots.map((r) => displayPath(r, io.homedir)).join(', ');
 
-    if (result.projects.length === 0) {
+    if (matrix.projects.length === 0) {
       await reportEmpty(roots, io);
       return EXIT_OK;
     }
 
     io.stdout(
-      `Scanned ${shownRoots} · ${plural(result.projects.length, 'project')} · ${plural(
-        uniquePackageCount(result),
+      `Scanned ${shownRoots} · ${plural(matrix.projects.length, 'project')} · ${plural(
+        matrix.rows.length,
         'package',
       )}`,
     );
-    for (const project of result.projects) {
-      io.stdout(
-        `  ${project.name}  (${project.manager}, ${plural(project.dependencies.length, 'dependency', 'dependencies')})`,
-      );
-    }
+    reportMatrix(matrix, io);
+
     for (const issue of result.issues) {
       io.stderr(`⚠ Skipped ${displayPath(issue.path, io.homedir)}: ${issue.reason}`);
     }
-    if (result.projects.length === 1) {
+    if (result.failedLookups.length > 0) {
+      io.stderr(
+        `⚠ Couldn't reach the npm registry for ${plural(result.failedLookups.length, 'package')}. Their latest versions are unknown.`,
+      );
+    }
+    if (result.advisoriesIncomplete) {
+      io.stderr(
+        "⚠ Couldn't check every version for vulnerabilities. Unchecked ones are shown as unknown, not safe.",
+      );
+    }
+    if (matrix.projects.length === 1) {
       io.stderr('Found 1 project. To compare projects, run: npx depboard ..');
     }
     return EXIT_OK;

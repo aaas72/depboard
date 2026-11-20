@@ -51,10 +51,8 @@ Sell the discovery, not the tool.
 - Write **TSDoc** only for functions exported from `shared` and for service interfaces, not for every function.
 - Comments explain **why**, not **what**:
   ```ts
-  // Abbreviated metadata is ~10x smaller than the full packument and has everything we need.
-  headers: {
-    accept: 'application/vnd.npm.install-v1+json';
-  }
+  // Only the `latest` manifest: the full metadata for `next` is 25 MB, this is 3 KB.
+  const url = `${base}/${name}/latest`;
   ```
 - No dead comments and no commented-out code. Git keeps the history.
 

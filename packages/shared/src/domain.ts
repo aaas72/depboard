@@ -16,10 +16,27 @@ export interface Project {
   manager: PackageManagerId;
 }
 
+export interface Advisory {
+  id: number;
+  title: string;
+  url: string;
+  severity: Severity;
+  /** semver range of affected versions, e.g. "<4.17.21". */
+  vulnerableVersions: string;
+}
+
 export interface CellVulnerability {
   severity: Severity;
   count: number;
+  advisoryIds: number[];
 }
+
+/**
+ * Where a cell's version comes from:
+ * - `installed`: read from node_modules (exact)
+ * - `declared`: not installed, so the lowest version the package.json range allows (an estimate)
+ */
+export type VersionSource = 'installed' | 'declared';
 
 export interface MatrixCell {
   projectId: string;
@@ -27,16 +44,32 @@ export interface MatrixCell {
   declared: string;
   /** The version found in node_modules, or null when not installed. */
   installed: string | null;
+  /** The version used for comparisons, or null when it can't be determined. */
+  version: string | null;
+  versionSource: VersionSource;
   updateType: UpdateType;
   depType: DependencyType;
-  /** null = no known advisory, 'unknown' = the advisory lookup failed. */
+  /**
+   * null = no known advisory for this exact version.
+   * 'unknown' = can't tell: the lookup failed, or the exact version isn't known (not installed).
+   */
   vulnerability: CellVulnerability | null | 'unknown';
 }
 
 export interface MatrixRow {
   name: string;
   latest: string | null;
+  /** Why `latest` is null, when it is. */
+  lookup: 'ok' | 'not-found' | 'failed' | 'skipped';
   cells: Record<string, MatrixCell>;
+  /** Every advisory affecting at least one version used in this row. */
+  advisories: Advisory[];
+}
+
+export interface Matrix {
+  projects: Project[];
+  rows: MatrixRow[];
+  scannedAt: string;
 }
 
 export function isPackageManagerId(value: unknown): value is PackageManagerId {

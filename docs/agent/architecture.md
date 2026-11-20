@@ -80,15 +80,19 @@ Phase 2: remember used roots in `~/.depboard/config.json`. When `npx depboard` r
 
 ### 2. Registry client (`server/src/registry/`)
 
-- Requests `https://registry.npmjs.org/<name>` with
-  `Accept: application/vnd.npm.install-v1+json` (abbreviated metadata, much smaller).
+- Requests `https://registry.npmjs.org/<name>/latest`: the manifest of the `latest` dist-tag only.
+  **Never the full metadata:** measured on 2026-11-20, `next` is 25.7 MB of metadata (even abbreviated) against 3 KB for `/latest`. Switching cut a real 15-project scan from 10 s to under 4 s.
+  When a feature needs the version list (e.g. version alignment), fetch it on demand for that one package.
 - Scoped names: `@scope/name` is sent as `@scope%2Fname`.
+- **Only plain registry ranges are looked up.** `workspace:`, `file:`, `link:`, `git`, URLs, `npm:` aliases and `catalog:` are never sent to the public registry, so internal and private package names don't leak.
 - **In-memory cache** with a 15-minute TTL (configurable), plus **dedupe**: each package is requested once, however many projects use it.
-- **Concurrency limit** of 8 requests (via `p-limit`) so the registry doesn't block us.
+- **Concurrency limit** of 16 requests (a small built-in limiter, `lib/concurrency.ts`), close to npm's own socket limit.
+- **Timeout** of 15 s per request, plus **one retry** after 300 ms for network errors, timeouts, 429, and 5xx. 404 is final (`not-found`).
+- Failures are never cached, so the next call retries. Successes and 404s are cached for the TTL.
 - Honoring the user's `.npmrc` (custom registry) comes later, but the API is designed for it now.
 - A failure for one package (404 or network) doesn't break the whole matrix. That cell is marked `unknown`.
 
-**Advisories (MVP)** (`server/src/registry/advisories.ts`):
+**Advisories (MVP)** (`getAdvisories` in `server/src/registry/registry-client.ts`):
 
 - Endpoint verified live on 2026-11-20 (`lodash@4.17.15` returned advisories with `id`, `url`, `title`, `severity`, `vulnerable_versions`, `cwe`, `cvss`).
 - **One** bulk request for all projects together, instead of running `npm audit` per project:
@@ -164,7 +168,12 @@ interface MatrixRow {
 ```
 
 - `Project.id` is a stable hash of the absolute path. Paths are never used as identifiers in URLs.
-- The server computes `updateType` with `semver.diff(installed, latest)`. The UI never computes it.
+- The server computes `updateType` (`server/src/versions/classify.ts`). The UI never computes it. Rules:
+  - It's a **risk level**, not "which digit changed". Following SemVer, a 0.x minor bump and any 0.0.x bump are `major` (possibly breaking).
+  - A prerelease moving to its own final release (`19.0.0-rc.1 → 19.0.0`) is `prerelease`, not `major`.
+  - At or ahead of `latest` (e.g. a canary) is `none`.
+- **`version` and `versionSource`:** the installed version when known (`installed`), else the lowest version the range allows (`declared`, an estimate shown as such).
+- **Vulnerabilities are only checked on installed versions.** For a `declared` estimate the status is `unknown`, because the range floor can be vulnerable while the version really used isn't, or the reverse. Reading exact versions from lock files (Phase 2) removes most of these unknowns.
 
 ## Runtime flow
 

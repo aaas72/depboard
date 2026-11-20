@@ -18,3 +18,13 @@ export {
   type ScanIssue,
 } from './scanner/scan-projects.js';
 export { displayPath } from './lib/paths.js';
+export {
+  createRegistryClient,
+  DEFAULT_REGISTRY_URL,
+  type RegistryClient,
+  type RegistryClientOptions,
+  type FetchLike,
+} from './registry/registry-client.js';
+export { analyze, type AnalyzeResult } from './analyze.js';
+export { buildMatrix } from './matrix/build-matrix.js';
+export { classifyUpdate } from './versions/classify.js';

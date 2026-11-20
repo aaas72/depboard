@@ -22,9 +22,10 @@ The MVP exists to deliver the first-run aha moment. These capabilities only:
 
 - [x] **Root selection:** current directory by default, explicit path(s), refuse drive roots, warn on home, single-project and no-project hints
 - [x] **Project discovery:** scanner + manager detection (walks up to the workspace lock file) + installed versions
-- [ ] **Version service:** registry client + 15-minute cache + concurrency limit
+- [x] **Version service:** registry client (`/latest` manifests) + 15-minute cache + concurrency limit + retry/timeout
 - [ ] **Matrix view:** opens directly on launch, sticky columns, virtualization, P/m/M coloring, search, and "Outdated only"
-- [ ] **Vulnerabilities:** one bulk advisory request for all projects, a severity marker per cell, advisory details in the drawer (direct dependencies only)
+- [x] **Vulnerabilities (data):** one bulk advisory request for all projects, matched per installed version (direct dependencies only)
+- [ ] **Vulnerabilities (UI):** a severity marker per cell, advisory details in the drawer
 - [ ] **Drift insights:** `vulnerable-spread`, `version-drift`, and `major-lag` sentences at the top of the matrix, computed server-side
 - [ ] **Performance budget:** ≤ 10 s to first insight for ~30 projects (cold cache)
 - [ ] **Single-project update:** npm adapter, major confirmation, output streamed over WebSocket
@@ -39,13 +40,14 @@ and on the author's real projects folder it surfaces at least one drift insight 
 
 Ordered by how much each item strengthens the aha moment:
 
-1. Workspaces / monorepo support (more projects in the picture)
-2. Remembered roots (`~/.depboard/config.json`) + "Add folder" in the UI
-3. Transitive vulnerabilities (from the lock file, not just direct dependencies)
-4. pnpm, yarn, and bun adapters
-5. Bulk updates (one package across all projects, or all patches at once)
-6. Changelog links from GitHub Releases
-7. Multi-select on the project page
+1. **Exact versions from lock files** (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`) for projects without `node_modules`: turns estimates and "unknown" vulnerability cells into real answers. Old, never-installed projects are exactly our audience.
+2. Workspaces / monorepo support (more projects in the picture)
+3. Remembered roots (`~/.depboard/config.json`) + "Add folder" in the UI
+4. Transitive vulnerabilities (from the lock file, not just direct dependencies)
+5. pnpm, yarn, and bun adapters
+6. Bulk updates (one package across all projects, or all patches at once)
+7. Changelog links from GitHub Releases
+8. Multi-select on the project page
 
 - Changelog links from GitHub Releases
 - Workspaces / monorepo support

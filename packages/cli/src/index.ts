@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import { createInterface } from 'node:readline/promises';
+import { createRegistryClient, DEFAULT_REGISTRY_URL } from '@depboard/server';
 import { run } from './run.js';
 
 function readVersion(): string {
@@ -18,6 +19,8 @@ async function confirm(question: string): Promise<boolean> {
   }
 }
 
+const version = readVersion();
+
 process.exitCode = await run(process.argv.slice(2), {
   stdout: (line) => {
     console.log(line);
@@ -27,6 +30,11 @@ process.exitCode = await run(process.argv.slice(2), {
   },
   cwd: process.cwd(),
   homedir: os.homedir(),
-  version: readVersion(),
+  version,
   confirm: process.stdin.isTTY && process.stderr.isTTY ? confirm : null,
+  registry: createRegistryClient({
+    // Overridable for e2e tests against a local fake registry. Honoring .npmrc comes later.
+    registryUrl: process.env['DEPBOARD_REGISTRY_URL'] ?? DEFAULT_REGISTRY_URL,
+    userAgent: `depboard/${version}`,
+  }),
 });
