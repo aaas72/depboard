@@ -3,38 +3,139 @@
 /*
  * Design tokens. Components use these names only, never raw colors.
  * Update-type colors and severity colors are separate scales (see docs/agent/ui-ux.md).
+ * Every colored badge has a matching `-fg` token chosen for WCAG AA contrast on it.
  */
 @theme {
   --color-surface: oklch(99% 0 0);
-  --color-surface-raised: oklch(97% 0 0);
-  --color-text: oklch(22% 0 0);
-  --color-text-muted: oklch(50% 0 0);
-  --color-border: oklch(90% 0 0);
+  --color-surface-raised: oklch(96.5% 0.003 260);
+  --color-surface-sunken: oklch(94% 0.004 260);
+  --color-text: oklch(22% 0.01 260);
+  --color-text-muted: oklch(46% 0.01 260);
+  --color-border: oklch(89% 0.005 260);
+  --color-border-strong: oklch(78% 0.01 260);
+  --color-accent: oklch(50% 0.17 255);
+  --color-accent-fg: oklch(99% 0 0);
+  --color-focus: oklch(55% 0.2 255);
+  --color-warning: oklch(48% 0.2 27);
+  --color-warning-fg: oklch(99% 0 0);
+  --color-notice: oklch(95% 0.05 85);
+  --color-notice-border: oklch(80% 0.1 80);
 
-  --color-update-none: oklch(60% 0 0);
-  --color-update-patch: oklch(55% 0.15 150);
-  --color-update-minor: oklch(65% 0.15 80);
-  --color-update-major: oklch(55% 0.2 27);
+  --color-update-none: oklch(90% 0 0);
+  --color-update-none-fg: oklch(38% 0 0);
+  --color-update-patch: oklch(48% 0.13 150);
+  --color-update-patch-fg: oklch(99% 0 0);
+  --color-update-minor: oklch(80% 0.15 85);
+  --color-update-minor-fg: oklch(25% 0.05 80);
+  --color-update-major: oklch(50% 0.2 27);
+  --color-update-major-fg: oklch(99% 0 0);
+  --color-update-unknown: oklch(88% 0 0);
+  --color-update-unknown-fg: oklch(35% 0 0);
 
-  --color-severity-low: oklch(60% 0.05 250);
-  --color-severity-moderate: oklch(65% 0.15 70);
-  --color-severity-high: oklch(55% 0.2 35);
-  --color-severity-critical: oklch(45% 0.22 20);
+  --color-severity-low: oklch(52% 0.06 250);
+  --color-severity-low-fg: oklch(99% 0 0);
+  --color-severity-moderate: oklch(50% 0.12 60);
+  --color-severity-moderate-fg: oklch(99% 0 0);
+  --color-severity-high: oklch(48% 0.2 35);
+  --color-severity-high-fg: oklch(99% 0 0);
+  --color-severity-critical: oklch(38% 0.2 18);
+  --color-severity-critical-fg: oklch(99% 0 0);
+
+  /* Version-drift groups: an underline per release line in a row, highest line first. */
+  --color-drift-1: oklch(55% 0.17 255);
+  --color-drift-2: oklch(60% 0.17 320);
+  --color-drift-3: oklch(62% 0.14 190);
+  --color-drift-4: oklch(65% 0.15 60);
+
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
 }
 
+/* Dark theme: follows the system unless the user picked light; or picked explicitly. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --color-surface: oklch(18% 0 0);
-    --color-surface-raised: oklch(22% 0 0);
-    --color-text: oklch(94% 0 0);
-    --color-text-muted: oklch(70% 0 0);
-    --color-border: oklch(32% 0 0);
+  :root:not([data-theme='light']) {
+    --color-surface: oklch(17% 0.005 260);
+    --color-surface-raised: oklch(21% 0.006 260);
+    --color-surface-sunken: oklch(14% 0.005 260);
+    --color-text: oklch(94% 0.005 260);
+    --color-text-muted: oklch(72% 0.01 260);
+    --color-border: oklch(30% 0.008 260);
+    --color-border-strong: oklch(42% 0.01 260);
+    --color-accent: oklch(70% 0.14 255);
+    --color-accent-fg: oklch(15% 0.02 260);
+    --color-focus: oklch(75% 0.15 255);
+    --color-warning: oklch(65% 0.19 27);
+    --color-warning-fg: oklch(15% 0.02 27);
+    --color-notice: oklch(28% 0.05 80);
+    --color-notice-border: oklch(45% 0.08 80);
+    --color-update-none: oklch(30% 0 0);
+    --color-update-none-fg: oklch(80% 0 0);
+    --color-update-unknown: oklch(32% 0 0);
+    --color-update-unknown-fg: oklch(82% 0 0);
+    --color-drift-1: oklch(72% 0.14 255);
+    --color-drift-2: oklch(74% 0.14 320);
+    --color-drift-3: oklch(76% 0.12 190);
+    --color-drift-4: oklch(80% 0.13 70);
   }
 }
 
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-surface: oklch(17% 0.005 260);
+  --color-surface-raised: oklch(21% 0.006 260);
+  --color-surface-sunken: oklch(14% 0.005 260);
+  --color-text: oklch(94% 0.005 260);
+  --color-text-muted: oklch(72% 0.01 260);
+  --color-border: oklch(30% 0.008 260);
+  --color-border-strong: oklch(42% 0.01 260);
+  --color-accent: oklch(70% 0.14 255);
+  --color-accent-fg: oklch(15% 0.02 260);
+  --color-focus: oklch(75% 0.15 255);
+  --color-warning: oklch(65% 0.19 27);
+  --color-warning-fg: oklch(15% 0.02 27);
+  --color-notice: oklch(28% 0.05 80);
+  --color-notice-border: oklch(45% 0.08 80);
+  --color-update-none: oklch(30% 0 0);
+  --color-update-none-fg: oklch(80% 0 0);
+  --color-update-unknown: oklch(32% 0 0);
+  --color-update-unknown-fg: oklch(82% 0 0);
+  --color-drift-1: oklch(72% 0.14 255);
+  --color-drift-2: oklch(74% 0.14 320);
+  --color-drift-3: oklch(76% 0.12 190);
+  --color-drift-4: oklch(80% 0.13 70);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
+  margin: 0;
   background: var(--color-surface);
   color: var(--color-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Noto Sans',
+    'Noto Sans Arabic',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* "Unknown" update type: striped, so it reads differently from "up to date" without color. */
+.stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 3px,
+    color-mix(in oklch, currentColor 18%, transparent) 3px 5px
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {

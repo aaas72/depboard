@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import fg from 'fast-glob';
-import type { DependencyType, PackageManagerId, Project } from '@depboard/shared';
+import type { DependencyType, PackageManagerId, Project, ScanIssue } from '@depboard/shared';
 import { mapWithConcurrency } from '../lib/concurrency.js';
 import { isSafePackageName } from '../lib/package-name.js';
 import { pathKey } from '../lib/paths.js';
@@ -42,10 +42,7 @@ export interface ScannedProject extends Project {
   dependencies: ScannedDependency[];
 }
 
-export interface ScanIssue {
-  path: string;
-  reason: string;
-}
+export type { ScanIssue };
 
 export interface ScanResult {
   projects: ScannedProject[];

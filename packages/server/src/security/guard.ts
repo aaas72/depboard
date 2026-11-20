@@ -1,9 +1,9 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import type { ErrorResponse } from '@depboard/shared';
+import { TOKEN_HEADER, type ErrorResponse } from '@depboard/shared';
 import { tokensMatch } from './token.js';
 
 export const SERVER_HOST = '127.0.0.1';
-export const TOKEN_HEADER = 'x-depboard-token';
+export { TOKEN_HEADER };
 
 export interface GuardOptions {
   token: string;

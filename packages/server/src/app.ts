@@ -2,7 +2,14 @@ import fs from 'node:fs';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 import * as z from 'zod/mini';
-import { DepboardError, type ErrorCode, type ErrorResponse, type Matrix } from '@depboard/shared';
+import {
+  DepboardError,
+  type ErrorCode,
+  type ErrorResponse,
+  type Matrix,
+  type MatrixResponse,
+  type ProjectsResponse,
+} from '@depboard/shared';
 import { analyze, type AnalyzeResult } from './analyze.js';
 import type { RegistryClient } from './registry/registry-client.js';
 import { registerGuard } from './security/guard.js';
@@ -108,36 +115,34 @@ export async function createApp(options: AppOptions): Promise<FastifyInstance> {
     reply.code(404).send(errorBody('NOT_FOUND', 'No such route.')),
   );
 
-  app.get('/api/projects', async () => {
+  const toResponse = (result: AnalyzeResult, matrix = result.matrix): MatrixResponse => ({
+    ...matrix,
+    failedLookups: result.failedLookups,
+    advisoriesIncomplete: result.advisoriesIncomplete,
+  });
+
+  app.get('/api/projects', async (): Promise<ProjectsResponse> => {
     const result = await latest();
     const count = result.matrix.projects.length;
     return {
-      roots: options.roots,
+      roots: [...options.roots],
       projects: result.matrix.projects,
       issues: result.issues,
       hint: count === 0 ? 'no-projects' : count === 1 ? 'single-project' : null,
     };
   });
 
-  app.get('/api/matrix', async (request) => {
+  app.get('/api/matrix', async (request): Promise<MatrixResponse> => {
     const query = matrixQuery.safeParse(request.query);
     if (!query.success) throw new DepboardError('INVALID_USAGE', 'Invalid query.');
     const result = await latest();
-    return {
-      ...(query.data.onlyOutdated === 'true' ? onlyOutdated(result.matrix) : result.matrix),
-      failedLookups: result.failedLookups,
-      advisoriesIncomplete: result.advisoriesIncomplete,
-    };
+    return toResponse(
+      result,
+      query.data.onlyOutdated === 'true' ? onlyOutdated(result.matrix) : result.matrix,
+    );
   });
 
-  app.post('/api/rescan', async () => {
-    const result = await rescan();
-    return {
-      ...result.matrix,
-      failedLookups: result.failedLookups,
-      advisoriesIncomplete: result.advisoriesIncomplete,
-    };
-  });
+  app.post('/api/rescan', async (): Promise<MatrixResponse> => toResponse(await rescan()));
 
   if (options.staticDir !== undefined && fs.existsSync(options.staticDir)) {
     await app.register(fastifyStatic, { root: options.staticDir, index: 'index.html' });

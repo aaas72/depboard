@@ -7,6 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "dev": "tsx watch src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "~20.19.43",
-    "@types/semver": "^7.8.0"
+    "@types/semver": "^7.8.0",
+    "tsx": "^4.23.15"
   }
 }
