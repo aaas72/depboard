@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { createRegistryClient, type RegistryClient } from '@depboard/server';
 import { EXIT_OK, EXIT_RUNTIME_ERROR, EXIT_USAGE_ERROR, run, type CliIO } from './run.js';
 
 const dirs: string[] = [];
@@ -20,6 +21,31 @@ async function tree(files: Record<string, object>): Promise<string> {
   return root;
 }
 
+/** A tiny in-memory registry: `latest` per package, advisories per package. No network. */
+function stubRegistry(
+  latest: Record<string, string> = {},
+  advisories: Record<string, object[]> = {},
+): RegistryClient {
+  return createRegistryClient({
+    fetch: (url, init) => {
+      if (init?.method === 'POST') {
+        const body = typeof init.body === 'string' ? init.body : '{}';
+        const asked = JSON.parse(body) as Record<string, string[]>;
+        return Promise.resolve(
+          Response.json(
+            Object.fromEntries(Object.keys(asked).map((n) => [n, advisories[n] ?? []])),
+          ),
+        );
+      }
+      const name = decodeURIComponent(/\/([^/]+)\/latest$/.exec(url)?.[1] ?? '');
+      const version = latest[name];
+      return Promise.resolve(
+        version ? Response.json({ name, version }) : new Response('not found', { status: 404 }),
+      );
+    },
+  });
+}
+
 function io(overrides: Partial<CliIO> = {}) {
   const out: string[] = [];
   const err: string[] = [];
@@ -30,6 +56,7 @@ function io(overrides: Partial<CliIO> = {}) {
     homedir: '/nonexistent-home',
     version: '1.2.3',
     confirm: null,
+    registry: stubRegistry(),
     ...overrides,
   };
   return { value, out, err };
@@ -49,15 +76,44 @@ describe('run', () => {
     expect(t.err[0]).toMatch(/^✖ --depth/);
   });
 
-  it('summarizes the projects it found', async () => {
+  it('summarizes outdated and vulnerable packages across projects', async () => {
     const root = await tree({
       'web/package.json': { name: 'web', dependencies: { react: '^18.0.0', lodash: '^4.0.0' } },
+      'web/node_modules/react/package.json': { version: '18.3.1' },
+      'web/node_modules/lodash/package.json': { version: '4.17.15' },
       'api/package.json': { name: 'api', dependencies: { lodash: '^4.0.0' } },
+      'api/node_modules/lodash/package.json': { version: '4.17.15' },
     });
-    const t = io({ cwd: root });
+    const registry = stubRegistry(
+      { react: '19.1.0', lodash: '4.17.21' },
+      {
+        lodash: [
+          { id: 1, title: 't', url: 'u', severity: 'high', vulnerable_versions: '<4.17.21' },
+        ],
+      },
+    );
+    const t = io({ cwd: root, registry });
     expect(await run([], t.value)).toBe(EXIT_OK);
-    expect(t.out[0]).toContain('2 projects · 2 packages');
-    expect(t.out.slice(1)).toEqual(['  api  (npm, 1 dependency)', '  web  (npm, 2 dependencies)']);
+    expect(t.out).toEqual([
+      expect.stringContaining('2 projects · 2 packages'),
+      '  2 packages outdated: 1 major · 0 minor · 1 patch',
+      '  ⚠ 1 package with known vulnerabilities:',
+      '    lodash (high) in 2 projects: api, web',
+    ]);
+  });
+
+  it('keeps working offline and says what is unknown', async () => {
+    const root = await tree({
+      'web/package.json': { name: 'web', dependencies: { react: '^18.0.0' } },
+      'web/node_modules/react/package.json': { version: '18.3.1' },
+      'api/package.json': { name: 'api', dependencies: { react: '^18.0.0' } },
+    });
+    const offline = createRegistryClient({ fetch: () => Promise.reject(new TypeError('offline')) });
+    const t = io({ cwd: root, registry: offline });
+    expect(await run([], t.value)).toBe(EXIT_OK);
+    expect(t.out[0]).toContain('2 projects · 1 package');
+    expect(t.err.join('\n')).toContain("Couldn't reach the npm registry for 1 package");
+    expect(t.err.join('\n')).toContain('not safe');
   });
 
   it('suggests running from the parent when only one project is found', async () => {

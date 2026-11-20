@@ -2,7 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { makeTree, trySymlink } from '../testing/tmp-tree.js';
-import { isSafePackageName, projectId, scanProjects } from './scan-projects.js';
+import { isSafePackageName } from '../lib/package-name.js';
+import { projectId, scanProjects } from './scan-projects.js';
 
 describe('scanProjects', () => {
   it('finds projects with their manager and installed versions', async () => {

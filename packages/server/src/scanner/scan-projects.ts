@@ -4,6 +4,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import type { DependencyType, PackageManagerId, Project } from '@depboard/shared';
 import { mapWithConcurrency } from '../lib/concurrency.js';
+import { isSafePackageName } from '../lib/package-name.js';
 import { pathKey } from '../lib/paths.js';
 import { ancestorsWithin, detectManager } from './detect-manager.js';
 import { parsePackageJson } from './package-json.js';
@@ -76,16 +77,6 @@ async function findPackageJsonFiles(root: string, depth: number): Promise<string
     suppressErrors: true,
   });
   return files.map((file) => path.resolve(file));
-}
-
-/**
- * npm package name shape: optional `@scope/`, then URL-safe characters, never `.` or `..` alone.
- * Checked before building a path, so a crafted name like `../../x` can't read outside node_modules.
- */
-const PACKAGE_NAME = /^(?:@[a-z0-9~-][\w.~-]*\/)?[a-z0-9~-][\w.~-]*$/i;
-
-export function isSafePackageName(name: string): boolean {
-  return name.length <= 214 && PACKAGE_NAME.test(name);
 }
 
 async function readVersionFile(file: string): Promise<string | null> {
