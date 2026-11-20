@@ -26,7 +26,8 @@ pnpm test
 | `pnpm format`    | Format with Prettier          |
 | `pnpm changeset` | Describe a user-facing change |
 
-Before opening a PR, run `pnpm lint && pnpm typecheck && pnpm test`.
+Before opening a PR, run `pnpm ci:local`. It runs the whole CI pipeline locally, including Linux and Node 20 in Docker.
+Without Docker, `pnpm ci:quick` runs the checks on your machine only.
 
 ## Repository layout
 

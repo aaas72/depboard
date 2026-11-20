@@ -72,16 +72,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter depboard build
-      - name: Only dist/ and metadata may be published
-        working-directory: packages/cli
-        run: |
-          npm pack --dry-run --json > pack.json
-          node -e '
-            const [pkg] = require("./pack.json");
-            const allowed = /^(dist\/|package\.json$|README\.md$|LICENSE$)/;
-            const bad = pkg.files.map((f) => f.path).filter((p) => !allowed.test(p));
-            if (bad.length) { console.error("Unexpected files in package:", bad); process.exit(1); }
-            const maxBytes = 5 * 1024 * 1024;
-            if (pkg.unpackedSize > maxBytes) { console.error("Package too large:", pkg.unpackedSize); process.exit(1); }
-            console.log(`OK: ${pkg.files.length} files, ${pkg.unpackedSize} bytes unpacked`);
-          '
+      # Same script as `pnpm ci:local`, so local and GitHub CI never drift apart.
+      - name: Only dist/ and metadata may be published, within the size budget
+        run: pnpm check:package

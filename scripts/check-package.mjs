@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+// Verifies what `npm publish` would ship for the `depboard` package: only allowed files, within the
+// size budget (docs/agent/engineering-standards.md). Used by CI and by `pnpm ci:local`.
+import { execFileSync } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const MAX_UNPACKED_BYTES = 5 * 1024 * 1024;
+const ALLOWED = /^(dist\/|package\.json$|README\.md$|LICENSE$)/;
+
+const cliDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'packages', 'cli');
+const packArgs = ['pack', '--dry-run', '--json'];
+// npm is a .cmd shim on Windows, which only runs through cmd.exe. The arguments are fixed constants.
+const [file, args] =
+  process.platform === 'win32'
+    ? ['cmd.exe', ['/d', '/s', '/c', 'npm', ...packArgs]]
+    : ['npm', packArgs];
+const output = execFileSync(file, args, {
+  cwd: cliDir,
+  encoding: 'utf8',
+  stdio: ['ignore', 'pipe', 'ignore'],
+});
+
+const [pkg] = JSON.parse(output);
+const files = pkg.files.map((file) => file.path);
+const unexpected = files.filter((file) => !ALLOWED.test(file));
+const required = ['package.json', 'README.md', 'LICENSE', 'dist/index.js'].filter(
+  (file) => !files.includes(file),
+);
+
+let failed = false;
+if (unexpected.length > 0) {
+  console.error('✖ Unexpected files in the package:', unexpected);
+  failed = true;
+}
+if (required.length > 0) {
+  console.error('✖ Missing files in the package:', required);
+  failed = true;
+}
+if (pkg.unpackedSize > MAX_UNPACKED_BYTES) {
+  console.error(
+    `✖ Package is ${pkg.unpackedSize} bytes unpacked, budget is ${MAX_UNPACKED_BYTES}.`,
+  );
+  failed = true;
+}
+if (failed) process.exit(1);
+
+const kb = (pkg.unpackedSize / 1024).toFixed(1);
+console.log(`✔ Package OK: ${files.length} files, ${kb} KB unpacked`);
