@@ -11,7 +11,10 @@ export default defineConfig({
   target: 'node20',
   clean: true,
   sourcemap: false,
-  minify: false,
+  // Minified, but with function names kept: no source maps ship, so names are what keeps a
+  // --debug stack trace readable in a bug report. See docs/agent/roadmap.md for the measurements.
+  minify: true,
+  keepNames: true,
   // Bundle everything: the published package has zero runtime dependencies (docs/adr/0001).
   noExternal: [/.*/],
   // Ship the built UI inside the package, next to the CLI (dist/web). The root build runs
