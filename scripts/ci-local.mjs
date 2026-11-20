@@ -46,7 +46,11 @@ function hostChecks() {
   for (const [name, args] of steps) {
     if (!run(`${os} (Node ${process.versions.node}): ${name}`, 'pnpm', args)) return false;
   }
-  return run(`${os}: package contents`, 'node', ['scripts/check-package.mjs']);
+  if (!run(`${os}: package contents`, 'node', ['scripts/check-package.mjs'])) return false;
+  return run(`${os}: performance budgets`, 'node', [
+    'scripts/perf-budget.mjs',
+    path.join('packages', 'cli', 'dist', 'index.js'),
+  ]);
 }
 
 function dockerAvailable() {

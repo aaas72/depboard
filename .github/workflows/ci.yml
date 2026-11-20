@@ -34,6 +34,9 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      # Time to first insight on 30 generated projects against a local registry with latency.
+      - name: Performance budgets
+        run: pnpm perf
 
   # Users may run the published CLI on Node 20.19+, even though our dev tooling needs Node 22.
   # Build on Node 22, then run the built CLI on Node 20.
