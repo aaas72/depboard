@@ -51,8 +51,8 @@ function plural(count: number, singular: string, pluralForm = `${singular}s`): s
 export const HEADLINE_LIMIT = 5;
 
 /**
- * A plain-text summary of the matrix, insights first. Temporary: the browser UI replaces it in
- * 0.1.0, but it already answers the core question in a terminal.
+ * A plain-text summary of the matrix, insights first: the core question answered in a terminal,
+ * printed before the browser opens and on its own with --summary.
  */
 function reportMatrix(matrix: Matrix, io: CliIO): void {
   const projectName = new Map(matrix.projects.map((p) => [p.id, p.name]));

@@ -13,6 +13,13 @@
     "cli"
   ],
   "author": "Abdellah Sheikh",
+  "homepage": "https://github.com/aaas72/depboard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaas72/depboard.git",
+    "directory": "packages/cli"
+  },
+  "bugs": "https://github.com/aaas72/depboard/issues",
   "license": "MIT",
   "type": "module",
   "bin": {
