@@ -1,12 +1,15 @@
 import { useMemo } from 'react';
 import type { MatrixRow, Project } from '@depboard/shared';
 import { t } from '../../lib/i18n.js';
+import { shortenPath } from '../../lib/paths.js';
 import { routeHref } from '../../lib/route.js';
 import { UpdateBadge, VulnerabilityMarker, showsUpdateBadge } from '../matrix/badges.js';
 import { projectSections, projectStats, type ProjectEntry } from './model.js';
 
 export interface ProjectViewProps {
   project: Project;
+  /** The user's home folder, to show the project's path as `~/…`. */
+  home: string;
   rows: readonly MatrixRow[];
   query: string;
   outdatedOnly: boolean;
@@ -124,6 +127,7 @@ function Section({
  */
 export function ProjectView({
   project,
+  home,
   rows,
   query,
   outdatedOnly,
@@ -151,7 +155,9 @@ export function ProjectView({
           {project.manager}
         </span>
       </h2>
-      <p className="font-mono text-xs break-all text-text-muted">{project.path}</p>
+      <p className="font-mono text-xs break-all text-text-muted" title={project.path}>
+        {shortenPath(project.path, home)}
+      </p>
       <p className="mt-2 text-sm">
         {t('matrix.rows', { n: stats.total })} ·{' '}
         {outdated === 0

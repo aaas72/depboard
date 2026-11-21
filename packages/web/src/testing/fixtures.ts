@@ -12,7 +12,7 @@ import type {
 import type { ApiClient } from '../lib/api.js';
 
 export function project(id: string, name = id): Project {
-  return { id, name, path: `/work/${name}`, manager: 'npm' };
+  return { id, name, path: `/home/me/work/${name}`, manager: 'npm' };
 }
 
 export function cell(projectId: string, overrides: Partial<MatrixCell> = {}): MatrixCell {
@@ -119,7 +119,8 @@ export function projectsFor(
 ): ProjectsResponse {
   const count = matrix.projects.length;
   return {
-    roots: ['/work'],
+    roots: ['/home/me/work'],
+    home: '/home/me',
     projects: matrix.projects,
     issues: [],
     hint: count === 0 ? 'no-projects' : count === 1 ? 'single-project' : null,

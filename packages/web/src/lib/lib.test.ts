@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TOKEN_HEADER } from '@depboard/shared';
 import { ApiError, createApiClient, takeToken, type FetchLike } from './api.js';
 import { t } from './i18n.js';
+import { shortenPath } from './paths.js';
 import { applyTheme, nextTheme, storedTheme } from './theme.js';
 
 const TOKEN = 'a'.repeat(64);
@@ -133,5 +134,30 @@ describe('theme', () => {
       'dark',
       'system',
     ]);
+  });
+});
+
+describe('shortenPath', () => {
+  it.each([
+    ['/home/me/projects', '/home/me', '~/projects'],
+    ['/home/me', '/home/me', '~'],
+    ['/home/me/projects', '/home/me/', '~/projects'],
+    ['C:\\Users\\Me\\projects', 'C:\\Users\\Me', '~\\projects'],
+    // Windows paths are case-insensitive; the original casing is kept in the output.
+    ['c:\\users\\me\\Projects', 'C:\\Users\\Me', '~\\Projects'],
+  ])('shows %s under home %s as %s', (p, home, expected) => {
+    expect(shortenPath(p, home)).toBe(expected);
+  });
+
+  it.each([
+    // A sibling whose name starts with the home folder's name is not inside it.
+    ['/home/meadow/projects', '/home/me'],
+    ['/srv/projects', '/home/me'],
+    // Case matters outside Windows.
+    ['/Home/me/projects', '/home/me'],
+    ['/home/me/projects', ''],
+    ['/projects', '/'],
+  ])('leaves %s alone under home %s', (p, home) => {
+    expect(shortenPath(p, home)).toBe(p);
   });
 });

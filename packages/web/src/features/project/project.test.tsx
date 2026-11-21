@@ -71,6 +71,7 @@ describe('the project screen', () => {
     const heading = await screen.findByRole('heading', { name: /^api/ });
     expect(heading).toBeTruthy();
     expect(screen.queryByRole('grid')).toBeNull();
+    expect(screen.getByText('~/work/api').getAttribute('title')).toBe('/home/me/work/api');
     expect(screen.getByText(/3 packages · outdated: 1 major · 1 minor · 0 patch/)).toBeTruthy();
 
     const deps = screen.getByRole('region', { name: /^dependencies/ });

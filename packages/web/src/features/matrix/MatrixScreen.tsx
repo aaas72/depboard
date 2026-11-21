@@ -11,6 +11,7 @@ import type { ApiClient } from '../../lib/api.js';
 import { ActivityPanel } from '../activity/ActivityPanel.js';
 import { useActivity } from '../activity/useActivity.js';
 import { ProjectView } from '../project/ProjectView.js';
+import { shortenPath } from '../../lib/paths.js';
 import { routeHref, useRoute } from '../../lib/route.js';
 import { CellDrawer } from './CellDrawer.js';
 import { DriftStrip, InsightSentence } from './DriftStrip.js';
@@ -109,14 +110,15 @@ export function MatrixScreen({
   );
 
   const projectCount = matrix.projects.length;
-  const roots = info.roots.join(', ');
+  const fullRoots = info.roots.join(', ');
+  const roots = info.roots.map((root) => shortenPath(root, info.home)).join(', ');
 
   return (
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2.5">
         <div className="flex min-w-0 items-baseline gap-3">
           <h1 className="text-base font-bold tracking-tight">DepBoard</h1>
-          <p className="truncate text-sm text-text-muted" title={roots}>
+          <p className="truncate text-sm text-text-muted" title={fullRoots}>
             <span className="font-mono">{roots}</span> · {t('header.projects', { n: projectCount })}
           </p>
         </div>
@@ -185,7 +187,7 @@ export function MatrixScreen({
               <ul className="mt-1 space-y-0.5 font-mono text-xs">
                 {info.issues.map((issue) => (
                   <li key={issue.path}>
-                    {issue.path}: {issue.reason}
+                    {shortenPath(issue.path, info.home)}: {issue.reason}
                   </li>
                 ))}
               </ul>
@@ -224,6 +226,7 @@ export function MatrixScreen({
             ) : (
               <ProjectView
                 project={routedProject}
+                home={info.home}
                 rows={matrix.rows}
                 query={query}
                 outdatedOnly={outdatedOnly}

@@ -12,6 +12,8 @@ export type ProjectsHint = 'no-projects' | 'single-project' | null;
 /** `GET /api/projects` */
 export interface ProjectsResponse {
   roots: string[];
+  /** The user's home folder, so the UI can show `~/projects` instead of a path with their username. */
+  home: string;
   projects: Project[];
   issues: ScanIssue[];
   hint: ProjectsHint;

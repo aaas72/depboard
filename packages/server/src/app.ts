@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import { PassThrough } from 'node:stream';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
@@ -26,6 +27,8 @@ export interface AppOptions {
   /** The listening port, read per request. */
   port: () => number;
   roots: readonly string[];
+  /** Sent to the UI so it can show paths as `~/projects`. Defaults to the real home folder. */
+  homedir?: string;
   registry: RegistryClient;
   depth?: number;
   /** A finished analysis to serve first (the CLI already ran one), instead of scanning again. */
@@ -147,6 +150,7 @@ export async function createApp(options: AppOptions): Promise<FastifyInstance> {
     const count = result.matrix.projects.length;
     return {
       roots: [...options.roots],
+      home: options.homedir ?? os.homedir(),
       projects: result.matrix.projects,
       issues: result.issues,
       hint: count === 0 ? 'no-projects' : count === 1 ? 'single-project' : null,

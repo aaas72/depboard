@@ -32,6 +32,7 @@ async function setup() {
     token: TOKEN,
     port: () => PORT,
     roots: [root],
+    homedir: '/home/me',
     registry: createRegistryClient({ fetch: registry.fetch }),
   });
   apps.push(app);
@@ -39,14 +40,16 @@ async function setup() {
 }
 
 describe('GET /api/projects', () => {
-  it('lists projects, the scanned roots, and no hint for several projects', async () => {
+  it('lists projects, the scanned roots, the home folder, and no hint for several projects', async () => {
     const { app, root } = await setup();
     const body = (await app.inject({ url: '/api/projects', headers })).json<{
       roots: string[];
+      home: string;
       projects: { name: string }[];
       hint: string | null;
     }>();
     expect(body.roots).toEqual([root]);
+    expect(body.home).toBe('/home/me');
     expect(body.projects.map((p) => p.name)).toEqual(['api', 'web']);
     expect(body.hint).toBeNull();
   });

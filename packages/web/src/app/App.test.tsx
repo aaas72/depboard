@@ -33,8 +33,10 @@ describe('first screen', () => {
     // Vulnerable first, then drift, then outdated, then the rest.
     expect(rowNames(grid)).toEqual(['lodash', 'react', 'zod', 'left-pad']);
     // The header says exactly what was scanned, so nobody wonders if it read the whole disk.
-    const scanned = screen.getByText('/work').parentElement;
-    expect(scanned?.textContent).toBe('/work · 3 projects');
+    const scanned = screen.getByText('~/work').parentElement;
+    expect(scanned?.textContent).toBe('~/work · 3 projects');
+    // The full path, with the username, stays out of the visible text but is one hover away.
+    expect(scanned?.getAttribute('title')).toBe('/home/me/work');
   });
 
   it('shows the project columns with their package manager', async () => {
@@ -246,7 +248,7 @@ describe('states', () => {
       getProjects: () =>
         Promise.resolve(
           projectsFor(matrix, {
-            issues: [{ path: '/work/bad/package.json', reason: 'Invalid JSON' }],
+            issues: [{ path: '/home/me/work/bad/package.json', reason: 'Invalid JSON' }],
           }),
         ),
     });
@@ -254,6 +256,7 @@ describe('states', () => {
     expect(screen.getByText(/Couldn’t reach the npm registry for 2 packages/)).toBeTruthy();
     expect(screen.getByText(/a missing shield doesn’t mean safe/)).toBeTruthy();
     expect(screen.getByText('Skipped 1 package.json that couldn’t be read.')).toBeTruthy();
+    expect(screen.getByText('~/work/bad/package.json: Invalid JSON')).toBeTruthy();
   });
 
   it('suggests including sibling folders when only one project was found', async () => {
@@ -273,7 +276,9 @@ describe('states', () => {
   it('names the scanned folder when nothing was found', async () => {
     const empty: MatrixResponse = { ...sampleMatrix(), projects: [], rows: [], insights: [] };
     render(<App api={fakeApi(empty)} />);
-    expect(await screen.findByRole('heading', { name: 'No projects found in /work' })).toBeTruthy();
+    expect(
+      await screen.findByRole('heading', { name: 'No projects found in ~/work' }),
+    ).toBeTruthy();
     expect(screen.queryByRole('grid')).toBeNull();
   });
 });
