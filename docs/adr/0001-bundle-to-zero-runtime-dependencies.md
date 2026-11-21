@@ -21,6 +21,9 @@ The `depboard` package bundles all of its code and dependencies (`fast-glob`, `z
 - Users can't patch a vulnerable transitive dependency with overrides. **We** must ship a patch release
   quickly instead. Renovate on our repo plus CI audit makes this our responsibility.
 - Bundled CommonJS code needs a `require` shim in the ESM output (see `packages/cli/tsup.config.ts`).
-- Licenses of bundled dependencies must be MIT-compatible. Third-party license notices are added to the
-  package before 0.1.0 (tracked in the roadmap).
+- Licenses of bundled dependencies must be permissive. The build generates `dist/THIRD_PARTY_LICENSES.md`
+  from the exact list of bundled modules (the CLI's esbuild metafile and the UI's Rollup output), and
+  **fails** when a package's license is not on the allowlist in `scripts/third-party-notices.mjs`
+  (MIT, ISC, BSD-2/3-Clause, Apache-2.0, 0BSD, BlueOak-1.0.0, CC0-1.0, Unlicense). Adding a license
+  to the allowlist is a decision, recorded in the PR.
 - The package-size budget (5 MB) in CI covers everything we ship.

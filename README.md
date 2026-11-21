@@ -35,4 +35,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). The published package bundles open-source dependencies (Fastify, React, and others), all under permissive licenses; their notices ship in `dist/THIRD_PARTY_LICENSES.md`.
