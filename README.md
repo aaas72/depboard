@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/depboard"><img src="https://img.shields.io/npm/v/depboard?color=CA3E47&label=npm" alt="npm version"></a>
   <a href="https://github.com/aaas72/depboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-525252" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A520.19-525252" alt="Node 20.19 or newer">
 </p>
@@ -30,6 +31,40 @@ three different major versions across six projects, or that a vulnerable lodash 
 them.
 
 No account. No config. Nothing uploaded. It runs on your machine and stops when you close it.
+
+## Contents
+
+- [Quick start](#quick-start)
+- [How it works, step by step](#how-it-works-step-by-step)
+- [Screens](#screens)
+- [Features](#features)
+- [Why DepBoard?](#why-depboard)
+- [Privacy and security](#privacy-and-security)
+- [Documentation](#documentation) · [Contributing](#contributing) · [License](#license)
+
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20.19 or newer.
+
+```bash
+npx depboard                       # the current folder
+npx depboard ~/projects            # one folder
+npx depboard ~/work ~/clients      # several folders, one matrix
+npx depboard ~/projects --summary  # print the findings and exit
+```
+
+| Option            | What it does                                       |
+| ----------------- | -------------------------------------------------- |
+| `--port <n>`      | Port to listen on (default: a random free port)    |
+| `--no-open`       | Print the link instead of opening the browser      |
+| `--summary`       | Print the findings and exit: no server, no browser |
+| `--depth <n>`     | How deep to look for projects (default: 6)         |
+| `-y`, `--yes`     | Skip confirmations                                 |
+| `--debug`         | Verbose logs on stderr                             |
+| `-v`, `--version` | Print the version                                  |
+
+New here? Start with [Getting started](https://github.com/aaas72/depboard/blob/main/docs/guide/getting-started.md) and
+[Reading the matrix](https://github.com/aaas72/depboard/blob/main/docs/guide/reading-the-matrix.md).
 
 ## How it works, step by step
 
@@ -79,9 +114,7 @@ What's hiding in your projects:
 ### 3. Explore the matrix in your browser
 
 The browser opens on the link by itself (or open it yourself, or pass `--no-open`). Every package
-against every project, with the findings on top.
-
-<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/overview.png" alt="The matrix: findings on top, one row per package, one column per project" width="900">
+against every project, with the findings on top (screen 2 under [Screens](#screens)).
 
 ### 4. Follow a finding, then act
 
@@ -104,27 +137,9 @@ scripts, and in CI:
 npx depboard ~/projects --summary
 ```
 
-## What you'll discover
+## Screens
 
-**What's hiding, in plain sentences.** Known vulnerabilities, packages used at different major
-versions, projects far behind. Click a finding and the matrix narrows to it.
-
-<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/all-findings.png" alt="The findings: known vulnerabilities, different versions across projects, and major versions behind, in three columns" width="900">
-
-**The whole picture on one screen.** One row per package, one column per project. Each cell shows the
-installed version and how far behind and how dangerous it is, in words: `↑ major`, `🛡 high`.
-Version drift is named next to the package (`↳ 3 versions`) and colored under each version.
-
-<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/drift-focus.png" alt="The matrix narrowed to React, used at major versions 16, 17, and 18 across projects" width="900">
-
-**Details, and a safe update.** Select a cell for its versions, every known advisory, and an Update
-button that shows the exact command before it runs anything.
-
-<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/cell-details.png" alt="The details of lodash in one project: versions, the npm command, the Update button, and its advisories" width="900">
-
-## Every screen
-
-Click any image to see it full size.
+Every screen of DepBoard, in the order you meet them. Click an image to see it full size.
 
 <table>
   <tr>
@@ -171,6 +186,11 @@ Click any image to see it full size.
 
 ## Features
 
+- **What's hiding, in plain sentences:** known vulnerabilities, packages used at different major
+  versions, projects far behind. Click a finding and the matrix narrows to it.
+- **Badges that read on their own:** how far behind (`↑ patch`, `↑ minor`, `↑ major`) and how
+  dangerous (`low`, `moderate`, `high`, `critical`). Version drift is named next to the package
+  (`↳ 3 versions`) and colored under each version.
 - **Every project at once:** one folder or several, every `package.json` below them, the version
   each project really installed.
 - **Findings that are proven:** a vulnerability only for a version that is installed; drift only
@@ -186,30 +206,6 @@ Click any image to see it full size.
 
 **Planned:** exact versions from lock files for projects that were never installed, workspaces,
 transitive vulnerabilities, and updates for pnpm, yarn, and bun. See the [roadmap](https://github.com/aaas72/depboard/blob/main/docs/roadmap.md).
-
-## Quick start
-
-You need [Node.js](https://nodejs.org) 20.19 or newer.
-
-```bash
-npx depboard                       # the current folder
-npx depboard ~/projects            # one folder
-npx depboard ~/work ~/clients      # several folders, one matrix
-npx depboard ~/projects --summary  # print the findings and exit
-```
-
-| Option            | What it does                                       |
-| ----------------- | -------------------------------------------------- |
-| `--port <n>`      | Port to listen on (default: a random free port)    |
-| `--no-open`       | Print the link instead of opening the browser      |
-| `--summary`       | Print the findings and exit: no server, no browser |
-| `--depth <n>`     | How deep to look for projects (default: 6)         |
-| `-y`, `--yes`     | Skip confirmations                                 |
-| `--debug`         | Verbose logs on stderr                             |
-| `-v`, `--version` | Print the version                                  |
-
-New here? Start with [Getting started](https://github.com/aaas72/depboard/blob/main/docs/guide/getting-started.md) and
-[Reading the matrix](https://github.com/aaas72/depboard/blob/main/docs/guide/reading-the-matrix.md).
 
 ## Why DepBoard?
 
@@ -239,14 +235,12 @@ Details: [Privacy and security](https://github.com/aaas72/depboard/blob/main/doc
 [Security model](https://github.com/aaas72/depboard/blob/main/docs/security-model.md). Found a vulnerability? Please report it privately; see
 [SECURITY.md](https://github.com/aaas72/depboard/blob/main/SECURITY.md).
 
-## Under the hood
+## Documentation
 
 DepBoard scans the folders you choose, reads each project's declared and installed versions, asks the
 npm registry for the latest versions and known advisories, and turns the result into a matrix and
 ranked findings. A small server on `127.0.0.1` serves the UI and does all the work; the browser only
 displays it. The [architecture](https://github.com/aaas72/depboard/blob/main/docs/architecture.md) explains the pieces.
-
-## Documentation
 
 - **Using DepBoard:** [getting started](https://github.com/aaas72/depboard/blob/main/docs/guide/getting-started.md) ·
   [reading the matrix](https://github.com/aaas72/depboard/blob/main/docs/guide/reading-the-matrix.md) · [updating](https://github.com/aaas72/depboard/blob/main/docs/guide/updating.md) ·
