@@ -63,7 +63,7 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
       role="dialog"
       aria-modal="false"
       aria-labelledby={titleId}
-      className="flex w-full max-w-sm flex-none flex-col border-s border-border bg-surface sm:w-96"
+      className="flex w-full max-w-sm min-h-0 flex-none flex-col overflow-hidden border-s border-border bg-surface sm:w-96"
     >
       <header className="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
         <div className="min-w-0">
@@ -85,7 +85,9 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
         </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      {/* min-h-0 lets this area scroll instead of growing; relative keeps the absolutely
+          positioned screen-reader text inside it, or that text stretches the whole page. */}
+      <div className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3">
         <dl className="divide-y divide-border">
           <Field label={t('drawer.declared')}>{cell.declared}</Field>
           <Field label={t('drawer.installed')}>

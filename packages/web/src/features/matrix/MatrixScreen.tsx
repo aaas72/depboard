@@ -118,7 +118,7 @@ export function MatrixScreen({
   const roots = info.roots.map((root) => shortenPath(root, info.home)).join(', ');
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col overflow-hidden">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2.5">
         <div className="flex min-w-0 items-baseline gap-3">
           <h1 className="flex items-center gap-2 self-center text-base font-bold tracking-tight">
