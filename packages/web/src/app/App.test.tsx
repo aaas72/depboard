@@ -79,7 +79,7 @@ describe('first screen', () => {
     expect(screen.getByText('All 3 projects agree on every shared package. 🎉')).toBeTruthy();
   });
 
-  it('shows five headlines first, then everything on request', async () => {
+  it('shows one column per kind, the top two of each first, then everything on request', async () => {
     const many: Insight[] = Array.from({ length: 8 }, (_, i) => ({
       kind: 'major-lag' as const,
       package: `pkg-${String(i)}`,
@@ -92,7 +92,6 @@ describe('first screen', () => {
     const matrix = { ...sampleMatrix(), insights: [...sampleMatrix().insights, ...many] };
     const { user } = await renderApp(fakeApi(matrix));
     const strip = screen.getByRole('region', { name: /What’s hiding/ });
-    expect(within(strip).getAllByRole('button', { pressed: false })).toHaveLength(5);
     // A visible title, and a key that names each icon with its count.
     expect(
       within(strip).getByRole('heading', { name: 'What’s hiding in your projects' }),
@@ -100,21 +99,28 @@ describe('first screen', () => {
     expect(strip.textContent).toContain('1 vulnerable');
     expect(strip.textContent).toContain('1 different versions');
     expect(strip.textContent).toContain('8 far behind');
-    await user.click(screen.getByRole('button', { name: 'Show all 10 findings' }));
-    expect(within(strip).getAllByRole('button', { pressed: false })).toHaveLength(10);
-    // The full list is grouped by kind, most dangerous first.
-    const groups = within(strip)
-      .getAllByRole('heading', { level: 3 })
-      .map((h) => h.textContent);
-    expect(groups).toEqual([
+    // The same columns collapsed and expanded, most dangerous first, each titled with its total.
+    const columns = () =>
+      within(strip)
+        .getAllByRole('heading', { level: 3 })
+        .map((h) => h.textContent);
+    const expected = [
       'Known vulnerabilities (1)',
       'Different versions across projects (1)',
       'Major versions behind (8)',
-    ]);
-    const behind = within(strip).getByRole('region', { name: 'Major versions behind (8)' });
-    expect(within(behind).getAllByRole('button')).toHaveLength(8);
+    ];
+    expect(columns()).toEqual(expected);
+    const behind = () => within(strip).getByRole('region', { name: 'Major versions behind (8)' });
+    expect(within(behind()).getAllByRole('button')).toHaveLength(2);
+    expect(within(strip).getAllByRole('button', { pressed: false })).toHaveLength(4);
+
+    await user.click(screen.getByRole('button', { name: 'Show all 10 findings' }));
+    expect(columns()).toEqual(expected);
+    expect(within(behind()).getAllByRole('button')).toHaveLength(8);
+    expect(within(strip).getAllByRole('button', { pressed: false })).toHaveLength(10);
+
     await user.click(screen.getByRole('button', { name: 'Show fewer' }));
-    expect(within(strip).queryAllByRole('heading', { level: 3 })).toHaveLength(0);
+    expect(within(behind()).getAllByRole('button')).toHaveLength(2);
   });
 
   it('explains every symbol of the matrix in the legend', async () => {

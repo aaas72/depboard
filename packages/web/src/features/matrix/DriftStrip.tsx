@@ -2,14 +2,14 @@ import { useState, type ReactNode } from 'react';
 import {
   describeInsight,
   describeInsightText,
-  pickHeadlines,
   type Insight,
   type InsightKind,
 } from '@depboard/shared';
 import { ClockIcon, ShieldIcon, SplitIcon } from '../../components/ui/icons.js';
 import { t } from '../../lib/i18n.js';
 
-export const HEADLINE_COUNT = 5;
+/** Findings shown per kind before "Show all": the top ones, ranked by impact. */
+export const COLLAPSED_PER_KIND = 2;
 
 const KIND_ICON: Record<InsightKind, ReactNode> = {
   'vulnerable-spread': <ShieldIcon className="size-3.5" />,
@@ -79,26 +79,17 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
     );
   }
 
-  const shown = showAll ? insights : pickHeadlines(insights, HEADLINE_COUNT);
-  const groups = KIND_ORDER.map((kind) => ({
-    kind,
-    items: shown.filter((insight) => insight.kind === kind),
-  })).filter((g) => g.items.length > 0);
-  const counts = KIND_ORDER.map((kind) => ({
-    kind,
-    n: insights.filter((insight) => insight.kind === kind).length,
-  })).filter((c) => c.n > 0);
+  // One column per kind, collapsed or not: the top findings of each kind first, all of them
+  // with "Show all". Insights arrive ranked, so the first ones of a kind are its most important.
+  const groups = KIND_ORDER.map((kind) => {
+    const all = insights.filter((insight) => insight.kind === kind);
+    return { kind, all, items: showAll ? all : all.slice(0, COLLAPSED_PER_KIND) };
+  }).filter((g) => g.all.length > 0);
+  const hasMore = groups.some((g) => g.all.length > COLLAPSED_PER_KIND);
 
-  /**
-   * One finding. As a chip in the headline strip, or, in the full list, as a table row: no
-   * border, alternating row colors like the matrix (`rowIndex` picks the shade).
-   */
-  const item = (insight: Insight, rowIndex?: number) => {
+  /** One finding, as a table row: no border, alternating row colors like the matrix. */
+  const item = (insight: Insight, rowIndex: number) => {
     const pressed = focused === insight;
-    const asRow = rowIndex !== undefined;
-    const look = asRow
-      ? `w-full px-3 py-2 ${pressed ? 'bg-accent/20' : `${rowIndex % 2 === 0 ? 'bg-row' : 'bg-row-alt'} hover:bg-row-hover`}`
-      : `rounded-lg border px-3 py-1.5 ${pressed ? 'border-accent bg-surface-sunken' : 'border-border bg-surface-raised hover:border-border-strong'}`;
     const family = insight.related.length > 0 ? [insight.package, ...insight.related] : null;
     return (
       <li key={`${insight.kind}:${insight.package}`}>
@@ -110,7 +101,11 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
           onClick={() => {
             onFocus(pressed ? null : insight);
           }}
-          className={`flex items-center gap-2 text-start text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus ${look}`}
+          className={`flex w-full items-center gap-2 px-3 py-2 text-start text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus ${
+            pressed
+              ? 'bg-accent/20'
+              : `${rowIndex % 2 === 0 ? 'bg-row' : 'bg-row-alt'} hover:bg-row-hover`
+          }`}
         >
           <KindIcon kind={insight.kind} />
           <span>
@@ -121,18 +116,6 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
     );
   };
 
-  const toggle = insights.length > HEADLINE_COUNT && (
-    <button
-      type="button"
-      onClick={() => {
-        setShowAll((v) => !v);
-      }}
-      className="rounded px-2 py-1 text-sm text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-focus"
-    >
-      {showAll ? t('drift.showLess') : t('drift.showAll', { n: insights.length })}
-    </button>
-  );
-
   return (
     <section aria-labelledby="drift-title" className="px-4 pt-3 pb-2">
       {/* The title and the icon key: a first-time viewer learns what the strip is and what each
@@ -142,48 +125,48 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
           {t('drift.title')}
         </h2>
         <ul aria-hidden="true" className="flex flex-wrap gap-x-3 text-xs text-text-muted">
-          {counts.map(({ kind, n }) => (
+          {groups.map(({ kind, all }) => (
             <li key={kind} className="inline-flex items-center gap-1">
-              <KindIcon kind={kind} /> {n} {t(`drift.key.${kind}`)}
+              <KindIcon kind={kind} /> {all.length} {t(`drift.key.${kind}`)}
             </li>
           ))}
         </ul>
       </div>
-      {showAll ? (
-        // Everything, one column per kind side by side, most dangerous first: each kind reads
-        // as its own list instead of one long mixed one. Columns stack on narrow screens. A long
-        // list scrolls as one block (at most 45% of the window), so the matrix stays in reach.
-        <>
-          <div
-            className={`grid max-h-[45vh] gap-4 overflow-y-auto ${GROUP_COLUMNS[groups.length] ?? 'md:grid-cols-3'}`}
-          >
-            {groups.map(({ kind, items }) => {
-              const headingId = `drift-group-${kind}`;
-              return (
-                <section
-                  key={kind}
-                  aria-labelledby={headingId}
-                  className="min-w-0 self-start overflow-hidden rounded-md"
-                >
-                  <h3
-                    id={headingId}
-                    className="flex items-center gap-1.5 bg-table-header px-3 py-2 text-xs font-semibold text-text-muted"
-                  >
-                    <KindIcon kind={kind} />
-                    {t(`drift.group.${kind}`)} ({items.length})
-                  </h3>
-                  <ul className="flex flex-col">{items.map((insight, i) => item(insight, i))}</ul>
-                </section>
-              );
-            })}
-          </div>
-          <div className="mt-2">{toggle}</div>
-        </>
-      ) : (
-        <ul className="flex flex-wrap gap-2">
-          {shown.map((insight) => item(insight))}
-          {toggle && <li className="flex items-center">{toggle}</li>}
-        </ul>
+      {/* Columns side by side, most dangerous on the start side; they stack on narrow screens.
+          A long list scrolls as one block (at most 45% of the window) so the matrix stays in reach. */}
+      <div
+        className={`grid max-h-[45vh] gap-4 overflow-y-auto ${GROUP_COLUMNS[groups.length] ?? 'md:grid-cols-3'}`}
+      >
+        {groups.map(({ kind, all, items }) => {
+          const headingId = `drift-group-${kind}`;
+          return (
+            <section
+              key={kind}
+              aria-labelledby={headingId}
+              className="min-w-0 self-start overflow-hidden rounded-md"
+            >
+              <h3
+                id={headingId}
+                className="flex items-center gap-1.5 bg-table-header px-3 py-2 text-xs font-semibold text-text-muted"
+              >
+                <KindIcon kind={kind} />
+                {t(`drift.group.${kind}`)} ({all.length})
+              </h3>
+              <ul className="flex flex-col">{items.map((insight, i) => item(insight, i))}</ul>
+            </section>
+          );
+        })}
+      </div>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => {
+            setShowAll((v) => !v);
+          }}
+          className="mt-2 rounded px-2 py-1 text-sm text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+        >
+          {showAll ? t('drift.showLess') : t('drift.showAll', { n: insights.length })}
+        </button>
       )}
     </section>
   );
