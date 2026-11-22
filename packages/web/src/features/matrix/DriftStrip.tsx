@@ -28,6 +28,13 @@ const KIND_STYLE: Record<InsightKind, string> = {
 /** The order the strip ranks kinds in: the most dangerous first. */
 const KIND_ORDER: readonly InsightKind[] = ['vulnerable-spread', 'version-drift', 'major-lag'];
 
+/** Static class names, so Tailwind sees them: one grid column per kind present. */
+const GROUP_COLUMNS: Record<number, string> = {
+  1: 'md:grid-cols-1',
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-3',
+};
+
 function KindIcon({ kind }: { kind: InsightKind }) {
   return <span className={`flex-none ${KIND_STYLE[kind]}`}>{KIND_ICON[kind]}</span>;
 }
@@ -73,6 +80,10 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
   }
 
   const shown = showAll ? insights : pickHeadlines(insights, HEADLINE_COUNT);
+  const groups = KIND_ORDER.map((kind) => ({
+    kind,
+    items: shown.filter((insight) => insight.kind === kind),
+  })).filter((g) => g.items.length > 0);
   const counts = KIND_ORDER.map((kind) => ({
     kind,
     n: insights.filter((insight) => insight.kind === kind).length,
@@ -135,26 +146,30 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
         </ul>
       </div>
       {showAll ? (
-        // Everything, grouped by kind: a long mixed list reads as noise.
+        // Everything, one column per kind side by side, most dangerous first: each kind reads
+        // as its own list instead of one long mixed one. Columns stack on narrow screens. A long
+        // list scrolls as one block (at most 45% of the window), so the matrix stays in reach.
         <>
-          {KIND_ORDER.map((kind) => {
-            const group = shown.filter((insight) => insight.kind === kind);
-            if (group.length === 0) return null;
-            const headingId = `drift-group-${kind}`;
-            return (
-              <section key={kind} aria-labelledby={headingId} className="mb-2">
-                <h3
-                  id={headingId}
-                  className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-muted"
-                >
-                  <KindIcon kind={kind} />
-                  {t(`drift.group.${kind}`)} ({group.length})
-                </h3>
-                <ul className="flex flex-wrap gap-2">{group.map(item)}</ul>
-              </section>
-            );
-          })}
-          {toggle}
+          <div
+            className={`grid max-h-[45vh] gap-4 overflow-y-auto ${GROUP_COLUMNS[groups.length] ?? 'md:grid-cols-3'}`}
+          >
+            {groups.map(({ kind, items }) => {
+              const headingId = `drift-group-${kind}`;
+              return (
+                <section key={kind} aria-labelledby={headingId} className="min-w-0">
+                  <h3
+                    id={headingId}
+                    className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text-muted"
+                  >
+                    <KindIcon kind={kind} />
+                    {t(`drift.group.${kind}`)} ({items.length})
+                  </h3>
+                  <ul className="flex flex-col gap-2 [&_button]:w-full">{items.map(item)}</ul>
+                </section>
+              );
+            })}
+          </div>
+          <div className="mt-2">{toggle}</div>
         </>
       ) : (
         <ul className="flex flex-wrap gap-2">
