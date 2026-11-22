@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest something that would make the picture across your projects clearer.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        DepBoard's question is "what is happening across all my projects at once?". The best requests
+        start from something you wanted to see or do across your projects. Check the
+        [roadmap](https://github.com/aaas72/depboard/blob/main/ROADMAP.md) first: it may already be planned.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What were you trying to see or do?
+      description: The situation, not the solution yet.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would help?
+      description: How you imagine it working.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What do you do today instead?
+      description: Other tools, scripts, or manual steps.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Fits DepBoard
+      options:
+        - label: It works locally, without an account or a cloud service.
+          required: true

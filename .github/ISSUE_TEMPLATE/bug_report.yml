@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in DepBoard doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. Found a security problem? Please don't file it here:
+        see [SECURITY.md](https://github.com/aaas72/depboard/blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect to see instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      description: The command you ran, and what you did in the UI.
+      placeholder: |
+        1. npx depboard ~/projects
+        2. Clicked the react cell in the "blog" column
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Terminal output
+      description: Run the command again with `--debug` and paste the output. Delete the token from the `Open:` line first.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: DepBoard version
+      description: Output of `npx depboard --version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux]
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      description: Output of `node --version`.
+    validations:
+      required: true
+  - type: dropdown
+    id: manager
+    attributes:
+      label: Package manager of the affected project(s)
+      multiple: true
+      options: [npm, pnpm, yarn, bun, not sure]
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: A screenshot of the matrix helps a lot. Paths inside your home folder already show as `~/…`.
