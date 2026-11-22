@@ -89,8 +89,16 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
     n: insights.filter((insight) => insight.kind === kind).length,
   })).filter((c) => c.n > 0);
 
-  const item = (insight: Insight) => {
+  /**
+   * One finding. As a chip in the headline strip, or, in the full list, as a table row: no
+   * border, alternating row colors like the matrix (`rowIndex` picks the shade).
+   */
+  const item = (insight: Insight, rowIndex?: number) => {
     const pressed = focused === insight;
+    const asRow = rowIndex !== undefined;
+    const look = asRow
+      ? `w-full px-3 py-2 ${pressed ? 'bg-accent/20' : `${rowIndex % 2 === 0 ? 'bg-row' : 'bg-row-alt'} hover:bg-row-hover`}`
+      : `rounded-lg border px-3 py-1.5 ${pressed ? 'border-accent bg-surface-sunken' : 'border-border bg-surface-raised hover:border-border-strong'}`;
     const family = insight.related.length > 0 ? [insight.package, ...insight.related] : null;
     return (
       <li key={`${insight.kind}:${insight.package}`}>
@@ -102,11 +110,7 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
           onClick={() => {
             onFocus(pressed ? null : insight);
           }}
-          className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-start text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
-            pressed
-              ? 'border-accent bg-surface-sunken'
-              : 'border-border bg-surface-raised hover:border-border-strong'
-          }`}
+          className={`flex items-center gap-2 text-start text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus ${look}`}
         >
           <KindIcon kind={insight.kind} />
           <span>
@@ -156,15 +160,19 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
             {groups.map(({ kind, items }) => {
               const headingId = `drift-group-${kind}`;
               return (
-                <section key={kind} aria-labelledby={headingId} className="min-w-0">
+                <section
+                  key={kind}
+                  aria-labelledby={headingId}
+                  className="min-w-0 self-start overflow-hidden rounded-md"
+                >
                   <h3
                     id={headingId}
-                    className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-text-muted"
+                    className="flex items-center gap-1.5 bg-table-header px-3 py-2 text-xs font-semibold text-text-muted"
                   >
                     <KindIcon kind={kind} />
                     {t(`drift.group.${kind}`)} ({items.length})
                   </h3>
-                  <ul className="flex flex-col gap-2 [&_button]:w-full">{items.map(item)}</ul>
+                  <ul className="flex flex-col">{items.map((insight, i) => item(insight, i))}</ul>
                 </section>
               );
             })}
@@ -173,7 +181,7 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
         </>
       ) : (
         <ul className="flex flex-wrap gap-2">
-          {shown.map(item)}
+          {shown.map((insight) => item(insight))}
           {toggle && <li className="flex items-center">{toggle}</li>}
         </ul>
       )}
