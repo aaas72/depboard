@@ -72,7 +72,7 @@ export function ThemeIcon({ className = 'size-4' }: IconProps) {
 /**
  * The DepBoard mark: a lens over a grid of dots (your projects), catching the one that was
  * hiding. The same drawing as docs/media/logo.svg. Dots take the muted text color, the lens the
- * accent, so it follows the theme.
+ * brand red.
  */
 const DOTS: readonly (readonly [number, number])[] = [
   [6, 6],
@@ -96,7 +96,7 @@ export function LogoMark({ className = 'size-7' }: IconProps) {
           <circle key={`${String(cx)}-${String(cy)}`} cx={cx} cy={cy} r="2.4" />
         ))}
       </g>
-      <g className="fill-accent stroke-accent">
+      <g className="fill-brand stroke-brand">
         <circle cx="29" cy="21" r="11" fill="none" strokeWidth="3" />
         <line x1="37" y1="29" x2="44.5" y2="36.5" strokeWidth="4" strokeLinecap="round" />
         <circle cx="29" cy="21" r="4.2" stroke="none" />

@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes } from 'react';
 type Variant = 'primary' | 'secondary' | 'warning' | 'ghost';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-fg hover:opacity-90',
+  primary: 'bg-brand text-brand-fg hover:opacity-90',
   secondary: 'border border-border-strong bg-surface text-text hover:bg-surface-raised',
   /** For actions that can break something (a major update). */
   warning: 'border border-warning bg-surface text-warning hover:bg-surface-raised',
