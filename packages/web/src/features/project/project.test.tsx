@@ -40,7 +40,7 @@ describe('projectSections and projectStats', () => {
     expect(names(sections.devDependencies)).toEqual(['vitest']);
   });
 
-  it('applies the same search and "Outdated only" filters as the matrix', () => {
+  it('applies the same search and "Hide up-to-date" filters as the matrix', () => {
     expect(
       names(projectSections(rows, 'p', { query: 'ZE', outdatedOnly: false }).dependencies),
     ).toEqual(['zeta']);

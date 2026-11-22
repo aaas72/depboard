@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { cell, project, row, sampleMatrix } from '../../testing/fixtures.js';
 import {
+  countUpToDate,
   driftGroups,
   filterMatrix,
   focusOn,
@@ -194,5 +195,13 @@ describe('nameColumnWidth', () => {
     expect(nameColumnWidth(['@some-really-long-scope/an-even-longer-package-name'])).toBe(
       NAME_MAX_W,
     );
+  });
+});
+
+describe('countUpToDate', () => {
+  it('counts packages up to date in every project, which "Hide up-to-date" hides', () => {
+    // sampleMatrix: left-pad is current everywhere; lodash, react, and zod are behind somewhere.
+    expect(countUpToDate(sampleMatrix().rows)).toBe(1);
+    expect(countUpToDate([])).toBe(0);
   });
 });

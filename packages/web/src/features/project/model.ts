@@ -45,7 +45,7 @@ function compareEntries(a: ProjectEntry, b: ProjectEntry): number {
 
 /**
  * A project's packages, split into dependencies and devDependencies, with the same search and
- * "Outdated only" filters as the matrix.
+ * "Hide up-to-date" filters as the matrix.
  */
 export function projectSections(
   rows: readonly MatrixRow[],

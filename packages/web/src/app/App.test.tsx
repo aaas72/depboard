@@ -163,9 +163,9 @@ describe('narrowing the matrix', () => {
     expect(screen.getByText('Nothing matches these filters.')).toBeTruthy();
   });
 
-  it('hides up-to-date packages with "Outdated only"', async () => {
+  it('hides up-to-date packages, saying how many', async () => {
     const { user } = await renderApp();
-    await user.click(screen.getByRole('checkbox', { name: 'Outdated only' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Hide up-to-date (1)' }));
     expect(rowNames(screen.getByRole('grid'))).toEqual(['lodash', 'react', 'zod']);
   });
 });

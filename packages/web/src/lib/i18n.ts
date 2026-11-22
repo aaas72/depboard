@@ -7,7 +7,7 @@ const en = {
   'header.projects': '{n} project|{n} projects',
   'search.label': 'Search packages or projects',
   'search.placeholder': 'Search packages or projects…',
-  'filter.outdatedOnly': 'Outdated only',
+  'filter.hideUpToDate': 'Hide up-to-date ({n})',
   'action.rescan': 'Rescan',
   'action.rescanning': 'Rescanning…',
   'action.retry': 'Try again',

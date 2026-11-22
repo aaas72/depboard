@@ -211,3 +211,9 @@ export function nameColumnWidth(names: readonly string[]): number {
   const longest = names.reduce((max, name) => Math.max(max, name.length), 0);
   return Math.min(NAME_MAX_W, Math.max(NAME_MIN_W, Math.ceil(longest * 7.5) + 24));
 }
+
+/** Packages up to date in every project: what "Hide up-to-date" would hide. */
+export function countUpToDate(rows: readonly MatrixRow[]): number {
+  return rows.filter((row) => !Object.values(row.cells).some((cell) => isOutdated(cell.updateType)))
+    .length;
+}

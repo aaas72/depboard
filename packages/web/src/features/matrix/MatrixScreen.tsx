@@ -15,7 +15,7 @@ import { routeHref, useRoute } from '../../lib/route.js';
 import { CellDrawer } from './CellDrawer.js';
 import { DriftStrip, InsightSentence } from './DriftStrip.js';
 import { MatrixGrid, type CellRef } from './MatrixGrid.js';
-import { filterMatrix, focusOn, nameColumnWidth, sortRows } from './model.js';
+import { countUpToDate, filterMatrix, focusOn, nameColumnWidth, sortRows } from './model.js';
 import type { MatrixData } from './useMatrix.js';
 
 export interface MatrixScreenProps {
@@ -61,6 +61,8 @@ export function MatrixScreen({
   );
 
   const sorted = useMemo(() => sortRows(matrix.rows), [matrix.rows]);
+  // "Hide up-to-date" names how many rows it hides, and only shows when there is something to hide.
+  const upToDate = useMemo(() => countUpToDate(matrix.rows), [matrix.rows]);
   const nameWidth = useMemo(
     () => nameColumnWidth(matrix.rows.map((row) => row.name)),
     [matrix.rows],
@@ -147,17 +149,19 @@ export function MatrixScreen({
               /
             </kbd>
           </label>
-          <label className="flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 text-sm hover:bg-surface-raised">
-            <input
-              type="checkbox"
-              checked={outdatedOnly}
-              onChange={(e) => {
-                setOutdatedOnly(e.target.checked);
-              }}
-              className="size-4 accent-accent"
-            />
-            {t('filter.outdatedOnly')}
-          </label>
+          {(upToDate > 0 || outdatedOnly) && (
+            <label className="flex h-8 cursor-pointer items-center gap-2 rounded-md px-2 text-sm hover:bg-surface-raised">
+              <input
+                type="checkbox"
+                checked={outdatedOnly}
+                onChange={(e) => {
+                  setOutdatedOnly(e.target.checked);
+                }}
+                className="size-4 accent-accent"
+              />
+              {t('filter.hideUpToDate', { n: upToDate })}
+            </label>
+          )}
           <Button onClick={rescan} disabled={rescanning} aria-busy={rescanning}>
             <RefreshIcon className={`size-3.5 ${rescanning ? 'animate-spin' : ''}`} />
             {rescanning ? t('action.rescanning') : t('action.rescan')}
