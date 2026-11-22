@@ -122,7 +122,7 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
         </div>
       )}
       <Button
-        variant={major ? 'warning' : 'primary'}
+        variant="primary"
         disabled={preview === null || busy || starting}
         onClick={() => {
           if (major) setConfirming(true);
