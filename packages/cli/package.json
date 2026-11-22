@@ -23,7 +23,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "depboard": "./dist/index.js"
+    "depboard": "dist/index.js"
   },
   "files": [
     "dist"
