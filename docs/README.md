@@ -11,7 +11,7 @@
 
 ## Contributing to DepBoard
 
-- [Contributing guide](../CONTRIBUTING.md): setup, workflow, and the bar for pull requests
+- [Contributing guide](../.github/CONTRIBUTING.md): setup, workflow, and the bar for pull requests
 - [Architecture](architecture.md): how the pieces fit, and why
 - [Security model](security-model.md): the threat model and the controls every change keeps
 - [UI guidelines](ui-guidelines.md): the rules behind the interface
@@ -19,7 +19,7 @@
 
 ## The project
 
-- [Roadmap](../ROADMAP.md): the vision, what's next, and what DepBoard will not do
+- [Roadmap](roadmap.md): the vision, what's next, and what DepBoard will not do
 - [Changelog](../packages/cli/CHANGELOG.md)
 - [Security policy](../SECURITY.md)
-- [Code of conduct](../CODE_OF_CONDUCT.md)
+- [Code of conduct](../.github/CODE_OF_CONDUCT.md)

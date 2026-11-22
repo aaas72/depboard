@@ -4,7 +4,7 @@
 // slip into a release unnoticed (docs/adr/0001).
 //
 // Called by packages/cli/tsup.config.ts after each build. Also runnable by hand:
-//   node scripts/third-party-notices.mjs <cli-metafile.json> <web-modules.json> <output.md>
+//   node .github/scripts/third-party-notices.mjs <cli-metafile.json> <web-modules.json> <output.md>
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

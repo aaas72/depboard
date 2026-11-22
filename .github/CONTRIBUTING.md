@@ -24,7 +24,7 @@ By taking part you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 - **Suggest a feature** with the feature request form. Tell us what you were trying to see or do.
 - **Improve the docs.** Unclear wording is a bug.
 - **Fix an issue.** Issues labeled `good first issue` are small and well defined.
-- **Report a vulnerability privately**, never in a public issue: see [SECURITY.md](SECURITY.md).
+- **Report a vulnerability privately**, never in a public issue: see [SECURITY.md](../SECURITY.md).
 
 ## Before you start
 
@@ -33,7 +33,7 @@ can't merge. Small fixes and doc changes can go straight to a pull request.
 
 Every feature has to pass one question: **does this make the full picture clearer?** DepBoard
 answers "what is happening across all my projects at once?". Features that don't serve that answer,
-however nice, are deferred. Read the [roadmap](ROADMAP.md) for what is planned and what is out of
+however nice, are deferred. Read the [roadmap](../docs/roadmap.md) for what is planned and what is out of
 scope.
 
 ## Development setup
@@ -72,11 +72,11 @@ packages/
   server/   scanner, registry client, insights, updates, security guard
   web/      React UI
   cli/      the published `depboard` package, bundles the other three
-scripts/    CI helpers: local CI, package check, performance budget, license notices
+.github/scripts/  CI helpers: local CI, package check, performance budget, license notices
 docs/       architecture, security model, UI guidelines, user guide, ADRs
 ```
 
-The [architecture overview](docs/architecture.md) explains how the pieces fit.
+The [architecture overview](../docs/architecture.md) explains how the pieces fit.
 
 ### Commands
 
@@ -125,9 +125,9 @@ A pull request is ready to merge when:
 - [ ] `pnpm lint` passes with **zero warnings** and `pnpm typecheck` passes.
 - [ ] New behavior and its edge cases are tested; no test is skipped to make CI pass.
 - [ ] The performance budget still holds (`pnpm perf`), or the PR explains why not.
-- [ ] Server changes keep every control in the [security model](docs/security-model.md) and tick its
+- [ ] Server changes keep every control in the [security model](../docs/security-model.md) and tick its
       checklist.
-- [ ] UI changes follow the [UI guidelines](docs/ui-guidelines.md) and include a screenshot or GIF.
+- [ ] UI changes follow the [UI guidelines](../docs/ui-guidelines.md) and include a screenshot or GIF.
 - [ ] A changeset is included if the change is visible to users.
 - [ ] Docs are updated if behavior, flags, or output changed.
 - [ ] New dependencies are justified in the description (each one adds weight and attack surface).
@@ -172,7 +172,7 @@ Keep pull requests focused, ideally under 400 changed lines. Reviewers aim to re
 ### Decisions
 
 A decision with a reasonable alternative gets an Architecture Decision Record in
-[docs/adr](docs/adr/): the context, the decision, and its consequences. Read the existing ones before
+[docs/adr](../docs/adr/): the context, the decision, and its consequences. Read the existing ones before
 reopening a settled question.
 
 ## Adding a package manager
@@ -197,7 +197,7 @@ and may change in any release. Before 1.0, a breaking change bumps the minor ver
 changelog.
 
 Changesets collect into a release pull request; merging it updates the version and
-[the changelog](packages/cli/CHANGELOG.md). A bad release is fixed with a new patch, never unpublished.
+[the changelog](../packages/cli/CHANGELOG.md). A bad release is fixed with a new patch, never unpublished.
 
 ## Getting help
 

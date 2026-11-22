@@ -3,7 +3,7 @@
 // loads, the API answers with the token and refuses without it. Used by local and GitHub CI to
 // prove the bundle works on our minimum Node version.
 //
-//   node scripts/smoke-server.mjs <path-to-cli-dist-index.js> <projects-folder>
+//   node .github/scripts/smoke-server.mjs <path-to-cli-dist-index.js> <projects-folder>
 import { spawn } from 'node:child_process';
 
 const [cli, folder] = process.argv.slice(2);

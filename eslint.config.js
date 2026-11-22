@@ -36,7 +36,7 @@ export default tseslint.config(
   },
   {
     // Repo maintenance scripts: plain Node ESM, outside any tsconfig.
-    files: ['scripts/**/*.mjs'],
+    files: ['.github/scripts/**/*.mjs'],
     ...tseslint.configs.disableTypeChecked,
     rules: { ...tseslint.configs.disableTypeChecked.rules, 'no-console': 'off' },
   },

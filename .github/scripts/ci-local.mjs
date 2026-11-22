@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const quick = process.argv.includes('--quick');
 const isWindows = process.platform === 'win32';
 
@@ -46,9 +46,9 @@ function hostChecks() {
   for (const [name, args] of steps) {
     if (!run(`${os} (Node ${process.versions.node}): ${name}`, 'pnpm', args)) return false;
   }
-  if (!run(`${os}: package contents`, 'node', ['scripts/check-package.mjs'])) return false;
+  if (!run(`${os}: package contents`, 'node', ['.github/scripts/check-package.mjs'])) return false;
   return run(`${os}: performance budgets`, 'node', [
-    'scripts/perf-budget.mjs',
+    '.github/scripts/perf-budget.mjs',
     path.join('packages', 'cli', 'dist', 'index.js'),
   ]);
 }
@@ -114,7 +114,7 @@ function node20Smoke() {
     '-v',
     `${path.join(repo, 'packages', 'cli')}:/cli:ro`,
     '-v',
-    `${path.join(repo, 'scripts')}:/scripts:ro`,
+    `${path.join(repo, '.github', 'scripts')}:/scripts:ro`,
     'node:20.19-bookworm-slim',
     'bash',
     '-c',

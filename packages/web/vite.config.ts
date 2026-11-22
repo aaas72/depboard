@@ -11,7 +11,7 @@ const DEV_SERVER = 'http://127.0.0.1:4319';
 
 /**
  * Records every module that ends up in the built UI, outside dist/ so it is never served or
- * published. The CLI build turns it into THIRD_PARTY_LICENSES.md (scripts/third-party-notices.mjs).
+ * published. The CLI build turns it into THIRD_PARTY_LICENSES.md (.github/scripts/third-party-notices.mjs).
  */
 function bundledModules(): Plugin {
   return {

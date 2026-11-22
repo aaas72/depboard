@@ -138,7 +138,7 @@ button that shows the exact command before it runs anything.
 - **Works everywhere:** Windows, macOS, and Linux; projects managed by npm, pnpm, yarn, and bun.
 
 **Planned:** exact versions from lock files for projects that were never installed, workspaces,
-transitive vulnerabilities, and updates for pnpm, yarn, and bun. See the [roadmap](https://github.com/aaas72/depboard/blob/main/ROADMAP.md).
+transitive vulnerabilities, and updates for pnpm, yarn, and bun. See the [roadmap](https://github.com/aaas72/depboard/blob/main/docs/roadmap.md).
 
 ## Quick start
 
@@ -204,15 +204,15 @@ displays it. The [architecture](https://github.com/aaas72/depboard/blob/main/doc
 - **Using DepBoard:** [getting started](https://github.com/aaas72/depboard/blob/main/docs/guide/getting-started.md) ·
   [reading the matrix](https://github.com/aaas72/depboard/blob/main/docs/guide/reading-the-matrix.md) · [updating](https://github.com/aaas72/depboard/blob/main/docs/guide/updating.md) ·
   [command line](https://github.com/aaas72/depboard/blob/main/docs/guide/cli.md) · [troubleshooting](https://github.com/aaas72/depboard/blob/main/docs/guide/troubleshooting.md)
-- **Contributing:** [contributing guide](https://github.com/aaas72/depboard/blob/main/CONTRIBUTING.md) · [architecture](https://github.com/aaas72/depboard/blob/main/docs/architecture.md) ·
+- **Contributing:** [contributing guide](https://github.com/aaas72/depboard/blob/main/.github/CONTRIBUTING.md) · [architecture](https://github.com/aaas72/depboard/blob/main/docs/architecture.md) ·
   [security model](https://github.com/aaas72/depboard/blob/main/docs/security-model.md) · [UI guidelines](https://github.com/aaas72/depboard/blob/main/docs/ui-guidelines.md) ·
   [decision records](https://github.com/aaas72/depboard/tree/main/docs/adr)
-- **Project:** [roadmap](https://github.com/aaas72/depboard/blob/main/ROADMAP.md) · [changelog](https://github.com/aaas72/depboard/blob/main/packages/cli/CHANGELOG.md) ·
-  [code of conduct](https://github.com/aaas72/depboard/blob/main/CODE_OF_CONDUCT.md)
+- **Project:** [roadmap](https://github.com/aaas72/depboard/blob/main/docs/roadmap.md) · [changelog](https://github.com/aaas72/depboard/blob/main/packages/cli/CHANGELOG.md) ·
+  [code of conduct](https://github.com/aaas72/depboard/blob/main/.github/CODE_OF_CONDUCT.md)
 
 ## Contributing
 
-Issues and pull requests are welcome. The [contributing guide](https://github.com/aaas72/depboard/blob/main/CONTRIBUTING.md) takes you from clone
+Issues and pull requests are welcome. The [contributing guide](https://github.com/aaas72/depboard/blob/main/.github/CONTRIBUTING.md) takes you from clone
 to a passing test run and explains what a pull request needs to merge. Adding updates for pnpm, yarn,
 or bun is a great first larger contribution.
 

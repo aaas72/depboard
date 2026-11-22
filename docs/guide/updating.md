@@ -38,4 +38,4 @@ update**. The dialog's focus starts on **Cancel**.
 DepBoard reads projects of every package manager, but in this version it updates **npm** projects
 only. For the others, the details panel shows the command to run yourself in the project folder.
 Running `npm install` inside a pnpm or yarn workspace could damage it, so DepBoard doesn't try.
-Updates for pnpm, yarn, and bun are on the [roadmap](../../ROADMAP.md).
+Updates for pnpm, yarn, and bun are on the [roadmap](../roadmap.md).

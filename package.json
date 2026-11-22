@@ -17,10 +17,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "changeset": "changeset",
-    "check:package": "node scripts/check-package.mjs",
-    "ci:local": "node scripts/ci-local.mjs",
-    "ci:quick": "node scripts/ci-local.mjs --quick",
-    "perf": "node scripts/perf-budget.mjs packages/cli/dist/index.js"
+    "check:package": "node .github/scripts/check-package.mjs",
+    "ci:local": "node .github/scripts/ci-local.mjs",
+    "ci:quick": "node .github/scripts/ci-local.mjs --quick",
+    "perf": "node .github/scripts/perf-budget.mjs packages/cli/dist/index.js"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",

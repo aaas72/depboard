@@ -86,7 +86,7 @@ interface GridRowProps {
 
 /**
  * One package row. Memoized: while scrolling, only rows entering the view render, which is
- * what keeps 500 × 30 smooth (CONTRIBUTING.md, performance budgets).
+ * what keeps 500 × 30 smooth (.github/CONTRIBUTING.md, performance budgets).
  */
 const GridRow = memo(function GridRow({
   row,

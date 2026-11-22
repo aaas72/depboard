@@ -7,7 +7,7 @@ body:
       value: |
         DepBoard's question is "what is happening across all my projects at once?". The best requests
         start from something you wanted to see or do across your projects. Check the
-        [roadmap](https://github.com/aaas72/depboard/blob/main/ROADMAP.md) first: it may already be planned.
+        [roadmap](https://github.com/aaas72/depboard/blob/main/docs/roadmap.md) first: it may already be planned.
   - type: textarea
     id: problem
     attributes:

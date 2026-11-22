@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Checks the performance budgets from CONTRIBUTING.md against the BUILT CLI,
+// Checks the performance budgets from .github/CONTRIBUTING.md against the BUILT CLI,
 // the way a user runs it, on a generated projects folder and a local registry with realistic
 // latency (the real registry's speed varies too much to gate CI on).
 //
-//   node scripts/perf-budget.mjs <path-to-cli-dist-index.js>
+//   node .github/scripts/perf-budget.mjs <path-to-cli-dist-index.js>
 //
 // Budgets checked (cold cache: every run is a fresh process):
 //   1. Time to first insight, ~30 projects  ≤ 10 s   (`--summary` prints the headlines)

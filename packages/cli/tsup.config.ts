@@ -31,7 +31,7 @@ export default defineConfig({
     // Every bundled package's license, generated from what was actually bundled (docs/adr/0001).
     // The build fails if a license isn't on the allowlist.
     const metafile = path.resolve('dist', 'metafile-esm.json');
-    const notices = await import('../../scripts/third-party-notices.mjs');
+    const notices = await import('../../.github/scripts/third-party-notices.mjs');
     const files = [
       ...notices.filesFromMetafile(metafile, process.cwd()),
       ...(JSON.parse(fs.readFileSync(webModules, 'utf8')) as string[]),

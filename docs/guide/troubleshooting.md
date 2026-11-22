@@ -16,7 +16,7 @@ restarted. Use the link from the current run in the terminal.
 Those projects have no `node_modules`, so DepBoard can only estimate the version from the range in
 `package.json`, and can't check an estimate for vulnerabilities. Run `npm install` (or your package
 manager's install) in those projects and press **Rescan**. Reading exact versions from lock files,
-without installing, is on the [roadmap](../../ROADMAP.md).
+without installing, is on the [roadmap](../roadmap.md).
 
 ## Some packages show `?`
 
@@ -35,7 +35,7 @@ registry show no badge at all: there is no public version to compare against.
 ## A monorepo shows each package as its own project
 
 That is expected in this version: workspace packages appear as separate columns. Full workspace
-support is on the [roadmap](../../ROADMAP.md).
+support is on the [roadmap](../roadmap.md).
 
 ## Why can't I update a pnpm, yarn, or bun project?
 

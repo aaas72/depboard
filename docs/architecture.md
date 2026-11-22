@@ -129,4 +129,4 @@ Internal: it exists for DepBoard's own UI and may change in any release. All rou
 - **Decisions with a real alternative get an ADR** in [docs/adr](adr/).
 
 See also: [security model](security-model.md) · [UI guidelines](ui-guidelines.md) ·
-[contributing](../CONTRIBUTING.md).
+[contributing](../.github/CONTRIBUTING.md).
