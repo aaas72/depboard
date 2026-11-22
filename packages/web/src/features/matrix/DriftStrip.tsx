@@ -23,6 +23,13 @@ const KIND_STYLE: Record<InsightKind, string> = {
   'major-lag': 'text-update-major',
 };
 
+/** The order the strip ranks kinds in: the most dangerous first. */
+const KIND_ORDER: readonly InsightKind[] = ['vulnerable-spread', 'version-drift', 'major-lag'];
+
+function KindIcon({ kind }: { kind: InsightKind }) {
+  return <span className={`flex-none ${KIND_STYLE[kind]}`}>{KIND_ICON[kind]}</span>;
+}
+
 function Sentence({ insight }: { insight: Insight }) {
   return (
     <>
@@ -64,56 +71,95 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
   }
 
   const shown = showAll ? insights : pickHeadlines(insights, HEADLINE_COUNT);
+  const counts = KIND_ORDER.map((kind) => ({
+    kind,
+    n: insights.filter((insight) => insight.kind === kind).length,
+  })).filter((c) => c.n > 0);
+
+  const item = (insight: Insight) => {
+    const pressed = focused === insight;
+    const family = insight.related.length > 0 ? [insight.package, ...insight.related] : null;
+    return (
+      <li key={`${insight.kind}:${insight.package}`}>
+        <button
+          type="button"
+          aria-pressed={pressed}
+          aria-label={`${t(`drift.kind.${insight.kind}`)}: ${describeInsightText(insight)}`}
+          title={family ? t('drift.family', { list: family.join(', ') }) : undefined}
+          onClick={() => {
+            onFocus(pressed ? null : insight);
+          }}
+          className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-start text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
+            pressed
+              ? 'border-accent bg-surface-sunken'
+              : 'border-border bg-surface-raised hover:border-border-strong'
+          }`}
+        >
+          <KindIcon kind={insight.kind} />
+          <span>
+            <Sentence insight={insight} />
+          </span>
+        </button>
+      </li>
+    );
+  };
+
+  const toggle = insights.length > HEADLINE_COUNT && (
+    <button
+      type="button"
+      onClick={() => {
+        setShowAll((v) => !v);
+      }}
+      className="rounded px-2 py-1 text-sm text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+    >
+      {showAll ? t('drift.showLess') : t('drift.showAll', { n: insights.length })}
+    </button>
+  );
 
   return (
     <section aria-labelledby="drift-title" className="px-4 pt-3 pb-2">
-      <h2 id="drift-title" className="sr-only">
-        {t('drift.title')}
-      </h2>
-      <ul className="flex flex-wrap gap-2">
-        {shown.map((insight) => {
-          const pressed = focused === insight;
-          const family = insight.related.length > 0 ? [insight.package, ...insight.related] : null;
-          return (
-            <li key={`${insight.kind}:${insight.package}`}>
-              <button
-                type="button"
-                aria-pressed={pressed}
-                aria-label={`${t(`drift.kind.${insight.kind}`)}: ${describeInsightText(insight)}`}
-                title={family ? t('drift.family', { list: family.join(', ') }) : undefined}
-                onClick={() => {
-                  onFocus(pressed ? null : insight);
-                }}
-                className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-start text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
-                  pressed
-                    ? 'border-accent bg-surface-sunken'
-                    : 'border-border bg-surface-raised hover:border-border-strong'
-                }`}
-              >
-                <span className={`flex-none ${KIND_STYLE[insight.kind]}`}>
-                  {KIND_ICON[insight.kind]}
-                </span>
-                <span>
-                  <Sentence insight={insight} />
-                </span>
-              </button>
+      {/* The title and the icon key: a first-time viewer learns what the strip is and what each
+          icon means without hovering anything. */}
+      <div className="mb-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <h2 id="drift-title" className="text-sm font-semibold">
+          {t('drift.title')}
+        </h2>
+        <ul aria-hidden="true" className="flex flex-wrap gap-x-3 text-xs text-text-muted">
+          {counts.map(({ kind, n }) => (
+            <li key={kind} className="inline-flex items-center gap-1">
+              <KindIcon kind={kind} /> {n} {t(`drift.key.${kind}`)}
             </li>
-          );
-        })}
-        {insights.length > HEADLINE_COUNT && (
-          <li className="flex items-center">
-            <button
-              type="button"
-              onClick={() => {
-                setShowAll((v) => !v);
-              }}
-              className="rounded px-2 py-1 text-sm text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-focus"
-            >
-              {showAll ? t('drift.showLess') : t('drift.showAll', { n: insights.length })}
-            </button>
-          </li>
-        )}
-      </ul>
+          ))}
+        </ul>
+      </div>
+      {showAll ? (
+        // Everything, grouped by kind: a long mixed list reads as noise.
+        <>
+          {KIND_ORDER.map((kind) => {
+            const group = shown.filter((insight) => insight.kind === kind);
+            if (group.length === 0) return null;
+            const headingId = `drift-group-${kind}`;
+            return (
+              <section key={kind} aria-labelledby={headingId} className="mb-2">
+                <h3
+                  id={headingId}
+                  className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-text-muted"
+                >
+                  <KindIcon kind={kind} />
+                  {t(`drift.group.${kind}`)} ({group.length})
+                </h3>
+                <ul className="flex flex-wrap gap-2">{group.map(item)}</ul>
+              </section>
+            );
+          })}
+          {toggle}
+        </>
+      ) : (
+        <ul className="flex flex-wrap gap-2">
+          {shown.map(item)}
+          {toggle && <li className="flex items-center">{toggle}</li>}
+        </ul>
+      )}
     </section>
   );
 }

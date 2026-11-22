@@ -287,20 +287,34 @@ export function MatrixScreen({
   );
 }
 
+/** Every symbol in the matrix, grouped by the question it answers. */
 function Legend() {
+  const label = 'font-medium text-text';
   return (
     <footer
       aria-label={t('legend.label')}
-      className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border px-4 py-1.5 text-xs text-text-muted"
+      className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-border px-4 py-1.5 text-xs text-text-muted"
     >
-      {(['none', 'patch', 'minor', 'major', 'unknown'] as const).map((type) => (
-        <span key={type} className="inline-flex items-center gap-1">
-          <UpdateBadge type={type} /> {t(`legend.${type}`)}
+      <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className={label}>{t('legend.age')}</span>
+        {(['none', 'patch', 'minor', 'major', 'unknown'] as const).map((type) => (
+          <span key={type} className="inline-flex items-center gap-1">
+            <UpdateBadge type={type} /> {t(`legend.${type}`)}
+          </span>
+        ))}
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className={label}>{t('legend.danger')}</span>
+        <VulnerabilityMarker vulnerability={{ severity: 'high', count: 1, advisoryIds: [] }} />
+        {t('legend.severities')}
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className={label}>{t('legend.drift')}</span>
+        <span aria-hidden="true" className="inline-flex gap-1 font-mono">
+          <span className="border-b-2 border-drift-1">18</span>
+          <span className="border-b-2 border-drift-2">17</span>
         </span>
-      ))}
-      <span className="inline-flex items-center gap-1">
-        <VulnerabilityMarker vulnerability={{ severity: 'high', count: 1, advisoryIds: [] }} />{' '}
-        {t('legend.vulnerable')}
+        {t('legend.driftBody')}
       </span>
       <span className="italic">{t('legend.estimated')}</span>
     </footer>

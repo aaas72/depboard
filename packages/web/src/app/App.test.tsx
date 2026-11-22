@@ -93,8 +93,42 @@ describe('first screen', () => {
     const { user } = await renderApp(fakeApi(matrix));
     const strip = screen.getByRole('region', { name: /What’s hiding/ });
     expect(within(strip).getAllByRole('button', { pressed: false })).toHaveLength(5);
+    // A visible title, and a key that names each icon with its count.
+    expect(
+      within(strip).getByRole('heading', { name: 'What’s hiding in your projects' }),
+    ).toBeTruthy();
+    expect(strip.textContent).toContain('1 vulnerable');
+    expect(strip.textContent).toContain('1 different versions');
+    expect(strip.textContent).toContain('8 far behind');
     await user.click(screen.getByRole('button', { name: 'Show all 10 findings' }));
     expect(within(strip).getAllByRole('button', { pressed: false })).toHaveLength(10);
+    // The full list is grouped by kind, most dangerous first.
+    const groups = within(strip)
+      .getAllByRole('heading', { level: 3 })
+      .map((h) => h.textContent);
+    expect(groups).toEqual([
+      'Known vulnerabilities (1)',
+      'Different versions across projects (1)',
+      'Major versions behind (8)',
+    ]);
+    const behind = within(strip).getByRole('region', { name: 'Major versions behind (8)' });
+    expect(within(behind).getAllByRole('button')).toHaveLength(8);
+    await user.click(screen.getByRole('button', { name: 'Show fewer' }));
+    expect(within(strip).queryAllByRole('heading', { level: 3 })).toHaveLength(0);
+  });
+
+  it('explains every symbol of the matrix in the legend', async () => {
+    await renderApp();
+    const legend = screen.getByRole('contentinfo', { name: 'Legend' });
+    for (const text of [
+      'How far behind:',
+      'How dangerous:',
+      'L low · Mo moderate · H high · C critical',
+      'Underline:',
+      'same color = same release line, shown when projects disagree',
+    ]) {
+      expect(legend.textContent).toContain(text);
+    }
   });
 });
 
