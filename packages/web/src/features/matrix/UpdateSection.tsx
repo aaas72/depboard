@@ -162,7 +162,7 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
               href={`https://www.npmjs.com/package/${row.name}?activeTab=versions`}
               target="_blank"
               rel="noreferrer noopener"
-              className="text-accent hover:underline"
+              className="link"
             >
               {t('update.whatsNew')} ↗
             </a>

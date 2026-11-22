@@ -76,7 +76,7 @@ function Section({
                         onOpen(row);
                       }}
                       aria-label={t('project.open', { name: row.name })}
-                      className="rounded text-start hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+                      className="link rounded text-start focus-visible:outline-2 focus-visible:outline-focus"
                     >
                       {row.name}
                     </button>
@@ -145,7 +145,7 @@ export function ProjectView({
     <div className="mx-auto max-w-5xl px-4 py-4">
       <a
         href={routeHref({ view: 'matrix' })}
-        className="text-sm text-accent hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+        className="link text-sm focus-visible:outline-2 focus-visible:outline-focus"
       >
         ← {t('project.back')}
       </a>

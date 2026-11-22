@@ -157,7 +157,7 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
                     href={advisory.url}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="text-sm font-medium text-accent hover:underline"
+                    className="link text-sm font-medium"
                   >
                     {advisory.title}
                   </a>
@@ -195,7 +195,7 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
             href={`https://www.npmjs.com/package/${row.name}`}
             target="_blank"
             rel="noreferrer noopener"
-            className="mt-5 inline-block text-sm text-accent hover:underline"
+            className="link mt-5 inline-block text-sm"
           >
             {t('drawer.npm')} ↗
           </a>

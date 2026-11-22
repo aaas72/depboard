@@ -72,6 +72,20 @@
   color-scheme: dark;
 }
 
+/*
+ * Every clickable piece of text (links and text buttons): the accent pink at full strength,
+ * always underlined, so it reads as clickable without hovering. Hover thickens the line.
+ */
+@utility link {
+  color: var(--color-accent);
+  text-decoration-line: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
 html,
 body,
 #root {

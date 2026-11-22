@@ -213,10 +213,7 @@ export function MatrixScreen({
             {routedProject === null ? (
               <div className="p-8 text-center text-sm">
                 <p>{t('project.notFound')}</p>
-                <a
-                  href={routeHref({ view: 'matrix' })}
-                  className="mt-2 inline-block text-accent hover:underline"
-                >
+                <a href={routeHref({ view: 'matrix' })} className="link mt-2 inline-block">
                   ← {t('project.back')}
                 </a>
               </div>

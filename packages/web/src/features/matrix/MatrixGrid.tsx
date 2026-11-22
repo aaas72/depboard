@@ -387,7 +387,7 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell, nameWidth }: 
                 <a
                   href={routeHref({ view: 'project', projectId: project.id })}
                   aria-label={t('project.columnLink', { name: project.name })}
-                  className="truncate text-sm font-semibold hover:text-accent hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+                  className="link truncate text-sm font-semibold focus-visible:outline-2 focus-visible:outline-focus"
                 >
                   {project.name}
                 </a>

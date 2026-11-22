@@ -163,7 +163,7 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
           onClick={() => {
             setShowAll((v) => !v);
           }}
-          className="mt-2 rounded px-2 py-1 text-sm text-accent underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-focus"
+          className="link mt-2 rounded px-2 py-1 text-sm focus-visible:outline-2 focus-visible:outline-focus"
         >
           {showAll ? t('drift.showLess') : t('drift.showAll', { n: insights.length })}
         </button>
