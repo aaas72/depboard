@@ -1,4 +1,5 @@
 import type { AddressInfo } from 'node:net';
+import { DepboardError } from '@depboard/shared';
 import { createApp, type AppOptions } from './app.js';
 import { SERVER_HOST } from './security/guard.js';
 import { generateToken } from './security/token.js';
@@ -30,7 +31,20 @@ export async function startServer(options: StartServerOptions): Promise<RunningS
   const app = await createApp({ ...options, token, port: () => port });
 
   // Never 0.0.0.0 or "localhost" (which can resolve to another interface): see security.md.
-  await app.listen({ host: SERVER_HOST, port: options.port ?? 0 });
+  try {
+    await app.listen({ host: SERVER_HOST, port: options.port ?? 0 });
+  } catch (error) {
+    await app.close();
+    // Only reachable with --port: without it the OS picks a free port.
+    if ((error as NodeJS.ErrnoException).code === 'EADDRINUSE') {
+      throw new DepboardError(
+        'PORT_IN_USE',
+        `Port ${String(options.port)} is already in use, maybe by another DepBoard.`,
+        { hint: 'Pick another one with --port, or leave --port out to use any free port.' },
+      );
+    }
+    throw error;
+  }
   port = (app.server.address() as AddressInfo).port;
 
   return {

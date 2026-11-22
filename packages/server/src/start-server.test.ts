@@ -1,3 +1,4 @@
+import { DepboardError } from '@depboard/shared';
 import { describe, expect, it } from 'vitest';
 import { createRegistryClient } from './registry/registry-client.js';
 import { startServer } from './start-server.js';
@@ -7,6 +8,20 @@ const registry = createRegistryClient({ registryUrl: 'http://127.0.0.1:9', userA
 const options = { roots: [], registry };
 
 describe('startServer', () => {
+  it('says plainly when the chosen port is taken, instead of an unexpected error', async () => {
+    const first = await startServer(options);
+    try {
+      const second = startServer({ ...options, port: first.port });
+      await expect(second).rejects.toBeInstanceOf(DepboardError);
+      await expect(second).rejects.toMatchObject({
+        code: 'PORT_IN_USE',
+        message: `Port ${String(first.port)} is already in use, maybe by another DepBoard.`,
+      });
+    } finally {
+      await first.close();
+    }
+  });
+
   it('generates a fresh 64-hex-character token per launch', async () => {
     const a = await startServer(options);
     const b = await startServer(options);
