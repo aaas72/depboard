@@ -146,7 +146,7 @@ const GridRow = memo(function GridRow({
         }}
       >
         <span
-          className={`min-w-0 truncate font-mono text-xs ${cell.installed === null ? 'text-text-muted italic' : ''} ${drift}`}
+          className={`min-w-0 truncate font-mono text-xs text-accent ${cell.installed === null ? 'italic' : ''} ${drift}`}
         >
           {cellVersionText(cell)}
         </span>

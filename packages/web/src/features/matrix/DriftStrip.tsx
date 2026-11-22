@@ -108,7 +108,8 @@ export function DriftStrip({ insights, projectCount, focused, onFocus }: DriftSt
           }`}
         >
           <KindIcon kind={insight.kind} />
-          <span>
+          {/* Clickable text reads as a link: pink and underlined (docs/agent/ui-ux.md). */}
+          <span className="link">
             <Sentence insight={insight} />
           </span>
         </button>
