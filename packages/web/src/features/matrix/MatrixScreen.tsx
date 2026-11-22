@@ -118,7 +118,7 @@ export function MatrixScreen({
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2.5">
         <div className="flex min-w-0 items-baseline gap-3">
           <h1 className="flex items-center gap-2 self-center text-base font-bold tracking-tight">
-            <LogoMark className="size-5 text-accent" />
+            <LogoMark className="size-8" />
             DepBoard
           </h1>
           <p className="truncate text-sm text-text-muted" title={fullRoots}>

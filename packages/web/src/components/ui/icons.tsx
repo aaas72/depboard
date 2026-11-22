@@ -69,21 +69,38 @@ export function ThemeIcon({ className = 'size-4' }: IconProps) {
   );
 }
 
-/** The DepBoard mark: a lens catching the one thing that was hiding. Colored by `currentColor`. */
-export function LogoMark({ className = 'size-5' }: IconProps) {
+/**
+ * The DepBoard mark: a lens over a grid of dots (your projects), catching the one that was
+ * hiding. The same drawing as docs/media/logo.svg. Dots take the muted text color, the lens the
+ * accent, so it follows the theme.
+ */
+const DOTS: readonly (readonly [number, number])[] = [
+  [6, 6],
+  [16, 6],
+  [26, 6],
+  [36, 6],
+  [6, 16],
+  [16, 16],
+  [6, 26],
+  [16, 26],
+  [6, 36],
+  [16, 36],
+  [26, 36],
+];
+
+export function LogoMark({ className = 'size-7' }: IconProps) {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
-      <circle cx="21" cy="21" r="13" fill="none" stroke="currentColor" strokeWidth="5" />
-      <line
-        x1="31"
-        y1="31"
-        x2="42"
-        y2="42"
-        stroke="currentColor"
-        strokeWidth="6"
-        strokeLinecap="round"
-      />
-      <circle cx="21" cy="21" r="5" fill="currentColor" />
+      <g className="fill-text-muted">
+        {DOTS.map(([cx, cy]) => (
+          <circle key={`${String(cx)}-${String(cy)}`} cx={cx} cy={cy} r="2.4" />
+        ))}
+      </g>
+      <g className="fill-accent stroke-accent">
+        <circle cx="29" cy="21" r="11" fill="none" strokeWidth="3" />
+        <line x1="37" y1="29" x2="44.5" y2="36.5" strokeWidth="4" strokeLinecap="round" />
+        <circle cx="29" cy="21" r="4.2" stroke="none" />
+      </g>
     </svg>
   );
 }
