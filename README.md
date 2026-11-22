@@ -9,8 +9,6 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/depboard"><img src="https://img.shields.io/npm/v/depboard?color=CA3E47&label=npm" alt="npm version"></a>
-  <a href="https://github.com/aaas72/depboard/actions/workflows/ci.yml"><img src="https://github.com/aaas72/depboard/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/aaas72/depboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-525252" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A520.19-525252" alt="Node 20.19 or newer">
 </p>
@@ -32,6 +30,79 @@ three different major versions across six projects, or that a vulnerable lodash 
 them.
 
 No account. No config. Nothing uploaded. It runs on your machine and stops when you close it.
+
+## How it works, step by step
+
+### 1. Run it on the folder that holds your projects
+
+```bash
+npx depboard ~/projects
+```
+
+`npx` downloads DepBoard the first time; there is nothing to install. It scans only the folder you
+give it (and everything below it), never the rest of your disk.
+
+### 2. Read the summary in your terminal
+
+A few seconds later, the terminal answers the question before any browser opens:
+
+```text
+Scanned ~/projects · 7 projects · 13 packages
+
+What's hiding in your projects:
+  ● lodash has 4 known vulnerabilities (high) in 4 projects
+      admin-dashboard, api-server, client-portal, shop-frontend
+  ● axios has 55 known vulnerabilities (high) in 3 projects
+      client-portal, mobile-web, shop-frontend
+  ● vite has 36 known vulnerabilities (high) in 3 projects
+      blog, landing-page, shop-frontend
+  ● react is used at 3 different major versions across 6 projects (18, 17, 16)
+      admin-dashboard, blog, client-portal, landing-page, mobile-web, shop-frontend
+  ● react-dom is used at 3 different major versions across 6 projects (18, 17, 16)
+      admin-dashboard, blog, client-portal, landing-page, mobile-web, shop-frontend
+  + 8 more findings
+
+  13 packages outdated: 10 major · 3 minor · 0 patch
+  7 packages with known vulnerabilities
+
+  ➜ Open: http://127.0.0.1:4400/?token=…
+  Press Ctrl+C to stop.
+```
+
+| Line                  | What it tells you                                                 |
+| --------------------- | ----------------------------------------------------------------- |
+| `Scanned …`           | Exactly which folder was read, and how many projects and packages |
+| `● …`                 | The most important findings, with the projects each one affects   |
+| `… packages outdated` | How many packages are behind, by how much                         |
+| `➜ Open: …`           | The link to the full picture. Its token is new on every run       |
+
+### 3. Explore the matrix in your browser
+
+The browser opens on the link by itself (or open it yourself, or pass `--no-open`). Every package
+against every project, with the findings on top.
+
+<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/overview.png" alt="The matrix: findings on top, one row per package, one column per project" width="900">
+
+### 4. Follow a finding, then act
+
+- **Click a finding** to narrow the matrix to that package and the projects involved.
+- **Select a cell** to see its versions, every known advisory, and the exact update command.
+- **Press Update** to run that command in that one project (npm projects; a major update asks
+  first). The output streams live, and the matrix refreshes when it's done.
+
+### 5. Stop it
+
+Press `Ctrl+C` in the terminal. DepBoard stops its server and leaves nothing behind: no files, no
+cache, no background process.
+
+### Terminal only?
+
+`--summary` prints the same findings and exits, with no server and no browser. Handy over SSH, in
+scripts, and in CI:
+
+```bash
+npx depboard ~/projects --summary
+```
 
 ## What you'll discover
 
@@ -121,7 +192,7 @@ Details: [Privacy and security](https://github.com/aaas72/depboard/blob/main/doc
 [Security model](https://github.com/aaas72/depboard/blob/main/docs/security-model.md). Found a vulnerability? Please report it privately; see
 [SECURITY.md](https://github.com/aaas72/depboard/blob/main/SECURITY.md).
 
-## How it works
+## Under the hood
 
 DepBoard scans the folders you choose, reads each project's declared and installed versions, asks the
 npm registry for the latest versions and known advisories, and turns the result into a matrix and
