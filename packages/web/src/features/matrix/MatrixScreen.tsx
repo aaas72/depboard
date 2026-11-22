@@ -3,7 +3,7 @@ import type { Insight } from '@depboard/shared';
 import { Alert } from '../../components/ui/Alert.js';
 import { Button } from '../../components/ui/Button.js';
 import { CopyCommand } from '../../components/ui/CopyCommand.js';
-import { LogoMark, RefreshIcon } from '../../components/ui/icons.js';
+import { FolderIcon, LogoMark, RefreshIcon } from '../../components/ui/icons.js';
 import { t } from '../../lib/i18n.js';
 import { UpdateBadge, VulnerabilityMarker } from './badges.js';
 import type { ApiClient } from '../../lib/api.js';
@@ -119,17 +119,24 @@ export function MatrixScreen({
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden">
-      <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2.5">
-        <div className="flex min-w-0 items-baseline gap-3">
-          <h1 className="flex items-center gap-2 self-center text-base font-bold tracking-tight">
-            <LogoMark className="size-8" />
-            DepBoard
-          </h1>
-          <p className="truncate text-sm text-text-muted" title={fullRoots}>
-            <span className="font-mono">{roots}</span> · {t('header.projects', { n: projectCount })}
-          </p>
-        </div>
-        <div className="ms-auto flex flex-wrap items-center gap-2">
+      {/* Three parts: the name, what was scanned (centered, so nobody wonders whether it read the
+          whole disk), and the tools. They stack on narrow screens. */}
+      <header className="grid grid-cols-1 items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2.5 md:grid-cols-[1fr_auto_1fr]">
+        <h1 className="flex items-center gap-2 justify-self-start text-base font-bold tracking-tight">
+          <LogoMark className="size-8" />
+          DepBoard
+        </h1>
+        <p
+          className="flex max-w-full min-w-0 items-center gap-2 justify-self-center rounded-full bg-surface-raised px-4 py-1.5 text-sm"
+          title={fullRoots}
+        >
+          <FolderIcon className="size-4 flex-none text-accent" />
+          <span className="truncate font-mono font-semibold">{roots}</span>{' '}
+          <span className="flex-none text-text-muted">
+            · {t('header.projects', { n: projectCount })}
+          </span>
+        </p>
+        <div className="flex flex-wrap items-center gap-2 md:justify-self-end">
           <label className="relative">
             <span className="sr-only">{t('search.label')}</span>
             <input
