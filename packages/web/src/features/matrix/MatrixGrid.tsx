@@ -15,9 +15,7 @@ import { routeHref } from '../../lib/route.js';
 import { UpdateBadge, VulnerabilityMarker, cellAriaLabel, showsUpdateBadge } from './badges.js';
 import { cellVersionText, driftGroups } from './model.js';
 
-const NAME_W = 232;
 const LATEST_W = 96;
-const STICKY_W = NAME_W + LATEST_W;
 const COL_W = 136;
 const ROW_H = 34;
 const HEADER_H = 60;
@@ -48,6 +46,8 @@ export interface MatrixGridProps {
   onOpenCell: (cell: CellRef) => void;
   /** The cell shown in the drawer, highlighted in the grid. */
   openCell: { rowName: string; projectId: string } | null;
+  /** The package column's width, from `nameColumnWidth` over every package (not just the visible ones). */
+  nameWidth: number;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -78,6 +78,8 @@ interface GridRowProps {
   openProjectId: string | null;
   idPrefix: string;
   onCellClick: (rowIndex: number, col: number) => void;
+  /** The package column's width: it fits the longest name (`nameColumnWidth`). */
+  nameWidth: number;
 }
 
 /**
@@ -94,6 +96,7 @@ const GridRow = memo(function GridRow({
   openProjectId,
   idPrefix,
   onCellClick,
+  nameWidth,
 }: GridRowProps) {
   const groups = useMemo(() => driftGroups(row), [row]);
   const ring = (c: number) => (activeCol === c ? ACTIVE_RING : '');
@@ -168,7 +171,7 @@ const GridRow = memo(function GridRow({
         aria-colindex={1}
         title={row.name}
         className={`sticky start-0 z-10 flex items-center px-3 text-sm font-medium ${stripe} group-hover:bg-row-hover ${ring(0)}`}
-        style={{ width: NAME_W }}
+        style={{ width: nameWidth }}
         onClick={() => {
           onCellClick(index, 0);
         }}
@@ -180,7 +183,7 @@ const GridRow = memo(function GridRow({
         role="gridcell"
         aria-colindex={2}
         className={`sticky z-10 flex items-center px-2 font-mono text-xs text-text-muted ${stripe} group-hover:bg-row-hover ${ring(1)}`}
-        style={{ width: LATEST_W, insetInlineStart: NAME_W }}
+        style={{ width: LATEST_W, insetInlineStart: nameWidth }}
         onClick={() => {
           onCellClick(index, 1);
         }}
@@ -201,7 +204,8 @@ const GridRow = memo(function GridRow({
  * PageUp/PageDown jump. Focus stays on the grid; the active cell is announced through
  * aria-activedescendant.
  */
-export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridProps) {
+export function MatrixGrid({ rows, projects, onOpenCell, openCell, nameWidth }: MatrixGridProps) {
+  const stickyW = nameWidth + LATEST_W;
   const scrollRef = useRef<HTMLDivElement>(null);
   const idPrefix = useId();
   const [active, setActive] = useState({ row: 0, col: 2 });
@@ -226,8 +230,8 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
     getScrollElement: () => scrollRef.current,
     estimateSize: () => COL_W,
     overscan: 3,
-    paddingStart: STICKY_W,
-    scrollPaddingStart: STICKY_W,
+    paddingStart: stickyW,
+    scrollPaddingStart: stickyW,
     isRtl: rtl,
     initialRect: INITIAL_RECT,
     useFlushSync: false,
@@ -314,8 +318,8 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
   const totalWidth = colVirtualizer.getTotalSize();
   const from = vCols[0]?.index ?? 0;
   const to = vCols.at(-1)?.index ?? -1;
-  const padStart = (vCols[0]?.start ?? STICKY_W) - STICKY_W;
-  const padEnd = totalWidth - (vCols.at(-1)?.end ?? STICKY_W);
+  const padStart = (vCols[0]?.start ?? stickyW) - stickyW;
+  const padEnd = totalWidth - (vCols.at(-1)?.end ?? stickyW);
   // Same numbers → same object, so memoized rows don't re-render on every scroll pixel.
   const cols = useMemo<ColumnWindow>(
     () => ({ from, to, padStart, padEnd, totalWidth }),
@@ -355,7 +359,7 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
             role="columnheader"
             aria-colindex={1}
             className="sticky start-0 z-30 flex items-end bg-table-header px-3 pb-2 text-xs font-semibold tracking-wide text-text-muted uppercase"
-            style={{ width: NAME_W }}
+            style={{ width: nameWidth }}
           >
             {t('matrix.package')} · {t('matrix.rows', { n: rows.length })}
           </div>
@@ -363,7 +367,7 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
             role="columnheader"
             aria-colindex={2}
             className="sticky z-30 flex items-end bg-table-header px-2 pb-2 text-xs font-semibold tracking-wide text-text-muted uppercase"
-            style={{ width: LATEST_W, insetInlineStart: NAME_W }}
+            style={{ width: LATEST_W, insetInlineStart: nameWidth }}
           >
             {t('matrix.latest')}
           </div>
@@ -409,6 +413,7 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
               openProjectId={openCell?.rowName === row.name ? openCell.projectId : null}
               idPrefix={idPrefix}
               onCellClick={onCellClick}
+              nameWidth={nameWidth}
             />
           );
         })}

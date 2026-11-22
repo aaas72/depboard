@@ -16,7 +16,7 @@ import { routeHref, useRoute } from '../../lib/route.js';
 import { CellDrawer } from './CellDrawer.js';
 import { DriftStrip, InsightSentence } from './DriftStrip.js';
 import { MatrixGrid, type CellRef } from './MatrixGrid.js';
-import { filterMatrix, focusOn, sortRows } from './model.js';
+import { filterMatrix, focusOn, nameColumnWidth, sortRows } from './model.js';
 import type { MatrixData } from './useMatrix.js';
 
 export interface MatrixScreenProps {
@@ -63,6 +63,10 @@ export function MatrixScreen({
   );
 
   const sorted = useMemo(() => sortRows(matrix.rows), [matrix.rows]);
+  const nameWidth = useMemo(
+    () => nameColumnWidth(matrix.rows.map((row) => row.name)),
+    [matrix.rows],
+  );
   const view = useMemo(
     () => filterMatrix(sorted, matrix.projects, { query, outdatedOnly, focus }),
     [sorted, matrix.projects, query, outdatedOnly, focus],
@@ -277,6 +281,7 @@ export function MatrixScreen({
                   projects={view.projects}
                   onOpenCell={onOpenCell}
                   openCell={open}
+                  nameWidth={nameWidth}
                 />
               )}
               <Legend />

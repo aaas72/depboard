@@ -197,3 +197,17 @@ export const UPDATE_GLYPH: Record<UpdateType, string> = {
   prerelease: 'pre',
   unknown: '?',
 };
+
+export const NAME_MIN_W = 168;
+export const NAME_MAX_W = 232;
+
+/**
+ * The package column's width: as wide as the longest package name needs, never narrower than
+ * its header ("PACKAGE · 13 PACKAGES") and never wider than before, where longer names truncate
+ * with the full name on hover. Computed over every package, so filtering doesn't make it jump.
+ * About 7.5 px per character at text-sm medium, plus the cell's 24 px of padding.
+ */
+export function nameColumnWidth(names: readonly string[]): number {
+  const longest = names.reduce((max, name) => Math.max(max, name.length), 0);
+  return Math.min(NAME_MAX_W, Math.max(NAME_MIN_W, Math.ceil(longest * 7.5) + 24));
+}

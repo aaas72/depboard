@@ -4,6 +4,9 @@ import {
   driftGroups,
   filterMatrix,
   focusOn,
+  NAME_MAX_W,
+  NAME_MIN_W,
+  nameColumnWidth,
   releaseLine,
   rowSeverity,
   sortRows,
@@ -171,5 +174,25 @@ describe('filterMatrix', () => {
   it('never shows a row with no cell in the visible columns', () => {
     const view = filterMatrix(rows, [project('a', 'web-app')], noFilters);
     expect(names(view)).toEqual(['react', 'lodash']);
+  });
+});
+
+describe('nameColumnWidth', () => {
+  it('keeps room for the column header when every name is short', () => {
+    expect(nameColumnWidth(['react', 'zod'])).toBe(NAME_MIN_W);
+    expect(nameColumnWidth([])).toBe(NAME_MIN_W);
+  });
+
+  it('grows with the longest name', () => {
+    const width = nameColumnWidth(['react', '@typescript-eslint/parser']);
+    expect(width).toBeGreaterThan(NAME_MIN_W);
+    expect(width).toBeLessThanOrEqual(NAME_MAX_W);
+    expect(width).toBeGreaterThan(nameColumnWidth(['@types/node']));
+  });
+
+  it('stops at the old fixed width; longer names truncate with the full name on hover', () => {
+    expect(nameColumnWidth(['@some-really-long-scope/an-even-longer-package-name'])).toBe(
+      NAME_MAX_W,
+    );
   });
 });
