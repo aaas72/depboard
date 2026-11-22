@@ -15,7 +15,14 @@ import { routeHref, useRoute } from '../../lib/route.js';
 import { CellDrawer } from './CellDrawer.js';
 import { DriftStrip, InsightSentence } from './DriftStrip.js';
 import { MatrixGrid, type CellRef } from './MatrixGrid.js';
-import { countUpToDate, filterMatrix, focusOn, nameColumnWidth, sortRows } from './model.js';
+import {
+  countUpToDate,
+  driftGroups,
+  filterMatrix,
+  focusOn,
+  nameColumnWidth,
+  sortRows,
+} from './model.js';
 import type { MatrixData } from './useMatrix.js';
 
 export interface MatrixScreenProps {
@@ -64,7 +71,14 @@ export function MatrixScreen({
   // "Hide up-to-date" names how many rows it hides, and only shows when there is something to hide.
   const upToDate = useMemo(() => countUpToDate(matrix.rows), [matrix.rows]);
   const nameWidth = useMemo(
-    () => nameColumnWidth(matrix.rows.map((row) => row.name)),
+    // The visible text of each name cell, drift label included.
+    () =>
+      nameColumnWidth(
+        matrix.rows.map((row) => {
+          const lines = new Set(driftGroups(row).values()).size;
+          return lines > 1 ? `${row.name}  ${t('matrix.versions', { n: lines })}` : row.name;
+        }),
+      ),
     [matrix.rows],
   );
   const view = useMemo(

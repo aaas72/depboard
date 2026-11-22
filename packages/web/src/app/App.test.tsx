@@ -16,7 +16,7 @@ async function renderApp(api = fakeApi()) {
 function rowNames(grid: HTMLElement): string[] {
   return within(grid)
     .queryAllByRole('rowheader')
-    .map((el) => el.textContent);
+    .map((el) => el.getAttribute('title') ?? '');
 }
 
 describe('first screen', () => {
@@ -30,6 +30,8 @@ describe('first screen', () => {
         name: /react is used at 3 different major versions across 3 projects/,
       }),
     ).toBeTruthy();
+    // Drift is said in words next to the package name, not only by underline colors.
+    expect(within(grid).getByRole('rowheader', { name: /react.*3 versions/ })).toBeTruthy();
     // Vulnerable first, then drift, then outdated, then the rest.
     expect(rowNames(grid)).toEqual(['lodash', 'react', 'zod', 'left-pad']);
     // The header says exactly what was scanned, so nobody wonders if it read the whole disk.
@@ -134,7 +136,7 @@ describe('first screen', () => {
       'How far behind:',
       'How dangerous:',
       'Underline:',
-      'same color = same release line, shown when projects disagree',
+      'the same color marks the same version',
     ]) {
       expect(legend.textContent).toContain(text);
     }

@@ -13,6 +13,7 @@ import type { MatrixRow, Project } from '@depboard/shared';
 import { t } from '../../lib/i18n.js';
 import { routeHref } from '../../lib/route.js';
 import { UpdateBadge, VulnerabilityMarker, cellAriaLabel, showsUpdateBadge } from './badges.js';
+import { SplitIcon } from '../../components/ui/icons.js';
 import { cellVersionText, driftGroups } from './model.js';
 
 const LATEST_W = 96;
@@ -100,6 +101,8 @@ const GridRow = memo(function GridRow({
   nameWidth,
 }: GridRowProps) {
   const groups = useMemo(() => driftGroups(row), [row]);
+  // How many release lines the row's projects are split across: 2+ is version drift.
+  const lines = new Set(groups.values()).size;
   const ring = (c: number) => (activeCol === c ? ACTIVE_RING : '');
   // Rows alternate two grays instead of lines between them. The sticky columns repeat the
   // row's color so scrolled cells never show through.
@@ -178,6 +181,13 @@ const GridRow = memo(function GridRow({
         }}
       >
         <span className="truncate">{row.name}</span>
+        {lines > 1 && (
+          // Drift said in words next to the name; the colored underlines show who is on which line.
+          <span className="ms-auto inline-flex flex-none items-center gap-1 ps-2 text-xs font-normal text-accent">
+            <SplitIcon className="size-3" />
+            {t('matrix.versions', { n: lines })}
+          </span>
+        )}
       </div>
       <div
         id={cellId(idPrefix, index, 1)}

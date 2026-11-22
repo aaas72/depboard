@@ -40,6 +40,7 @@ const en = {
   'drift.kind.version-drift': 'Version drift',
   'drift.kind.major-lag': 'Behind',
   'drift.family': 'Includes {list}',
+  'matrix.versions': '{n} versions',
   'drift.group.vulnerable-spread': 'Known vulnerabilities',
   'drift.group.version-drift': 'Different versions across projects',
   'drift.group.major-lag': 'Major versions behind',
@@ -62,7 +63,8 @@ const en = {
   'legend.age': 'How far behind:',
   'legend.danger': 'How dangerous:',
   'legend.drift': 'Underline:',
-  'legend.driftBody': 'same color = same release line, shown when projects disagree',
+  'legend.driftBody':
+    'when projects use different major versions (“↳ 3 versions”), the same color marks the same version',
   'legend.none': 'up to date',
   'legend.unknown': 'unknown',
   'legend.estimated': 'Italic: not installed, estimated from package.json',
