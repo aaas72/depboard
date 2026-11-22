@@ -16,7 +16,8 @@ import { UpdateBadge, VulnerabilityMarker, cellAriaLabel, showsUpdateBadge } fro
 import { cellVersionText, driftGroups } from './model.js';
 
 const LATEST_W = 96;
-const COL_W = 136;
+// Room for a version, an update word ("↑ minor"), and a severity word ("moderate").
+const COL_W = 196;
 const ROW_H = 34;
 const HEADER_H = 60;
 /** First-paint size before the container is measured (and the size used in tests). */

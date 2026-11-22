@@ -4,7 +4,7 @@ import type { ApiClient } from '../../lib/api.js';
 import { t } from '../../lib/i18n.js';
 import type { Activity } from '../activity/useActivity.js';
 import { UpdateBadge, VulnerabilityMarker, showsUpdateBadge } from './badges.js';
-import { cellVersionText, SEVERITY_LETTER } from './model.js';
+import { cellVersionText } from './model.js';
 import { UpdateSection, canUpdate } from './UpdateSection.js';
 
 export interface CellDrawerProps {
@@ -163,10 +163,7 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
                   </a>
                 </div>
                 <p className="mt-1 ps-9 font-mono text-xs text-text-muted">
-                  <span className="sr-only">
-                    {t(`severity.${advisory.severity}`)} ({SEVERITY_LETTER[advisory.severity]}
-                    ).{' '}
-                  </span>
+                  <span className="sr-only">{t(`severity.${advisory.severity}`)}. </span>
                   {t('drawer.affected', { range: advisory.vulnerableVersions })}
                 </p>
               </li>

@@ -112,3 +112,37 @@ export function FolderIcon({ className = 'size-4' }: IconProps) {
     </svg>
   );
 }
+
+export function ArrowUpIcon({ className = 'size-2.5' }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M6 10V2.5M2.75 5.5 6 2.25 9.25 5.5" />
+    </svg>
+  );
+}
+
+export function CheckIcon({ className = 'size-2.5' }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M2.5 6.25 5 8.75l4.5-5.5" />
+    </svg>
+  );
+}

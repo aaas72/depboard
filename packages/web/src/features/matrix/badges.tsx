@@ -5,9 +5,9 @@ import type {
   Project,
   UpdateType,
 } from '@depboard/shared';
-import { ShieldIcon } from '../../components/ui/icons.js';
+import { ArrowUpIcon, CheckIcon, ShieldIcon } from '../../components/ui/icons.js';
 import { t } from '../../lib/i18n.js';
-import { cellVersionText, SEVERITY_LETTER, UPDATE_GLYPH } from './model.js';
+import { cellVersionText, SEVERITY_LABEL, UPDATE_LABEL } from './model.js';
 
 const UPDATE_STYLE: Record<UpdateType, string> = {
   none: 'bg-update-none text-update-none-fg',
@@ -22,31 +22,32 @@ const SEVERITY_STYLE: Record<CellVulnerability['severity'], string> = {
   low: 'bg-severity-low text-severity-low-fg',
   moderate: 'bg-severity-moderate text-severity-moderate-fg',
   high: 'bg-severity-high text-severity-high-fg',
-  critical:
-    'bg-severity-critical text-severity-critical-fg ring-2 ring-severity-critical ring-offset-1 ring-offset-surface',
+  critical: 'bg-severity-critical text-severity-critical-fg ring-1 ring-severity-critical-ring',
 };
 
-/** "How old?": a letter on a color, never color alone. */
+/** "How old?": an arrow and the semver word (patch / minor / major), or a check when current. */
 export function UpdateBadge({ type }: { type: UpdateType }) {
+  const behind = type === 'patch' || type === 'minor' || type === 'major' || type === 'prerelease';
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex h-4 min-w-4 items-center justify-center rounded-sm px-1 text-[0.6875rem] leading-none font-semibold ${UPDATE_STYLE[type]}`}
+      className={`inline-flex h-4 min-w-4 flex-none items-center justify-center gap-0.5 rounded-sm px-1 text-[0.6875rem] leading-none font-semibold ${UPDATE_STYLE[type]}`}
     >
-      {UPDATE_GLYPH[type]}
+      {behind && <ArrowUpIcon />}
+      {type === 'none' ? <CheckIcon /> : UPDATE_LABEL[type]}
     </span>
   );
 }
 
-/** "How dangerous?": a shield and a severity letter, visually apart from the update badge. */
+/** "How dangerous?": a shield and the severity word, rounded so it reads apart from the update badge. */
 export function VulnerabilityMarker({ vulnerability }: { vulnerability: CellVulnerability }) {
   return (
     <span
       aria-hidden="true"
-      className={`inline-flex h-4 items-center gap-0.5 rounded-full px-1 text-[0.6875rem] leading-none font-bold ${SEVERITY_STYLE[vulnerability.severity]}`}
+      className={`inline-flex h-4 flex-none items-center gap-0.5 rounded-full px-1.5 text-[0.6875rem] leading-none font-semibold ${SEVERITY_STYLE[vulnerability.severity]}`}
     >
       <ShieldIcon className="size-2.5" />
-      {SEVERITY_LETTER[vulnerability.severity]}
+      {SEVERITY_LABEL[vulnerability.severity]}
     </span>
   );
 }

@@ -316,16 +316,24 @@ function Legend() {
     >
       <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className={label}>{t('legend.age')}</span>
-        {(['none', 'patch', 'minor', 'major', 'unknown'] as const).map((type) => (
-          <span key={type} className="inline-flex items-center gap-1">
-            <UpdateBadge type={type} /> {t(`legend.${type}`)}
-          </span>
+        <span className="inline-flex items-center gap-1">
+          <UpdateBadge type="none" /> {t('legend.none')}
+        </span>
+        {(['patch', 'minor', 'major'] as const).map((type) => (
+          <UpdateBadge key={type} type={type} />
         ))}
+        <span className="inline-flex items-center gap-1">
+          <UpdateBadge type="unknown" /> {t('legend.unknown')}
+        </span>
       </span>
       <span className="inline-flex items-center gap-1.5">
         <span className={label}>{t('legend.danger')}</span>
-        <VulnerabilityMarker vulnerability={{ severity: 'high', count: 1, advisoryIds: [] }} />
-        {t('legend.severities')}
+        {(['low', 'moderate', 'high', 'critical'] as const).map((severity) => (
+          <VulnerabilityMarker
+            key={severity}
+            vulnerability={{ severity, count: 1, advisoryIds: [] }}
+          />
+        ))}
       </span>
       <span className="inline-flex items-center gap-1.5">
         <span className={label}>{t('legend.drift')}</span>

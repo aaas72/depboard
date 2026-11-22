@@ -6,7 +6,7 @@ import type { JobView } from './useActivity.js';
 const STATUS_STYLE: Record<JobStatus, string> = {
   running: 'text-accent',
   success: 'text-update-patch',
-  failed: 'text-update-major',
+  failed: 'text-warning',
 };
 
 const STATUS_GLYPH: Record<JobStatus, string> = { running: '●', success: '✓', failed: '✕' };

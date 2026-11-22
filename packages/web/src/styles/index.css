@@ -4,8 +4,7 @@
  * Design tokens. Components use these names only, never raw colors.
  *
  * The identity (docs/adr/0003): neutral grays (#313131 · #414141 · #525252) and one brand red,
- * #CA3E47. Because red is the brand, danger no longer uses it: a major update is orange, and
- * vulnerability severity is a slate → brown → purple scale. Update types and severities stay
+ * #CA3E47 (docs/adr/0004 for the status colors, which follow the standard conventions). Update types and severities stay
  * separate scales (docs/agent/ui-ux.md). Every colored badge has a matching `-fg` token, and
  * every pair is checked for WCAG AA contrast.
  */
@@ -32,31 +31,31 @@
   --color-accent-fg: #1a1a1a;
   --color-focus: #f59ea3;
 
-  --color-warning: #fb923c;
+  --color-warning: #f87171;
   --color-warning-fg: #1a1a1a;
   --color-notice: oklch(30% 0.05 80);
   --color-notice-border: oklch(48% 0.08 80);
 
-  /* How far behind: green → yellow → orange. */
+  /* How far behind, the convention of ncu and most tools: green → yellow → red. */
   --color-update-none: #4a4a4a;
   --color-update-none-fg: #d6d6d6;
-  --color-update-patch: oklch(48% 0.13 150);
-  --color-update-patch-fg: #ffffff;
-  --color-update-minor: oklch(80% 0.15 85);
-  --color-update-minor-fg: oklch(25% 0.05 80);
-  --color-update-major: #fb923c;
+  --color-update-patch: #22c55e;
+  --color-update-patch-fg: #052e16;
+  --color-update-minor: #facc15;
+  --color-update-minor-fg: #1f1a00;
+  --color-update-major: #ef4444;
   --color-update-major-fg: #1a1a1a;
   --color-update-unknown: #4d4d4d;
   --color-update-unknown-fg: #d9d9d9;
 
-  /* How dangerous: slate → brown → purple → deep purple (with a ring). Never red: red is the brand. */
+  /* How dangerous, the convention of npm audit and GitHub Advisories: gray → yellow → orange → dark red. */
   --color-severity-low: #94a3b8;
   --color-severity-low-fg: #1a1a1a;
-  --color-severity-moderate: oklch(50% 0.12 60);
-  --color-severity-moderate-fg: #ffffff;
-  --color-severity-high: #c084fc;
+  --color-severity-moderate: #eab308;
+  --color-severity-moderate-fg: #1a1a1a;
+  --color-severity-high: #f97316;
   --color-severity-high-fg: #1a1a1a;
-  --color-severity-critical: #6d28d9;
+  --color-severity-critical: #b91c1c;
   --color-severity-critical-fg: #ffffff;
 
   /* Version-drift groups: an underline per release line in a row, highest line first. */

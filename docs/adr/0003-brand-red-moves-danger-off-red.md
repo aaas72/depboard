@@ -1,6 +1,6 @@
 # 0003: A red brand, so danger moves off red
 
-- Status: accepted
+- Status: accepted; its status colors are superseded by [0004](0004-standard-status-colors-and-words.md)
 - Date: 2026-11-22
 
 ## Context

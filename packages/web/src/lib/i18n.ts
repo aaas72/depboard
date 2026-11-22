@@ -61,13 +61,9 @@ const en = {
   'legend.label': 'Legend',
   'legend.age': 'How far behind:',
   'legend.danger': 'How dangerous:',
-  'legend.severities': 'L low · Mo moderate · H high · C critical',
   'legend.drift': 'Underline:',
   'legend.driftBody': 'same color = same release line, shown when projects disagree',
   'legend.none': 'up to date',
-  'legend.patch': 'patch',
-  'legend.minor': 'minor',
-  'legend.major': 'major',
   'legend.unknown': 'unknown',
   'legend.estimated': 'Italic: not installed, estimated from package.json',
 

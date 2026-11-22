@@ -126,10 +126,13 @@ describe('first screen', () => {
   it('explains every symbol of the matrix in the legend', async () => {
     await renderApp();
     const legend = screen.getByRole('contentinfo', { name: 'Legend' });
+    // Badges carry standard words, not letters: the legend shows each one as it appears.
+    for (const word of ['patch', 'minor', 'major', 'low', 'moderate', 'high', 'critical']) {
+      expect(legend.textContent).toContain(word);
+    }
     for (const text of [
       'How far behind:',
       'How dangerous:',
-      'L low · Mo moderate · H high · C critical',
       'Underline:',
       'same color = same release line, shown when projects disagree',
     ]) {

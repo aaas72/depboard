@@ -182,18 +182,20 @@ export function cellVersionText(cell: MatrixCell): string {
   return cell.installed ?? cell.declared;
 }
 
-export const SEVERITY_LETTER: Record<Severity, string> = {
-  low: 'L',
-  moderate: 'Mo',
-  high: 'H',
-  critical: 'C',
+/** Severity words as npm audit and GitHub Advisories print them. */
+export const SEVERITY_LABEL: Record<Severity, string> = {
+  low: 'low',
+  moderate: 'moderate',
+  high: 'high',
+  critical: 'critical',
 };
 
-export const UPDATE_GLYPH: Record<UpdateType, string> = {
-  none: '✓',
-  patch: 'P',
-  minor: 'm',
-  major: 'M',
+/** The word on an update badge: the semver part that changed (empty for up to date: a check mark). */
+export const UPDATE_LABEL: Record<UpdateType, string> = {
+  none: '',
+  patch: 'patch',
+  minor: 'minor',
+  major: 'major',
   prerelease: 'pre',
   unknown: '?',
 };
