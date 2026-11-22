@@ -1,6 +1,11 @@
 export { SERVER_HOST, TOKEN_HEADER } from './security/guard.js';
 export { createApp, type AppOptions } from './app.js';
-export { startServer, type RunningServer, type StartServerOptions } from './start-server.js';
+export {
+  ensurePortFree,
+  startServer,
+  type RunningServer,
+  type StartServerOptions,
+} from './start-server.js';
 export {
   resolveRoots,
   type ResolvedRoots,

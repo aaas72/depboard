@@ -1,11 +1,26 @@
 import { DepboardError } from '@depboard/shared';
 import { describe, expect, it } from 'vitest';
 import { createRegistryClient } from './registry/registry-client.js';
-import { startServer } from './start-server.js';
+import { ensurePortFree, startServer } from './start-server.js';
 
 // Never contacted: there are no roots, so nothing is looked up.
 const registry = createRegistryClient({ registryUrl: 'http://127.0.0.1:9', userAgent: 'test' });
 const options = { roots: [], registry };
+
+describe('ensurePortFree', () => {
+  it('passes for a free port and fails with PORT_IN_USE for a taken one', async () => {
+    const running = await startServer(options);
+    try {
+      await expect(ensurePortFree(running.port)).rejects.toMatchObject({ code: 'PORT_IN_USE' });
+    } finally {
+      await running.close();
+    }
+    // The same port, now released: the probe must also release it again.
+    await expect(ensurePortFree(running.port)).resolves.toBeUndefined();
+    const again = await startServer({ ...options, port: running.port });
+    await again.close();
+  });
+});
 
 describe('startServer', () => {
   it('says plainly when the chosen port is taken, instead of an unexpected error', async () => {

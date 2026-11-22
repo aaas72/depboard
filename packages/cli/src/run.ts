@@ -30,6 +30,8 @@ export interface CliIO {
    */
   startServer: (options: ServeOptions) => Promise<{ url: string }>;
   openBrowser: (url: string) => void;
+  /** Throws PORT_IN_USE when a port chosen with --port is taken. Checked before scanning. */
+  checkPort: (port: number) => Promise<void>;
   /** The built UI, when it ships with this build. Without it only the API is served. */
   staticDir: string | undefined;
 }
@@ -152,6 +154,9 @@ export async function run(argv: readonly string[], io: CliIO): Promise<number> {
         return EXIT_OK;
       }
     }
+
+    // A taken --port would only fail after the scan: say so before spending seconds on it.
+    if (!options.summary && options.port !== undefined) await io.checkPort(options.port);
 
     const result = await analyze(roots, io.registry, { depth: options.depth });
     const { matrix } = result;

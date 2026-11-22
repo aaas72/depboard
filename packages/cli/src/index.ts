@@ -4,7 +4,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
-import { createRegistryClient, DEFAULT_REGISTRY_URL, startServer } from '@depboard/server';
+import {
+  createRegistryClient,
+  DEFAULT_REGISTRY_URL,
+  ensurePortFree,
+  startServer,
+} from '@depboard/server';
 import { openBrowser } from './open-browser.js';
 import { run, type ServeOptions } from './run.js';
 
@@ -77,5 +82,6 @@ process.exitCode = await run(process.argv.slice(2), {
   }),
   startServer: serve,
   openBrowser,
+  checkPort: ensurePortFree,
   staticDir: findStaticDir(),
 });

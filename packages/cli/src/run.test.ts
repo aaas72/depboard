@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { DepboardError } from '@depboard/shared';
 import { createRegistryClient, type RegistryClient } from '@depboard/server';
 import {
   EXIT_OK,
@@ -71,6 +72,7 @@ function io(overrides: Partial<CliIO> = {}) {
       return Promise.resolve({ url: 'http://127.0.0.1:4319/?token=t' });
     },
     openBrowser: (url) => opened.push(url),
+    checkPort: () => Promise.resolve(),
     staticDir: undefined,
     ...overrides,
   };
@@ -230,6 +232,45 @@ describe('run', () => {
       const t = io({ cwd: await twoProjects(), staticDir: undefined });
       await run([], t.value);
       expect(t.opened).toEqual([]);
+    });
+
+    it('checks a chosen port before scanning, so a taken one fails fast', async () => {
+      let lookups = 0;
+      const counting = createRegistryClient({
+        fetch: () => {
+          lookups++;
+          return Promise.resolve(new Response('not found', { status: 404 }));
+        },
+      });
+      const t = io({
+        cwd: await twoProjects(),
+        registry: counting,
+        checkPort: (port) =>
+          Promise.reject(
+            new DepboardError('PORT_IN_USE', `Port ${String(port)} is already in use.`, {
+              hint: 'Pick another one with --port.',
+            }),
+          ),
+      });
+      expect(await run(['--port', '4400'], t.value)).toBe(EXIT_RUNTIME_ERROR);
+      expect(t.err.join('\n')).toContain('Port 4400 is already in use.');
+      expect(lookups).toBe(0);
+      expect(t.out.join('\n')).not.toContain('Scanned');
+      expect(t.served).toEqual([]);
+    });
+
+    it('checks the port only when one is chosen and a server will start', async () => {
+      const checked: number[] = [];
+      const checkPort = (port: number) => {
+        checked.push(port);
+        return Promise.resolve();
+      };
+      const cwd = await twoProjects();
+      await run([], io({ cwd, checkPort }).value);
+      await run(['--port', '5000', '--summary'], io({ cwd, checkPort }).value);
+      expect(checked).toEqual([]);
+      await run(['--port', '5000'], io({ cwd, checkPort }).value);
+      expect(checked).toEqual([5000]);
     });
 
     it('starts nothing with --summary', async () => {
