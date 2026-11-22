@@ -64,7 +64,7 @@ const en = {
   'legend.danger': 'How dangerous:',
   'legend.drift': 'Underline:',
   'legend.driftBody':
-    'when projects use different major versions (“↳ 3 versions”), the same color marks the same version',
+    'when projects use different major versions (marked “3 versions”), the same color marks the same version',
   'legend.none': 'up to date',
   'legend.unknown': 'unknown',
   'legend.estimated': 'Italic: not installed, estimated from package.json',
