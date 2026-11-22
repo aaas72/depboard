@@ -1,4 +1,8 @@
-# DepBoard
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/logo.svg" alt="" width="72">
+</p>
+
+<h1 align="center">DepBoard</h1>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/demo.gif" alt="Running npx depboard ~/projects: the terminal lists what's hiding, then the browser opens on a matrix of 13 packages across 7 projects. Clicking “react is used at 3 different major versions” narrows it to React at 16, 17, and 18; clicking “lodash has 4 known vulnerabilities in 4 projects” shows the four projects and the advisory details." width="900">

@@ -3,7 +3,7 @@ import type { Insight } from '@depboard/shared';
 import { Alert } from '../../components/ui/Alert.js';
 import { Button } from '../../components/ui/Button.js';
 import { CopyCommand } from '../../components/ui/CopyCommand.js';
-import { RefreshIcon, ThemeIcon } from '../../components/ui/icons.js';
+import { LogoMark, RefreshIcon, ThemeIcon } from '../../components/ui/icons.js';
 import { t } from '../../lib/i18n.js';
 import { applyTheme, nextTheme, storedTheme, type Theme } from '../../lib/theme.js';
 import { UpdateBadge, VulnerabilityMarker } from './badges.js';
@@ -117,7 +117,10 @@ export function MatrixScreen({
     <div className="flex h-full flex-col">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2.5">
         <div className="flex min-w-0 items-baseline gap-3">
-          <h1 className="text-base font-bold tracking-tight">DepBoard</h1>
+          <h1 className="flex items-center gap-2 self-center text-base font-bold tracking-tight">
+            <LogoMark className="size-5 text-accent" />
+            DepBoard
+          </h1>
           <p className="truncate text-sm text-text-muted" title={fullRoots}>
             <span className="font-mono">{roots}</span> · {t('header.projects', { n: projectCount })}
           </p>

@@ -68,3 +68,22 @@ export function ThemeIcon({ className = 'size-4' }: IconProps) {
     </svg>
   );
 }
+
+/** The DepBoard mark: a lens catching the one thing that was hiding. Colored by `currentColor`. */
+export function LogoMark({ className = 'size-5' }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true" className={className}>
+      <circle cx="21" cy="21" r="13" fill="none" stroke="currentColor" strokeWidth="5" />
+      <line
+        x1="31"
+        y1="31"
+        x2="42"
+        y2="42"
+        stroke="currentColor"
+        strokeWidth="6"
+        strokeLinecap="round"
+      />
+      <circle cx="21" cy="21" r="5" fill="currentColor" />
+    </svg>
+  );
+}
