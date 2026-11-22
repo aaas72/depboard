@@ -7,6 +7,10 @@ import { App } from '../../app/App.js';
 import { ApiError, type ApiClient } from '../../lib/api.js';
 import { fakeApi, job, sampleMatrix } from '../../testing/fixtures.js';
 
+/** The shown command, whole: it wraps between arguments, so its text spans several elements. */
+const command = (text: string) => (_: string, el: Element | null) =>
+  el?.tagName === 'CODE' && el.textContent === text;
+
 /** A fake API whose job stream the test drives event by event. */
 function controllableApi(
   matrix: MatrixResponse = sampleMatrix(),
@@ -60,7 +64,7 @@ describe('updating one package in one project', () => {
     const { user, drawer } = await openCell(api, /^zod in api/);
 
     expect(
-      await within(drawer).findByText('npm install zod@3.23.0 --no-audit --no-fund'),
+      await within(drawer).findByText(command('npm install zod@3.23.0 --no-audit --no-fund')),
     ).toBeTruthy();
     await user.click(within(drawer).getByRole('button', { name: 'Update to 3.23.0' }));
     expect(startUpdate).toHaveBeenCalledWith({
@@ -105,7 +109,9 @@ describe('updating one package in one project', () => {
     await user.click(await within(drawer).findByRole('button', { name: 'Update to 19.1.0…' }));
 
     const dialog = screen.getByRole('alertdialog', { name: 'Update react from 18.3.1 to 19.1.0?' });
-    expect(within(dialog).getByText('npm install react@19.1.0 --no-audit --no-fund')).toBeTruthy();
+    expect(
+      within(dialog).getByText(command('npm install react@19.1.0 --no-audit --no-fund')),
+    ).toBeTruthy();
     expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Cancel' }));
     expect(startUpdate).not.toHaveBeenCalled();
 

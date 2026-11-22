@@ -63,7 +63,7 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
       role="dialog"
       aria-modal="false"
       aria-labelledby={titleId}
-      className="flex w-full max-w-sm flex-none flex-col border-s border-border bg-surface shadow-lg sm:w-96"
+      className="flex w-full max-w-sm flex-none flex-col border-s border-border bg-surface sm:w-96"
     >
       <header className="flex items-start justify-between gap-2 border-b border-border px-4 py-3">
         <div className="min-w-0">

@@ -173,9 +173,12 @@ describe('narrowing the matrix', () => {
 describe('cell details', () => {
   it('opens on click with versions and advisories, and closes with Esc back to the grid', async () => {
     const { user, grid } = await renderApp();
+    // The drawer's space is reserved with a hint, so opening a cell never moves the matrix.
+    expect(screen.getByRole('complementary', { name: 'Details' })).toBeTruthy();
     await user.click(within(grid).getByRole('gridcell', { name: /^lodash in web-app/ }));
 
     const drawer = screen.getByRole('dialog', { name: 'lodash' });
+    expect(screen.queryByRole('complementary', { name: 'Details' })).toBeNull();
     expect(within(drawer).getByText('in web-app')).toBeTruthy();
     expect(within(drawer).getByText('4.17.20')).toBeTruthy();
     const advisory = within(drawer).getByRole('link', { name: 'Prototype Pollution in lodash' });
@@ -186,6 +189,7 @@ describe('cell details', () => {
 
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.getByRole('complementary', { name: 'Details' })).toBeTruthy();
     expect(document.activeElement).toBe(screen.getByRole('grid'));
   });
 

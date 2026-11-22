@@ -89,6 +89,9 @@ const en = {
   'cell.vulnerable': '{severity} vulnerability|{n} vulnerabilities, highest {severity}',
 
   'drawer.inProject': 'in {project}',
+  'drawer.emptyTitle': 'Details',
+  'drawer.emptyBody':
+    'Select a cell to see its versions, known vulnerabilities, and the exact update command. Arrow keys and Enter work too.',
   'drawer.declared': 'In package.json',
   'drawer.installed': 'Installed',
   'drawer.notInstalled': 'Not installed',

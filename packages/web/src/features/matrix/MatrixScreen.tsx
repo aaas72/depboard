@@ -244,7 +244,7 @@ export function MatrixScreen({
               />
             )}
           </div>
-          {drawer}
+          {drawer || <DetailsPlaceholder />}
         </div>
       ) : (
         <>
@@ -286,12 +286,29 @@ export function MatrixScreen({
               )}
               <Legend />
             </div>
-            {drawer}
+            {drawer || <DetailsPlaceholder />}
           </div>
         </>
       )}
       <ActivityPanel jobs={activity.jobs} projects={matrix.projects} />
     </div>
+  );
+}
+
+/**
+ * The drawer's space, kept while no cell is open (on wide screens), so opening one fills it
+ * instead of pushing the matrix aside: the table never moves under the pointer.
+ */
+function DetailsPlaceholder() {
+  return (
+    <aside
+      aria-label={t('drawer.emptyTitle')}
+      className="hidden w-96 flex-none flex-col items-center justify-center gap-2 border-s border-border bg-surface p-8 text-center lg:flex"
+    >
+      <LogoMark className="size-10 opacity-60" />
+      <p className="text-sm font-semibold">{t('drawer.emptyTitle')}</p>
+      <p className="max-w-64 text-sm text-text-muted">{t('drawer.emptyBody')}</p>
+    </aside>
   );
 }
 

@@ -14,6 +14,23 @@ function manualCommand(manager: Project['manager'], name: string, version: strin
   return `${add} ${spec}${dev ? ' -D' : ''}`;
 }
 
+/**
+ * A shell command that wraps only between arguments: a flag like `--no-fund` never splits at
+ * its hyphen. Copying the text still gives the exact command.
+ */
+function CommandText({ command }: { command: string }) {
+  return (
+    <code className="block overflow-x-auto rounded-md bg-surface-sunken px-2 py-1.5 font-mono text-xs">
+      {command.split(' ').map((part, i) => (
+        <span key={i}>
+          {i > 0 && ' '}
+          <span className="whitespace-nowrap">{part}</span>
+        </span>
+      ))}
+    </code>
+  );
+}
+
 export function canUpdate(row: MatrixRow, cell: MatrixCell): boolean {
   return (
     row.lookup === 'ok' &&
@@ -101,9 +118,7 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
       {command !== undefined && (
         <div className="text-sm">
           <p className="mb-1 text-text-muted">{t('update.willRun')}</p>
-          <code className="block rounded-md bg-surface-sunken px-2 py-1.5 font-mono text-xs break-all">
-            {command}
-          </code>
+          <CommandText command={command} />
         </div>
       )}
       <Button
@@ -141,9 +156,7 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
           }}
         >
           <p>{t('update.confirmBody', { project: project.name })}</p>
-          <code className="block rounded-md bg-surface-sunken px-2 py-1.5 font-mono text-xs break-all">
-            {command}
-          </code>
+          <CommandText command={command} />
           <p>
             <a
               href={`https://www.npmjs.com/package/${row.name}?activeTab=versions`}
