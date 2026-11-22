@@ -11,7 +11,7 @@ import {
 } from '@depboard/shared';
 
 /**
- * Scores only order insights. The bands encode the product's priorities (docs/agent/ui-ux.md):
+ * Scores only order insights. The bands encode the product's priorities (docs/architecture.md, Insights):
  * high and critical vulnerabilities always come first, then version drift, then moderate/low
  * vulnerabilities, then major lag. Within a band, more projects and bigger gaps rank higher.
  */

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Checks the performance budgets from docs/agent/engineering-standards.md against the BUILT CLI,
+// Checks the performance budgets from CONTRIBUTING.md against the BUILT CLI,
 // the way a user runs it, on a generated projects folder and a local registry with realistic
 // latency (the real registry's speed varies too much to gate CI on).
 //

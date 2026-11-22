@@ -13,7 +13,7 @@ export default defineConfig({
   clean: true,
   sourcemap: false,
   // Minified, but with function names kept: no source maps ship, so names are what keeps a
-  // --debug stack trace readable in a bug report. See docs/agent/roadmap.md for the measurements.
+  // --debug stack trace readable in a bug report. Measurements in docs/adr/0002.
   minify: true,
   keepNames: true,
   // Bundle everything: the published package has zero runtime dependencies (docs/adr/0001).

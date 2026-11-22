@@ -20,7 +20,7 @@ function Centered({ title, body, action }: { title: string; body?: string; actio
   );
 }
 
-/** Opens directly on the matrix (docs/agent/ui-ux.md): no welcome page in front of it. */
+/** Opens directly on the matrix (docs/ui-guidelines.md): no welcome page in front of it. */
 export function App({ api: injected }: AppProps) {
   const api = useMemo(() => injected ?? createApiClient(takeToken()), [injected]);
   const { state, reload, rescan, refresh, rescanning, rescanError } = useMatrix(api);

@@ -24,4 +24,4 @@ Only the latest published version gets security fixes.
 - Reading files outside the folders the user chose
 - Sending anything other than package names and versions to the network
 
-The design behind these rules is in [docs/agent/security.md](docs/agent/security.md).
+The design behind these rules is in [docs/security-model.md](docs/security-model.md).

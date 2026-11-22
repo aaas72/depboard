@@ -5,7 +5,7 @@
  *
  * The identity (docs/adr/0003): neutral grays (#313131 · #414141 · #525252) and one brand red,
  * #CA3E47 (docs/adr/0004 for the status colors, which follow the standard conventions). Update types and severities stay
- * separate scales (docs/agent/ui-ux.md). Every colored badge has a matching `-fg` token, and
+ * separate scales (docs/ui-guidelines.md). Every colored badge has a matching `-fg` token, and
  * every pair is checked for WCAG AA contrast.
  */
 @theme {

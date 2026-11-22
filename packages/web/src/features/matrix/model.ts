@@ -85,7 +85,7 @@ export function driftGroups(row: MatrixRow): Map<string, number> {
 }
 
 /**
- * The default order (docs/agent/ui-ux.md): high/critical vulnerabilities first, then drift
+ * The default order (docs/ui-guidelines.md): high/critical vulnerabilities first, then drift
  * (most release lines), then most outdated (major, minor, patch), then alphabetical.
  */
 export function sortRows(rows: readonly MatrixRow[]): MatrixRow[] {

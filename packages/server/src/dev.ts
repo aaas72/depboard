@@ -3,7 +3,7 @@
  *
  * - Fixed port 4319, so the Vite dev server (5173) can proxy /api to it.
  * - Fixed token from DEPBOARD_DEV_TOKEN (or a printed random one), so reloading the page works.
- * - The Vite origin is allowed here and only here (docs/agent/security.md).
+ * - The Vite origin is allowed here and only here (docs/security-model.md).
  * - Scans DEPBOARD_DEV_ROOT, or this repository when unset.
  */
 import path from 'node:path';

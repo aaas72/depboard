@@ -27,7 +27,7 @@ function isProtected(url: string): boolean {
 }
 
 /**
- * One global gate in front of every route (docs/agent/security.md):
+ * One global gate in front of every route (docs/security-model.md):
  * - Host must be exactly 127.0.0.1:<port>  → blocks DNS rebinding
  * - Origin, when present, must be our own  → blocks other sites in the browser
  * - non-GET requests must carry an Origin  → no blind cross-site writes

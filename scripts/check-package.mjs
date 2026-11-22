@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Verifies what `npm publish` would ship for the `depboard` package: only allowed files, within the
-// size budget (docs/agent/engineering-standards.md). Used by CI and by `pnpm ci:local`.
+// size budget (CONTRIBUTING.md). Used by CI and by `pnpm ci:local`.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

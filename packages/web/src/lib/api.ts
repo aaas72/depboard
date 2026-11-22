@@ -16,7 +16,7 @@ const TOKEN_KEY = 'depboard.token';
 /**
  * Reads the session token from the launch URL (`/?token=…`), keeps it for this tab only
  * (so a reload still works), and removes it from the address bar right away
- * (docs/agent/security.md: it must not linger in history or screenshots).
+ * (docs/security-model.md: it must not linger in history or screenshots).
  */
 export function takeToken(win: Window = window): string | null {
   const url = new URL(win.location.href);
