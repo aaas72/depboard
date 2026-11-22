@@ -18,6 +18,12 @@
   --color-border: #dcdcdc;
   --color-border-strong: #a8a8a8;
 
+  /* Tables: rows alternate two grays instead of drawing lines between them. */
+  --color-row: #fafafa;
+  --color-row-alt: #efefef;
+  --color-row-hover: #e3e3e3;
+  --color-table-header: #e6e6e6;
+
   /* The brand red, as is: the logo, the favicon, and primary buttons (white text, 4.9:1). */
   --color-brand: #ca3e47;
   --color-brand-fg: #ffffff;
@@ -72,6 +78,10 @@
     --color-text-muted: #bdbdbd;
     --color-border: #525252;
     --color-border-strong: #6e6e6e;
+    --color-row: #313131;
+    --color-row-alt: #414141;
+    --color-row-hover: #4b4b4b;
+    --color-table-header: #292929;
     --color-accent: #f59ea3;
     --color-accent-fg: #1a1a1a;
     --color-focus: #f59ea3;
@@ -106,6 +116,10 @@
   --color-text-muted: #bdbdbd;
   --color-border: #525252;
   --color-border-strong: #6e6e6e;
+  --color-row: #313131;
+  --color-row-alt: #414141;
+  --color-row-hover: #4b4b4b;
+  --color-table-header: #292929;
   --color-accent: #f59ea3;
   --color-accent-fg: #1a1a1a;
   --color-focus: #f59ea3;

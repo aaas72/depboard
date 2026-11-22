@@ -38,9 +38,9 @@ function Section({
       {entries.length === 0 ? (
         <p className="text-sm text-text-muted">{t('project.noneHere')}</p>
       ) : (
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse text-sm [&_tr>:first-child]:ps-3">
           <thead>
-            <tr className="border-b border-border-strong text-start text-xs tracking-wide text-text-muted uppercase">
+            <tr className="bg-table-header text-start text-xs tracking-wide text-text-muted uppercase">
               <th scope="col" className="py-2 pe-3 text-start font-semibold">
                 {t('matrix.package')}
               </th>
@@ -62,12 +62,12 @@ function Section({
             </tr>
           </thead>
           <tbody>
-            {entries.map(({ row, cell }) => {
+            {entries.map(({ row, cell }, i) => {
               const v = cell.vulnerability;
               return (
                 <tr
                   key={row.name}
-                  className={`border-b border-border hover:bg-surface-raised ${openPackage === row.name ? 'bg-surface-sunken' : ''}`}
+                  className={`hover:bg-row-hover ${openPackage === row.name ? 'bg-surface-sunken' : i % 2 === 0 ? 'bg-row' : 'bg-row-alt'}`}
                 >
                   <th scope="row" className="py-1.5 pe-3 text-start font-medium">
                     <button

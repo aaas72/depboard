@@ -97,6 +97,9 @@ const GridRow = memo(function GridRow({
 }: GridRowProps) {
   const groups = useMemo(() => driftGroups(row), [row]);
   const ring = (c: number) => (activeCol === c ? ACTIVE_RING : '');
+  // Rows alternate two grays instead of lines between them. The sticky columns repeat the
+  // row's color so scrolled cells never show through.
+  const stripe = index % 2 === 0 ? 'bg-row' : 'bg-row-alt';
 
   const cells = [];
   for (let i = cols.from; i <= cols.to; i++) {
@@ -104,7 +107,7 @@ const GridRow = memo(function GridRow({
     if (project === undefined) continue;
     const cell = row.cells[project.id];
     const col = i + 2;
-    const base = `flex flex-none items-center gap-1.5 border-e border-border px-2 ${ring(col)} ${openProjectId === project.id ? 'bg-surface-sunken' : ''}`;
+    const base = `flex flex-none items-center gap-1.5 px-2 ${ring(col)} ${openProjectId === project.id ? 'bg-surface-sunken' : ''}`;
     if (cell === undefined) {
       // The project doesn't use this package: completely empty, on purpose.
       cells.push(
@@ -156,7 +159,7 @@ const GridRow = memo(function GridRow({
     <div
       role="row"
       aria-rowindex={index + 2}
-      className="group absolute start-0 top-0 flex border-b border-border hover:bg-surface-raised"
+      className={`group absolute start-0 top-0 flex ${stripe} hover:bg-row-hover`}
       style={{ height: ROW_H, width: cols.totalWidth, transform: `translateY(${String(start)}px)` }}
     >
       <div
@@ -164,7 +167,7 @@ const GridRow = memo(function GridRow({
         role="rowheader"
         aria-colindex={1}
         title={row.name}
-        className={`sticky start-0 z-10 flex items-center bg-surface px-3 text-sm font-medium group-hover:bg-surface-raised ${ring(0)}`}
+        className={`sticky start-0 z-10 flex items-center px-3 text-sm font-medium ${stripe} group-hover:bg-row-hover ${ring(0)}`}
         style={{ width: NAME_W }}
         onClick={() => {
           onCellClick(index, 0);
@@ -176,7 +179,7 @@ const GridRow = memo(function GridRow({
         id={cellId(idPrefix, index, 1)}
         role="gridcell"
         aria-colindex={2}
-        className={`sticky z-10 flex items-center border-e border-border bg-surface px-2 font-mono text-xs text-text-muted group-hover:bg-surface-raised ${ring(1)}`}
+        className={`sticky z-10 flex items-center px-2 font-mono text-xs text-text-muted ${stripe} group-hover:bg-row-hover ${ring(1)}`}
         style={{ width: LATEST_W, insetInlineStart: NAME_W }}
         onClick={() => {
           onCellClick(index, 1);
@@ -345,13 +348,13 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
         <div
           role="row"
           aria-rowindex={1}
-          className="sticky top-0 z-20 flex border-b border-border-strong bg-surface-raised"
+          className="sticky top-0 z-20 flex bg-table-header"
           style={{ height: HEADER_H, width: totalWidth }}
         >
           <div
             role="columnheader"
             aria-colindex={1}
-            className="sticky start-0 z-30 flex items-end bg-surface-raised px-3 pb-2 text-xs font-semibold tracking-wide text-text-muted uppercase"
+            className="sticky start-0 z-30 flex items-end bg-table-header px-3 pb-2 text-xs font-semibold tracking-wide text-text-muted uppercase"
             style={{ width: NAME_W }}
           >
             {t('matrix.package')} · {t('matrix.rows', { n: rows.length })}
@@ -359,7 +362,7 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
           <div
             role="columnheader"
             aria-colindex={2}
-            className="sticky z-30 flex items-end border-e border-border bg-surface-raised px-2 pb-2 text-xs font-semibold tracking-wide text-text-muted uppercase"
+            className="sticky z-30 flex items-end bg-table-header px-2 pb-2 text-xs font-semibold tracking-wide text-text-muted uppercase"
             style={{ width: LATEST_W, insetInlineStart: NAME_W }}
           >
             {t('matrix.latest')}
@@ -374,7 +377,7 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell }: MatrixGridP
                 role="columnheader"
                 aria-colindex={vc.index + 3}
                 title={project.path}
-                className="flex flex-none flex-col justify-end border-e border-border px-2 pb-2"
+                className="flex flex-none flex-col justify-end px-2 pb-2"
                 style={{ width: COL_W }}
               >
                 <a
