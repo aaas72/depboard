@@ -16,15 +16,15 @@ the clash; or make red the main color and move danger to other colors. The owner
 ## Decision
 
 - **Brand:** `#CA3E47` as is for the logo, the favicon, and primary buttons (`brand` token; white text,
-  4.9:1). For text, links, selection, and focus a readable variant (`accent`): `#B3333C` in light,
-  `#F59EA3` in dark.
-- **Neutrals:** the dark theme uses the three grays as they are (surface `#313131`, raised `#414141`,
-  borders `#525252`). The light theme is derived from them (`#FAFAFA` / `#F1F1F1`, text `#313131`).
+  4.9:1). For text, links, selection, and focus a lighter variant (`accent`, `#F59EA3`), readable on the
+  grays.
+- **Neutrals:** the three grays as they are (surface `#313131`, raised `#414141`, borders `#525252`).
+  The UI is dark only (the light theme was removed on 2026-11-22).
 - **How far behind:** green (patch) → yellow (minor) → **orange** (major). Still a familiar
   traffic-light order, and the letters P / m / M carry the meaning without color.
 - **How dangerous:** slate (low) → brown (moderate) → **purple** (high) → **deep purple with a ring**
   (critical). The shield icon and the letters L / Mo / H / C carry the meaning without color.
-- Every text and badge pair was checked for WCAG AA in both themes. In dark, the orange, purple, and
+- Every text and badge pair was checked for WCAG AA. The orange, purple, and
   slate badges take dark text, because white on them falls below 4.5:1.
 
 ## Consequences

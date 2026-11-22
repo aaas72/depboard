@@ -61,14 +61,6 @@ export function RefreshIcon({ className = 'size-3.5' }: IconProps) {
   );
 }
 
-export function ThemeIcon({ className = 'size-4' }: IconProps) {
-  return (
-    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" className={className}>
-      <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Zm0 1.5v10a5 5 0 0 1 0-10Z" />
-    </svg>
-  );
-}
-
 /**
  * The DepBoard mark: a lens over a grid of dots (your projects), catching the one that was
  * hiding. The same drawing as docs/media/logo.svg. Dots take the muted text color, the lens the

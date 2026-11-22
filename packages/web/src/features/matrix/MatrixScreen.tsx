@@ -3,9 +3,8 @@ import type { Insight } from '@depboard/shared';
 import { Alert } from '../../components/ui/Alert.js';
 import { Button } from '../../components/ui/Button.js';
 import { CopyCommand } from '../../components/ui/CopyCommand.js';
-import { LogoMark, RefreshIcon, ThemeIcon } from '../../components/ui/icons.js';
+import { LogoMark, RefreshIcon } from '../../components/ui/icons.js';
 import { t } from '../../lib/i18n.js';
-import { applyTheme, nextTheme, storedTheme, type Theme } from '../../lib/theme.js';
 import { UpdateBadge, VulnerabilityMarker } from './badges.js';
 import type { ApiClient } from '../../lib/api.js';
 import { ActivityPanel } from '../activity/ActivityPanel.js';
@@ -46,7 +45,6 @@ export function MatrixScreen({
   const [outdatedOnly, setOutdatedOnly] = useState(false);
   const [focused, setFocused] = useState<Insight | null>(null);
   const [open, setOpen] = useState<{ rowName: string; projectId: string } | null>(null);
-  const [theme, setTheme] = useState<Theme>(storedTheme);
   const searchRef = useRef<HTMLInputElement>(null);
   // Where focus was when the drawer opened, so closing it goes back there (grid or table row).
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -163,18 +161,6 @@ export function MatrixScreen({
           <Button onClick={rescan} disabled={rescanning} aria-busy={rescanning}>
             <RefreshIcon className={`size-3.5 ${rescanning ? 'animate-spin' : ''}`} />
             {rescanning ? t('action.rescanning') : t('action.rescan')}
-          </Button>
-          <Button
-            variant="ghost"
-            aria-label={t('theme.label', { theme: t(`theme.${theme}`) })}
-            title={t('theme.label', { theme: t(`theme.${theme}`) })}
-            onClick={() => {
-              const next = nextTheme(theme);
-              applyTheme(next);
-              setTheme(next);
-            }}
-          >
-            <ThemeIcon />
           </Button>
         </div>
       </header>

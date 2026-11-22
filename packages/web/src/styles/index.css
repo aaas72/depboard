@@ -7,108 +7,9 @@
  * #CA3E47. Because red is the brand, danger no longer uses it: a major update is orange, and
  * vulnerability severity is a slate → brown → purple scale. Update types and severities stay
  * separate scales (docs/agent/ui-ux.md). Every colored badge has a matching `-fg` token, and
- * every pair is checked for WCAG AA contrast in both themes.
+ * every pair is checked for WCAG AA contrast.
  */
 @theme {
-  --color-surface: #fafafa;
-  --color-surface-raised: #f1f1f1;
-  --color-surface-sunken: #e8e8e8;
-  --color-text: #313131;
-  --color-text-muted: #5c5c5c;
-  --color-border: #dcdcdc;
-  --color-border-strong: #a8a8a8;
-
-  /* Tables: rows alternate two grays instead of drawing lines between them. */
-  --color-row: #fafafa;
-  --color-row-alt: #efefef;
-  --color-row-hover: #e3e3e3;
-  --color-table-header: #e6e6e6;
-
-  /* The brand red, as is: the logo, the favicon, and primary buttons (white text, 4.9:1). */
-  --color-brand: #ca3e47;
-  --color-brand-fg: #ffffff;
-  /* Red for text, links, selection, and focus: darker in light, lighter in dark, for contrast. */
-  --color-accent: #b3333c;
-  --color-accent-fg: #ffffff;
-  --color-focus: #b3333c;
-
-  --color-warning: #c2410c;
-  --color-warning-fg: #ffffff;
-  --color-notice: oklch(95% 0.05 85);
-  --color-notice-border: oklch(80% 0.1 80);
-
-  /* How far behind: green → yellow → orange. */
-  --color-update-none: #e4e4e4;
-  --color-update-none-fg: #4a4a4a;
-  --color-update-patch: oklch(48% 0.13 150);
-  --color-update-patch-fg: #ffffff;
-  --color-update-minor: oklch(80% 0.15 85);
-  --color-update-minor-fg: oklch(25% 0.05 80);
-  --color-update-major: #c2410c;
-  --color-update-major-fg: #ffffff;
-  --color-update-unknown: #e0e0e0;
-  --color-update-unknown-fg: #474747;
-
-  /* How dangerous: slate → brown → purple → deep purple (with a ring). Never red: red is the brand. */
-  --color-severity-low: #546178;
-  --color-severity-low-fg: #ffffff;
-  --color-severity-moderate: oklch(50% 0.12 60);
-  --color-severity-moderate-fg: #ffffff;
-  --color-severity-high: #7e22ce;
-  --color-severity-high-fg: #ffffff;
-  --color-severity-critical: #4c1d95;
-  --color-severity-critical-fg: #ffffff;
-
-  /* Version-drift groups: an underline per release line in a row, highest line first. */
-  --color-drift-1: oklch(55% 0.17 255);
-  --color-drift-2: oklch(55% 0.17 300);
-  --color-drift-3: oklch(55% 0.12 190);
-  --color-drift-4: oklch(62% 0.13 100);
-
-  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
-}
-
-/* Dark theme: follows the system unless the user picked light; or picked explicitly. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --color-surface: #313131;
-    --color-surface-raised: #414141;
-    --color-surface-sunken: #292929;
-    --color-text: #f2f2f2;
-    --color-text-muted: #bdbdbd;
-    --color-border: #525252;
-    --color-border-strong: #6e6e6e;
-    --color-row: #313131;
-    --color-row-alt: #414141;
-    --color-row-hover: #4b4b4b;
-    --color-table-header: #292929;
-    --color-accent: #f59ea3;
-    --color-accent-fg: #1a1a1a;
-    --color-focus: #f59ea3;
-    --color-warning: #fb923c;
-    --color-warning-fg: #1a1a1a;
-    --color-notice: oklch(30% 0.05 80);
-    --color-notice-border: oklch(48% 0.08 80);
-    --color-update-none: #4a4a4a;
-    --color-update-none-fg: #d6d6d6;
-    --color-update-major: #fb923c;
-    --color-update-major-fg: #1a1a1a;
-    --color-update-unknown: #4d4d4d;
-    --color-update-unknown-fg: #d9d9d9;
-    --color-severity-low: #94a3b8;
-    --color-severity-low-fg: #1a1a1a;
-    --color-severity-high: #c084fc;
-    --color-severity-high-fg: #1a1a1a;
-    --color-drift-1: oklch(74% 0.13 255);
-    --color-drift-2: oklch(78% 0.12 300);
-    --color-drift-3: oklch(78% 0.11 190);
-    --color-drift-4: oklch(84% 0.12 100);
-    --color-severity-critical: #6d28d9;
-  }
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
   --color-surface: #313131;
   --color-surface-raised: #414141;
   --color-surface-sunken: #292929;
@@ -116,36 +17,59 @@
   --color-text-muted: #bdbdbd;
   --color-border: #525252;
   --color-border-strong: #6e6e6e;
+
+  /* Tables: rows alternate two grays instead of drawing lines between them. */
   --color-row: #313131;
   --color-row-alt: #414141;
   --color-row-hover: #4b4b4b;
   --color-table-header: #292929;
+
+  /* The brand red, as is: the logo, the favicon, and primary buttons (white text, 4.9:1). */
+  --color-brand: #ca3e47;
+  --color-brand-fg: #ffffff;
+  /* Red for text, links, selection, and focus: lighter than the brand red, for contrast on gray. */
   --color-accent: #f59ea3;
   --color-accent-fg: #1a1a1a;
   --color-focus: #f59ea3;
+
   --color-warning: #fb923c;
   --color-warning-fg: #1a1a1a;
   --color-notice: oklch(30% 0.05 80);
   --color-notice-border: oklch(48% 0.08 80);
+
+  /* How far behind: green → yellow → orange. */
   --color-update-none: #4a4a4a;
   --color-update-none-fg: #d6d6d6;
+  --color-update-patch: oklch(48% 0.13 150);
+  --color-update-patch-fg: #ffffff;
+  --color-update-minor: oklch(80% 0.15 85);
+  --color-update-minor-fg: oklch(25% 0.05 80);
   --color-update-major: #fb923c;
   --color-update-major-fg: #1a1a1a;
   --color-update-unknown: #4d4d4d;
   --color-update-unknown-fg: #d9d9d9;
+
+  /* How dangerous: slate → brown → purple → deep purple (with a ring). Never red: red is the brand. */
   --color-severity-low: #94a3b8;
   --color-severity-low-fg: #1a1a1a;
+  --color-severity-moderate: oklch(50% 0.12 60);
+  --color-severity-moderate-fg: #ffffff;
   --color-severity-high: #c084fc;
   --color-severity-high-fg: #1a1a1a;
+  --color-severity-critical: #6d28d9;
+  --color-severity-critical-fg: #ffffff;
+
+  /* Version-drift groups: an underline per release line in a row, highest line first. */
   --color-drift-1: oklch(74% 0.13 255);
   --color-drift-2: oklch(78% 0.12 300);
   --color-drift-3: oklch(78% 0.11 190);
   --color-drift-4: oklch(84% 0.12 100);
-  --color-severity-critical: #6d28d9;
+
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
 }
 
-:root[data-theme='light'] {
-  color-scheme: light;
+:root {
+  color-scheme: dark;
 }
 
 html,

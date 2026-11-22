@@ -3,7 +3,6 @@ import { TOKEN_HEADER } from '@depboard/shared';
 import { ApiError, createApiClient, takeToken, type FetchLike } from './api.js';
 import { t } from './i18n.js';
 import { shortenPath } from './paths.js';
-import { applyTheme, nextTheme, storedTheme } from './theme.js';
 
 const TOKEN = 'a'.repeat(64);
 
@@ -109,31 +108,6 @@ describe('t', () => {
 
   it('leaves unknown placeholders visible instead of printing "undefined"', () => {
     expect(t('drawer.inProject')).toBe('in {project}');
-  });
-});
-
-describe('theme', () => {
-  afterEach(() => {
-    localStorage.clear();
-    document.documentElement.removeAttribute('data-theme');
-  });
-
-  it('follows the system by default and remembers an explicit choice', () => {
-    expect(storedTheme()).toBe('system');
-    applyTheme('dark');
-    expect(document.documentElement.dataset['theme']).toBe('dark');
-    expect(storedTheme()).toBe('dark');
-    applyTheme('system');
-    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
-    expect(storedTheme()).toBe('system');
-  });
-
-  it('cycles system → light → dark → system', () => {
-    expect([nextTheme('system'), nextTheme('light'), nextTheme('dark')]).toEqual([
-      'light',
-      'dark',
-      'system',
-    ]);
   });
 });
 

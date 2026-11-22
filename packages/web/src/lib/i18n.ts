@@ -15,10 +15,6 @@ const en = {
   'action.copied': 'Copied',
   'action.close': 'Close',
   'action.clearFilter': 'Show everything',
-  'theme.label': 'Theme: {theme}. Change theme',
-  'theme.system': 'system',
-  'theme.light': 'light',
-  'theme.dark': 'dark',
 
   'state.loading': 'Reading your projects…',
   'state.unauthorized.title': 'This page needs the link DepBoard printed',
