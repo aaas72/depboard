@@ -115,8 +115,7 @@ docs: explain the vulnerability badges
 
 Scopes: `cli`, `server`, `web`, `shared`, `docs`, `ci`, `deps`. The body says **why**, not what.
 
-Commit under your own name. You are the author of what you submit and answer for it in review, so
-don't add co-author trailers or credits for tools, AI assistants included.
+Commit under your own name: you are the author of what you submit and answer for it in review.
 
 ## Pull request requirements
 
