@@ -1,52 +1,77 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/logo.svg" alt="" width="72">
+  <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/logo.svg" alt="" width="80">
 </p>
 
 <h1 align="center">DepBoard</h1>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/demo.gif" alt="Running npx depboard ~/projects: the terminal lists what's hiding, then the browser opens on a matrix of 13 packages across 7 projects. Clicking “react is used at 3 different major versions” narrows it to React at 16, 17, and 18; clicking “lodash has 4 known vulnerabilities in 4 projects” shows the four projects and the advisory details." width="900">
+  <strong>Discover what's hiding in your projects in 10 seconds.</strong>
 </p>
 
-**Discover what's hiding in your projects in 10 seconds.**
+<p align="center">
+  <a href="https://www.npmjs.com/package/depboard"><img src="https://img.shields.io/npm/v/depboard?color=CA3E47&label=npm" alt="npm version"></a>
+  <a href="https://github.com/aaas72/depboard/actions/workflows/ci.yml"><img src="https://github.com/aaas72/depboard/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/aaas72/depboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-525252" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/node-%E2%89%A520.19-525252" alt="Node 20.19 or newer">
+</p>
 
 ```bash
 npx depboard ~/projects
 ```
 
-Every dependency tool answers _"what is outdated in this project?"_. DepBoard answers
-_"what is happening across **all** my projects at once?"_. Point it at the folder that holds your
-projects and it opens one matrix in your browser: every package, every project, every version.
-That's where you find out that React runs at three different major versions across six projects,
-or that a vulnerable lodash sits in four of them.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/demo.gif" alt="Running npx depboard ~/projects: the terminal lists what's hiding, then the browser opens on a matrix of 13 packages across 7 projects. Clicking “react is used at 3 different major versions” narrows it to React 16, 17, and 18; clicking “lodash has 4 known vulnerabilities in 4 projects” opens the advisory details and the update command." width="900">
+</p>
 
-No account, no config, nothing uploaded. It runs on your machine and stops when you close it.
+Every dependency tool answers _"what is outdated in **this** project?"_. DepBoard answers the question
+none of them do: _"what is happening across **all** my projects at once?"_
 
-## What you get
+Point it at the folder that holds your projects. It opens one matrix in your browser, every package
+against every project, and tells you in plain sentences what you didn't know: that React runs at
+three different major versions across six projects, or that a vulnerable lodash sits in four of
+them.
 
-- **The whole picture on one screen.** One row per package, one column per project. Each cell shows the
-  installed version and how far behind it is: **P**atch, **m**inor, **M**ajor.
-- **What's hiding, in plain sentences.** _"react is used at 3 different major versions across 6 projects"_,
-  _"lodash has 4 known vulnerabilities (high) in 4 projects"_. Click one and the matrix narrows to it.
-- **Known vulnerabilities** for every project from a single request to the npm advisory database, the
-  same data `npm audit` uses, with details for each advisory.
-- **One project at a time.** Open a project to see all its packages, most urgent first.
-- **Update from the browser.** Pick a package in an npm project, see the exact command first
-  (`npm install lodash@4.18.1 --no-audit --no-fund`), confirm, and watch the output live.
-  Major updates ask for a second confirmation. The matrix refreshes when it's done.
-- **A terminal summary** with `--summary`, for when you don't want a browser.
+No account. No config. Nothing uploaded. It runs on your machine and stops when you close it.
 
-Works with projects managed by npm, pnpm, yarn, and bun. In 0.1, updating from the browser is npm only;
-for the others DepBoard shows the command to run yourself.
+## What you'll discover
 
-### Planned
+**What's hiding, in plain sentences.** Known vulnerabilities, packages used at different major
+versions, projects far behind. Click a finding and the matrix narrows to it.
 
-- Exact versions from lock files, for projects that were never installed (today these are estimated from
-  `package.json` and shown in italics)
-- Workspaces (monorepos) as separate projects, and vulnerabilities in transitive dependencies
-- Updates for pnpm, yarn, and bun, and one package across many projects at once
+<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/all-findings.png" alt="The findings: known vulnerabilities, different versions across projects, and major versions behind, in three columns" width="900">
 
-## Usage
+**The whole picture on one screen.** One row per package, one column per project. Each cell shows the
+installed version and how far behind and how dangerous it is, in words: `↑ major`, `🛡 high`.
+Version drift is named next to the package (`↳ 3 versions`) and colored under each version.
+
+<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/drift-focus.png" alt="The matrix narrowed to React, used at major versions 16, 17, and 18 across projects" width="900">
+
+**Details, and a safe update.** Select a cell for its versions, every known advisory, and an Update
+button that shows the exact command before it runs anything.
+
+<img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/cell-details.png" alt="The details of lodash in one project: versions, the npm command, the Update button, and its advisories" width="900">
+
+## Features
+
+- **Every project at once:** one folder or several, every `package.json` below them, the version
+  each project really installed.
+- **Findings that are proven:** a vulnerability only for a version that is installed; drift only
+  between real major versions.
+- **Known vulnerabilities** from the npm advisory database (the one `npm audit` uses), in a single
+  request for all your projects.
+- **One project at a time:** all its packages, the most urgent first.
+- **Update from the browser:** one package in one npm project, with the exact command shown first
+  and a second confirmation for major updates. Live output, and the matrix refreshes when done.
+- **A terminal summary** with `--summary`, for scripts and CI.
+- **Fast:** about 5 seconds for 30 projects; CI fails the build if it ever exceeds 10.
+- **Works everywhere:** Windows, macOS, and Linux; projects managed by npm, pnpm, yarn, and bun.
+
+**Planned:** exact versions from lock files for projects that were never installed, workspaces,
+transitive vulnerabilities, and updates for pnpm, yarn, and bun. See the [roadmap](https://github.com/aaas72/depboard/blob/main/ROADMAP.md).
+
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20.19 or newer.
 
 ```bash
 npx depboard                       # the current folder
@@ -55,55 +80,72 @@ npx depboard ~/work ~/clients      # several folders, one matrix
 npx depboard ~/projects --summary  # print the findings and exit
 ```
 
-| Option            | What it does                                      |
-| ----------------- | ------------------------------------------------- |
-| `--port <n>`      | Port to listen on (default: a random free port)   |
-| `--no-open`       | Print the link instead of opening the browser     |
-| `--summary`       | Print the summary and exit: no server, no browser |
-| `--depth <n>`     | How deep to look for projects (default: 6)        |
-| `-y`, `--yes`     | Skip confirmations                                |
-| `--debug`         | Verbose logs to stderr                            |
-| `-v`, `--version` | Print the version                                 |
-| `-h`, `--help`    | Show the help                                     |
+| Option            | What it does                                       |
+| ----------------- | -------------------------------------------------- |
+| `--port <n>`      | Port to listen on (default: a random free port)    |
+| `--no-open`       | Print the link instead of opening the browser      |
+| `--summary`       | Print the findings and exit: no server, no browser |
+| `--depth <n>`     | How deep to look for projects (default: 6)         |
+| `-y`, `--yes`     | Skip confirmations                                 |
+| `--debug`         | Verbose logs on stderr                             |
+| `-v`, `--version` | Print the version                                  |
 
-DepBoard skips `node_modules`, build output, virtualenvs, vendored code, and hidden folders. It refuses to
-scan a whole drive and asks before scanning your entire home folder.
+New here? Start with [Getting started](https://github.com/aaas72/depboard/blob/main/docs/guide/getting-started.md) and
+[Reading the matrix](https://github.com/aaas72/depboard/blob/main/docs/guide/reading-the-matrix.md).
 
 ## Why DepBoard?
 
-The tools below are good at what they do, and DepBoard doesn't replace them. It's the view none of them
-give you: all your projects side by side.
+The tools below are good at what they do, and DepBoard doesn't replace them. It adds the view none of
+them give you: all your projects side by side.
 
-| Tool                      | Scope                         | Where it runs        |
-| ------------------------- | ----------------------------- | -------------------- |
-| `npm outdated`, ncu, taze | One project at a time         | Terminal             |
-| npm-gui                   | One project at a time         | Local browser UI     |
-| Renovate, Dependabot      | One repository at a time      | Cloud, as PRs        |
-| **DepBoard**              | **Every project in a folder** | **Local browser UI** |
+| Tool                      | Looks at                      | Runs as               |
+| ------------------------- | ----------------------------- | --------------------- |
+| `npm outdated`, ncu, taze | One project at a time         | Terminal output       |
+| `npm audit`               | One project at a time         | Terminal output       |
+| npm-gui                   | One project at a time         | Local browser UI      |
+| Renovate, Dependabot      | One repository at a time      | Cloud service, as PRs |
+| **DepBoard**              | **Every project in a folder** | **Local browser UI**  |
 
-## Security & privacy
+## Privacy and security
 
 DepBoard reads your projects and, unless you confirm an update, never writes to them.
 
-- The server listens on `127.0.0.1` only. Every request needs a token created for this launch, and
-  requests from other sites are refused (Host and Origin checks).
-- Updates run `npm` directly, never through a shell, and only for a package and project from the scan.
-- It asks the npm registry (`registry.npmjs.org`) for the latest version of each package, and its
-  advisory database about the installed versions. Package names and versions are all it sends: no code,
-  no paths, no telemetry, no account.
+- **Nothing leaves your machine but package names and versions,** sent to the npm registry for the
+  latest versions and known advisories. No paths, no code, no telemetry, no account.
+- **The local server listens on `127.0.0.1` only,** and every request needs a token created for this
+  run. Requests from other websites are refused.
+- **Updates run `npm` directly, never through a shell,** only for a package the project declares, at
+  an exact version, after you confirm.
 
-Found a security issue? Please report it privately; see [SECURITY.md](https://github.com/aaas72/depboard/blob/main/SECURITY.md).
+Details: [Privacy and security](https://github.com/aaas72/depboard/blob/main/docs/guide/privacy-and-security.md) ·
+[Security model](https://github.com/aaas72/depboard/blob/main/docs/security-model.md). Found a vulnerability? Please report it privately; see
+[SECURITY.md](https://github.com/aaas72/depboard/blob/main/SECURITY.md).
 
-## Requirements
+## How it works
 
-Node.js 20.19 or newer, on Windows, macOS, or Linux.
+DepBoard scans the folders you choose, reads each project's declared and installed versions, asks the
+npm registry for the latest versions and known advisories, and turns the result into a matrix and
+ranked findings. A small server on `127.0.0.1` serves the UI and does all the work; the browser only
+displays it. The [architecture](https://github.com/aaas72/depboard/blob/main/docs/architecture.md) explains the pieces.
+
+## Documentation
+
+- **Using DepBoard:** [getting started](https://github.com/aaas72/depboard/blob/main/docs/guide/getting-started.md) ·
+  [reading the matrix](https://github.com/aaas72/depboard/blob/main/docs/guide/reading-the-matrix.md) · [updating](https://github.com/aaas72/depboard/blob/main/docs/guide/updating.md) ·
+  [command line](https://github.com/aaas72/depboard/blob/main/docs/guide/cli.md) · [troubleshooting](https://github.com/aaas72/depboard/blob/main/docs/guide/troubleshooting.md)
+- **Contributing:** [contributing guide](https://github.com/aaas72/depboard/blob/main/CONTRIBUTING.md) · [architecture](https://github.com/aaas72/depboard/blob/main/docs/architecture.md) ·
+  [security model](https://github.com/aaas72/depboard/blob/main/docs/security-model.md) · [UI guidelines](https://github.com/aaas72/depboard/blob/main/docs/ui-guidelines.md) ·
+  [decision records](https://github.com/aaas72/depboard/tree/main/docs/adr)
+- **Project:** [roadmap](https://github.com/aaas72/depboard/blob/main/ROADMAP.md) · [changelog](https://github.com/aaas72/depboard/blob/main/packages/cli/CHANGELOG.md) ·
+  [code of conduct](https://github.com/aaas72/depboard/blob/main/CODE_OF_CONDUCT.md)
 
 ## Contributing
 
-Issues and pull requests are welcome. See [CONTRIBUTING.md](https://github.com/aaas72/depboard/blob/main/CONTRIBUTING.md)
-to get from clone to a passing test run.
+Issues and pull requests are welcome. The [contributing guide](https://github.com/aaas72/depboard/blob/main/CONTRIBUTING.md) takes you from clone
+to a passing test run and explains what a pull request needs to merge. Adding updates for pnpm, yarn,
+or bun is a great first larger contribution.
 
 ## License
 
-[MIT](LICENSE). The published package bundles open-source dependencies (Fastify, React, and others), all
-under permissive licenses; their notices ship in `dist/THIRD_PARTY_LICENSES.md`.
+[MIT](https://github.com/aaas72/depboard/blob/main/LICENSE). The published package bundles open-source dependencies (Fastify, React, and others),
+all under permissive licenses; their notices ship in `dist/THIRD_PARTY_LICENSES.md`.

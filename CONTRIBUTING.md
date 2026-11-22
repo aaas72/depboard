@@ -1,48 +1,206 @@
 # Contributing to DepBoard
 
-Thanks for helping! This guide gets you from clone to a passing test run.
+Thank you for considering a contribution. DepBoard runs on developers' machines, inside folders
+full of their work, so we hold changes to a high bar. This guide tells you exactly what that bar is,
+so nothing in review comes as a surprise.
 
-## Requirements
+- [Ways to contribute](#ways-to-contribute)
+- [Before you start](#before-you-start)
+- [Development setup](#development-setup)
+- [Making a change](#making-a-change)
+- [Pull request requirements](#pull-request-requirements)
+- [Standards](#standards)
+- [Adding a package manager](#adding-a-package-manager)
+- [Releases](#releases)
+- [Getting help](#getting-help)
 
-- **Node.js 22.12+** for development (our dev tooling needs it). The published CLI itself supports Node 20.19+.
-- **pnpm 10** (`corepack enable` picks the right version automatically).
+By taking part you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Setup
+## Ways to contribute
+
+- **Report a bug** with the bug report form. Include the command you ran, your OS, Node version, and
+  package manager. A screenshot of the matrix helps (paths inside your home folder already show as
+  `~/…`).
+- **Suggest a feature** with the feature request form. Tell us what you were trying to see or do.
+- **Improve the docs.** Unclear wording is a bug.
+- **Fix an issue.** Issues labeled `good first issue` are small and well defined.
+- **Report a vulnerability privately**, never in a public issue: see [SECURITY.md](SECURITY.md).
+
+## Before you start
+
+**Open or comment on an issue before a large change.** It saves you from building something we
+can't merge. Small fixes and doc changes can go straight to a pull request.
+
+Every feature has to pass one question: **does this make the full picture clearer?** DepBoard
+answers "what is happening across all my projects at once?". Features that don't serve that answer,
+however nice, are deferred. Read the [roadmap](ROADMAP.md) for what is planned and what is out of
+scope.
+
+## Development setup
+
+You need **Node.js 22.12+** for development (the published CLI supports Node 20.19+) and **pnpm 10**:
+`corepack enable` picks the right version from `package.json`.
 
 ```bash
+git clone https://github.com/aaas72/depboard.git
+cd depboard
 pnpm install
 pnpm test
 ```
 
-## Everyday commands
+### Running it
 
-| Command          | What it does                  |
-| ---------------- | ----------------------------- |
-| `pnpm dev`       | Server and UI in watch mode   |
-| `pnpm build`     | Build every package           |
-| `pnpm lint`      | ESLint, zero warnings allowed |
-| `pnpm typecheck` | TypeScript strict checks      |
-| `pnpm test`      | Unit tests (Vitest)           |
-| `pnpm format`    | Format with Prettier          |
-| `pnpm changeset` | Describe a user-facing change |
+```bash
+pnpm build
+node packages/cli/dist/index.js ~/projects   # the real CLI, exactly as published
+```
 
-Before opening a PR, run `pnpm ci:local`. It runs the whole CI pipeline locally, including Linux and Node 20 in Docker.
-Without Docker, `pnpm ci:quick` runs the checks on your machine only.
+For UI work, `pnpm dev` runs the server in watch mode on port 4319 and the Vite dev server on
+port 5173 with hot reload:
 
-## Repository layout
+| Variable                | Effect                                                              |
+| ----------------------- | ------------------------------------------------------------------- |
+| `DEPBOARD_DEV_ROOT`     | Folder to scan (default: this repository)                           |
+| `DEPBOARD_DEV_TOKEN`    | Fixed token (64 hex characters) so reloading the page keeps working |
+| `DEPBOARD_REGISTRY_URL` | Registry to use instead of registry.npmjs.org                       |
+
+### Repository layout
 
 ```
 packages/
-  cli/      the published `depboard` package (bundles everything else)
-  server/   local Fastify server: scanner, registry, adapters, routes
+  shared/   types, error codes, insight wording (no Node or DOM code)
+  server/   scanner, registry client, insights, updates, security guard
   web/      React UI
-  shared/   types shared by server and UI
+  cli/      the published `depboard` package, bundles the other three
+scripts/    CI helpers: local CI, package check, performance budget, license notices
+docs/       architecture, security model, UI guidelines, user guide, ADRs
 ```
 
-## Commits and PRs
+The [architecture overview](docs/architecture.md) explains how the pieces fit.
 
-- [Conventional Commits](https://www.conventionalcommits.org): `feat(server): detect package manager from lock file`.
-- Keep PRs small and focused. Add tests with your change, and a changeset if users will notice it.
-- Anything touching the server must keep the security rules in [docs/agent/security.md](docs/agent/security.md).
+### Commands
 
-More detail on how we work is in [docs/agent/](docs/agent/).
+| Command          | What it does                                               |
+| ---------------- | ---------------------------------------------------------- |
+| `pnpm dev`       | Server and UI in watch mode                                |
+| `pnpm build`     | Build every package (the UI, then the CLI bundle)          |
+| `pnpm lint`      | ESLint, zero warnings allowed                              |
+| `pnpm typecheck` | TypeScript strict checks                                   |
+| `pnpm test`      | Unit, integration, and component tests (Vitest)            |
+| `pnpm format`    | Format with Prettier                                       |
+| `pnpm perf`      | Time-to-first-insight budget against the built CLI         |
+| `pnpm ci:local`  | The whole CI pipeline locally, Linux and Node 20 in Docker |
+| `pnpm ci:quick`  | The same checks on your machine only, without Docker       |
+| `pnpm changeset` | Describe a user-facing change for the changelog            |
+
+## Making a change
+
+1. **Branch from `main`:** `feat/short-name`, `fix/short-name`, `docs/short-name`, `chore/short-name`.
+2. **Work in small steps:** a type in `shared`, then the service, then the route, then the UI. Each
+   step testable on its own.
+3. **Write tests with the code,** not after it. A bug fix starts with a test that fails.
+4. **Run `pnpm ci:local`** (or `pnpm ci:quick`) before pushing.
+5. **Add a changeset** if users will notice the change: `pnpm changeset`. Write it for users, not
+   for the code: "The matrix now shows …", not "refactor MatrixRow".
+
+### Commit messages
+
+[Conventional Commits](https://www.conventionalcommits.org), one logical change per commit:
+
+```
+feat(server): detect the package manager from the lock file
+fix(web): keep the first column in place on horizontal scroll
+docs: explain the vulnerability badges
+```
+
+Scopes: `cli`, `server`, `web`, `shared`, `docs`, `ci`, `deps`. The body says **why**, not what.
+
+Commit under your own name. You are the author of what you submit and answer for it in review, so
+don't add co-author trailers or credits for tools, AI assistants included.
+
+## Pull request requirements
+
+A pull request is ready to merge when:
+
+- [ ] CI is green on Windows, macOS, and Linux.
+- [ ] `pnpm lint` passes with **zero warnings** and `pnpm typecheck` passes.
+- [ ] New behavior and its edge cases are tested; no test is skipped to make CI pass.
+- [ ] The performance budget still holds (`pnpm perf`), or the PR explains why not.
+- [ ] Server changes keep every control in the [security model](docs/security-model.md) and tick its
+      checklist.
+- [ ] UI changes follow the [UI guidelines](docs/ui-guidelines.md) and include a screenshot or GIF.
+- [ ] A changeset is included if the change is visible to users.
+- [ ] Docs are updated if behavior, flags, or output changed.
+- [ ] New dependencies are justified in the description (each one adds weight and attack surface).
+
+Keep pull requests focused, ideally under 400 changed lines. Reviewers aim to respond within a week.
+
+## Standards
+
+### Code
+
+- **TypeScript strict**, with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`. No `any`:
+  narrow `unknown`, or validate external data with a schema.
+- **ESM only,** `import type` for types, literal unions instead of `enum`, no default exports except
+  where a tool requires one.
+- **Small pure functions;** side effects (files, network, processes) at the edges.
+- **Comments explain why,** never what.
+- **Errors** are `DepboardError` with a stable `code`, and every message a user sees answers: what
+  happened, why, and what to do next. One broken project never fails the whole scan.
+- **Cross-platform:** `path.join` / `path.resolve` only, never string-built paths; never assume bash or
+  `HOME`. Windows, macOS, and Linux are equal: a feature that doesn't work on all three doesn't ship.
+
+### Tests
+
+- Vitest next to the code (`*.test.ts`); UI tests with Testing Library.
+- **No real network** (the registry is always faked) and **no real `npm install`** in unit tests:
+  install commands are pure functions, tested as data.
+- Tests describe behavior: `it('marks 18.3.1 → 19.1.0 as major')`.
+- Security tests prove that the server rejects a missing token, a bad Origin or Host, and malicious
+  names and versions. Insight tests prove that no false finding is ever produced: a wrong insight
+  costs more trust than a missing one.
+
+### Performance budgets
+
+| Budget                                         | Limit    |
+| ---------------------------------------------- | -------- |
+| Time to first insight, 30 projects, cold cache | ≤ 10 s   |
+| Matrix scrolling, 500 packages × 30 projects   | 60 fps   |
+| UI bundle, gzipped                             | ≤ 250 KB |
+| Published package, unpacked                    | ≤ 5 MB   |
+| Runtime dependencies of the published package  | none     |
+
+### Decisions
+
+A decision with a reasonable alternative gets an Architecture Decision Record in
+[docs/adr](docs/adr/): the context, the decision, and its consequences. Read the existing ones before
+reopening a settled question.
+
+## Adding a package manager
+
+Today DepBoard **reads** projects of every manager but **updates** npm projects only. Adding pnpm,
+yarn, or bun updates is the clearest first larger contribution:
+
+1. Add `packages/server/src/adapters/<manager>.ts` with a pure `buildInstallCommand` that returns
+   `{ file, args, display }` for one package and exact version, like `npm.ts`. No user-supplied
+   flags; dev dependencies keep their flag.
+2. Cover it with table tests: names, scoped names, dev dependencies, and rejected input.
+3. Wire it in `updates/plan-update.ts` in place of the `MANAGER_NOT_SUPPORTED` refusal for that
+   manager. Workspaces need care: the command must run where the manager expects it, because running
+   the wrong one inside a workspace can damage it.
+4. Run a real update on all three operating systems and describe it in the pull request.
+
+## Releases
+
+DepBoard follows [Semantic Versioning](https://semver.org). The CLI's name, flags, exit codes, and
+minimum Node version are the public contract; the HTTP API between the server and the UI is internal
+and may change in any release. Before 1.0, a breaking change bumps the minor version and leads the
+changelog.
+
+Changesets collect into a release pull request; merging it updates the version and
+[the changelog](packages/cli/CHANGELOG.md). A bad release is fixed with a new patch, never unpublished.
+
+## Getting help
+
+Ask in [GitHub Discussions](https://github.com/aaas72/depboard/discussions), or comment on the
+issue you're working on. There are no silly questions here.
