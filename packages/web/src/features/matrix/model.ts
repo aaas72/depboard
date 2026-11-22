@@ -219,3 +219,38 @@ export function countUpToDate(rows: readonly MatrixRow[]): number {
   return rows.filter((row) => !Object.values(row.cells).some((cell) => isOutdated(cell.updateType)))
     .length;
 }
+
+/**
+ * Project columns, most urgent first, so the projects that need attention are on screen without
+ * scrolling: by vulnerable packages (critical, then high, moderate, low), then by outdated ones
+ * (major, minor, patch), then by name. Mirrors the row order.
+ */
+export function sortProjects(rows: readonly MatrixRow[], projects: readonly Project[]): Project[] {
+  const SEVERITIES: readonly Severity[] = ['critical', 'high', 'moderate', 'low'];
+  const UPDATES: readonly UpdateType[] = ['major', 'minor', 'patch'];
+  const keys = new Map<string, number[]>();
+  for (const project of projects) {
+    const key = new Array<number>(SEVERITIES.length + UPDATES.length).fill(0);
+    for (const row of rows) {
+      const cell = row.cells[project.id];
+      if (cell === undefined) continue;
+      const v = cell.vulnerability;
+      if (v !== null && v !== 'unknown') {
+        const i = SEVERITIES.indexOf(v.severity);
+        key[i] = (key[i] ?? 0) + 1;
+      }
+      const u = UPDATES.indexOf(cell.updateType);
+      if (u >= 0) key[SEVERITIES.length + u] = (key[SEVERITIES.length + u] ?? 0) + 1;
+    }
+    keys.set(project.id, key);
+  }
+  return [...projects].sort((a, b) => {
+    const ka = keys.get(a.id) ?? [];
+    const kb = keys.get(b.id) ?? [];
+    for (let i = 0; i < ka.length; i++) {
+      const diff = (kb[i] ?? 0) - (ka[i] ?? 0);
+      if (diff !== 0) return diff;
+    }
+    return a.name.localeCompare(b.name);
+  });
+}

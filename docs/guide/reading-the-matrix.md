@@ -73,7 +73,8 @@ project on React 17.
 ### Order
 
 Packages with high or critical vulnerabilities come first, then those with version drift, then the
-most outdated, then the rest by name.
+most outdated, then the rest by name. Projects are ordered the same way: the ones with the most
+serious problems on the left, so they are on screen without scrolling.
 
 ## The details panel
 

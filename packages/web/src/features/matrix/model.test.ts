@@ -9,6 +9,7 @@ import {
   NAME_MIN_W,
   nameColumnWidth,
   releaseLine,
+  sortProjects,
   rowSeverity,
   sortRows,
   worstUpdate,
@@ -203,5 +204,44 @@ describe('countUpToDate', () => {
     // sampleMatrix: left-pad is current everywhere; lodash, react, and zod are behind somewhere.
     expect(countUpToDate(sampleMatrix().rows)).toBe(1);
     expect(countUpToDate([])).toBe(0);
+  });
+});
+
+describe('sortProjects', () => {
+  const vuln = (severity: 'low' | 'moderate' | 'high' | 'critical') => ({
+    severity,
+    count: 1,
+    advisoryIds: [],
+  });
+
+  it('puts the most urgent projects first: vulnerabilities by severity, then outdated, then name', () => {
+    const projects = ['alpha', 'beta', 'gamma', 'delta', 'omega'].map((id) => project(id));
+    const rows = [
+      row('next', [
+        cell('gamma', { vulnerability: vuln('critical') }),
+        cell('beta', { vulnerability: vuln('high') }),
+      ]),
+      row('lodash', [
+        cell('beta', { vulnerability: vuln('high') }),
+        cell('delta', { vulnerability: vuln('high') }),
+      ]),
+      row('react', [
+        cell('alpha', { updateType: 'major' }),
+        cell('omega', { updateType: 'minor' }),
+      ]),
+    ];
+    // gamma: 1 critical · beta: 2 high · delta: 1 high · alpha: 1 major · omega: 1 minor
+    expect(sortProjects(rows, projects).map((p) => p.id)).toEqual([
+      'gamma',
+      'beta',
+      'delta',
+      'alpha',
+      'omega',
+    ]);
+  });
+
+  it('keeps alphabetical order between projects with nothing to report', () => {
+    const projects = ['zeta', 'beta', 'alpha'].map((id) => project(id));
+    expect(sortProjects([], projects).map((p) => p.id)).toEqual(['alpha', 'beta', 'zeta']);
   });
 });

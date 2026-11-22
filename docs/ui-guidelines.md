@@ -48,7 +48,8 @@ The rules behind DepBoard's interface. Every visible change is reviewed against 
 - **Versions in italics** are estimates: the package isn't installed, so the version comes from the
   range in `package.json`.
 - Default order: high and critical vulnerabilities first, then drift, then the most outdated, then
-  by name.
+  by name. Columns follow the same idea: the projects with the most serious problems first
+  (vulnerabilities by severity, then outdated packages), so they are on screen without scrolling.
 
 ## Badges and colors
 

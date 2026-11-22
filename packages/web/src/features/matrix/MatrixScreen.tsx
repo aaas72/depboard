@@ -21,6 +21,7 @@ import {
   filterMatrix,
   focusOn,
   nameColumnWidth,
+  sortProjects,
   sortRows,
 } from './model.js';
 import type { MatrixData } from './useMatrix.js';
@@ -68,6 +69,11 @@ export function MatrixScreen({
   );
 
   const sorted = useMemo(() => sortRows(matrix.rows), [matrix.rows]);
+  // Columns too: the projects that need attention first, so they're on screen without scrolling.
+  const projectOrder = useMemo(
+    () => sortProjects(matrix.rows, matrix.projects),
+    [matrix.rows, matrix.projects],
+  );
   // "Hide up-to-date" names how many rows it hides, and only shows when there is something to hide.
   const upToDate = useMemo(() => countUpToDate(matrix.rows), [matrix.rows]);
   const nameWidth = useMemo(
@@ -82,8 +88,8 @@ export function MatrixScreen({
     [matrix.rows],
   );
   const view = useMemo(
-    () => filterMatrix(sorted, matrix.projects, { query, outdatedOnly, focus }),
-    [sorted, matrix.projects, query, outdatedOnly, focus],
+    () => filterMatrix(sorted, projectOrder, { query, outdatedOnly, focus }),
+    [sorted, projectOrder, query, outdatedOnly, focus],
   );
 
   // "/" jumps to search from anywhere except a text field.
