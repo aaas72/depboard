@@ -122,6 +122,53 @@ button that shows the exact command before it runs anything.
 
 <img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/cell-details.png" alt="The details of lodash in one project: versions, the npm command, the Update button, and its advisories" width="900">
 
+## Every screen
+
+Click any image to see it full size.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/terminal.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/terminal.png" alt="1 · The terminal summary"></a>
+      <p><strong>1 · The terminal summary</strong><br>The findings before any browser opens; <code>--summary</code> stops here.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/overview.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/overview.png" alt="2 · The matrix"></a>
+      <p><strong>2 · The matrix</strong><br>Every package against every project, the findings on top, a reserved details panel.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/all-findings.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/all-findings.png" alt="3 · All findings"></a>
+      <p><strong>3 · All findings</strong><br>One column per kind: vulnerabilities, different versions, major versions behind.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/drift-focus.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/drift-focus.png" alt="4 · A finding in focus"></a>
+      <p><strong>4 · A finding in focus</strong><br>Click a finding and the matrix narrows to that package and its projects.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/cell-details.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/cell-details.png" alt="5 · A cell’s details"></a>
+      <p><strong>5 · A cell’s details</strong><br>Declared, installed, and latest versions, every advisory, and the exact update command.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/update-confirm.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/update-confirm.png" alt="6 · A major update asks first"></a>
+      <p><strong>6 · A major update asks first</strong><br>The exact command, a link to what changed, and Cancel focused by default.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/update-output.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/update-output.png" alt="7 · The update, live"></a>
+      <p><strong>7 · The update, live</strong><br>The command’s output streams in; the matrix refreshes when it’s done.</p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/project.png"><img src="https://raw.githubusercontent.com/aaas72/depboard/main/docs/media/screenshots/project.png" alt="8 · One project"></a>
+      <p><strong>8 · One project</strong><br>All of a project’s packages, dependencies and devDependencies, the most urgent first.</p>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - **Every project at once:** one folder or several, every `package.json` below them, the version

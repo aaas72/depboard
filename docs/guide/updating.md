@@ -16,6 +16,8 @@ runs only that.
    into the **Activity** panel at the bottom.
 4. When it succeeds, DepBoard scans again and the matrix shows the new version.
 
+   ![A finished update: the command and its output in the Activity panel](../media/screenshots/update-output.png)
+
 A dev dependency keeps its place: the command includes `--save-dev`.
 
 ## Major updates ask first
@@ -23,6 +25,8 @@ A dev dependency keeps its place: the command includes `--save-dev`.
 A major update can break code. Its button ends with `…`: pressing it opens a dialog that repeats the
 exact command and links to the package's versions on npm. Nothing runs until you press **Run the
 update**. The dialog's focus starts on **Cancel**.
+
+![The confirmation for a major update, with the exact command](../media/screenshots/update-confirm.png)
 
 ## What DepBoard will and won't do
 
