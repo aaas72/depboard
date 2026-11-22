@@ -17,10 +17,12 @@ const KIND_ICON: Record<InsightKind, ReactNode> = {
   'major-lag': <ClockIcon />,
 };
 
+// One brand color for every kind: the icon's shape tells the kinds apart (and the key next to
+// the title names them), so the strip reads as one voice instead of three competing colors.
 const KIND_STYLE: Record<InsightKind, string> = {
-  'vulnerable-spread': 'text-severity-high',
-  'version-drift': 'text-drift-1',
-  'major-lag': 'text-update-major',
+  'vulnerable-spread': 'text-accent',
+  'version-drift': 'text-accent',
+  'major-lag': 'text-accent',
 };
 
 /** The order the strip ranks kinds in: the most dangerous first. */
