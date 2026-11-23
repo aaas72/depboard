@@ -61,6 +61,14 @@ export function planUpdate(
       `${request.package} isn't a registry version DepBoard can update (workspace, file, git, alias, or unreachable).`,
     );
   }
+  // In a monorepo the right command depends on which of its packages declares the dependency,
+  // and the wrong one can damage the workspace: do no harm, show the way instead.
+  if (project.workspacePackages !== undefined) {
+    throw new DepboardError(
+      'WORKSPACE_NOT_SUPPORTED',
+      'Updating packages inside a monorepo from DepBoard comes in a later version.',
+    );
+  }
   if (project.manager !== 'npm') {
     throw new DepboardError(
       'MANAGER_NOT_SUPPORTED',

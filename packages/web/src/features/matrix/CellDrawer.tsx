@@ -111,6 +111,22 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
           <Field label={t('drawer.depType')}>{cell.depType}</Field>
         </dl>
 
+        {cell.variants !== undefined && (
+          <section aria-labelledby="drawer-variants" className="mt-5">
+            <h3 id="drawer-variants" className="mb-1 text-sm font-semibold">
+              {t('drawer.variants')}
+            </h3>
+            <p className="mb-2 text-sm text-text-muted">{t('drawer.variantsNote')}</p>
+            <dl className="divide-y divide-border">
+              {cell.variants.map((variant) => (
+                <Field key={variant.member} label={variant.member}>
+                  {variant.installed ?? variant.declared}
+                </Field>
+              ))}
+            </dl>
+          </section>
+        )}
+
         {row.lookup !== 'ok' && (
           <p className="mt-3 text-sm text-text-muted">{t(`drawer.lookup.${row.lookup}`)}</p>
         )}

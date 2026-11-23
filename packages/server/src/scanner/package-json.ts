@@ -18,8 +18,24 @@ const dependencyMap = z.pipe(
   }),
 );
 
+/** npm, yarn, and bun: `"workspaces": [...]` or `"workspaces": { "packages": [...] }`. */
+const workspacesField = z.pipe(
+  z.catch(z.optional(z.unknown()), undefined),
+  z.transform((value): string[] | undefined => {
+    const list = Array.isArray(value)
+      ? value
+      : typeof value === 'object' && value !== null && 'packages' in value
+        ? value.packages
+        : undefined;
+    if (!Array.isArray(list)) return undefined;
+    const patterns = list.filter((p): p is string => typeof p === 'string' && p.length > 0);
+    return patterns.length > 0 ? patterns : undefined;
+  }),
+);
+
 const packageJsonSchema = z.object({
   name: z.catch(z.optional(z.string()), undefined),
+  workspaces: workspacesField,
   packageManager: z.optional(z.unknown()),
   dependencies: dependencyMap,
   devDependencies: dependencyMap,
@@ -35,6 +51,8 @@ export interface ParsedPackageJson {
   name: string | undefined;
   packageManager: unknown;
   dependencies: DeclaredDependency[];
+  /** Workspace globs, when this package.json is a monorepo root (npm, yarn, bun). */
+  workspaces: string[] | undefined;
 }
 
 export type ParseResult = { ok: true; value: ParsedPackageJson } | { ok: false; reason: string };
@@ -51,7 +69,7 @@ export function parsePackageJson(text: string): ParseResult {
   const result = packageJsonSchema.safeParse(json);
   if (!result.success) return { ok: false, reason: 'not a JSON object' };
 
-  const { name, packageManager, dependencies, devDependencies } = result.data;
+  const { name, packageManager, dependencies, devDependencies, workspaces } = result.data;
   const deps: DeclaredDependency[] = [
     ...Object.entries(dependencies).map(([dep, declared]) => ({
       name: dep,
@@ -64,5 +82,5 @@ export function parsePackageJson(text: string): ParseResult {
       .map(([dep, declared]) => ({ name: dep, declared, depType: 'devDependencies' as const })),
   ];
 
-  return { ok: true, value: { name, packageManager, dependencies: deps } };
+  return { ok: true, value: { name, packageManager, dependencies: deps, workspaces } };
 }

@@ -152,7 +152,9 @@ export function ProjectView({
       <h2 className="mt-2 text-lg font-semibold">
         {project.name}{' '}
         <span className="rounded border border-border px-1.5 py-0.5 align-middle text-xs font-normal text-text-muted">
-          {project.manager}
+          {project.workspacePackages === undefined
+            ? t('project.manager', { manager: project.manager })
+            : t('project.workspace', { manager: project.manager, n: project.workspacePackages })}
         </span>
       </h2>
       <p className="font-mono text-xs break-all text-text-muted" title={project.path}>

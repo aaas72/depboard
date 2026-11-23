@@ -83,6 +83,11 @@ const en = {
   'cell.vulnerable': '{severity} vulnerability|{n} vulnerabilities, highest {severity}',
 
   'drawer.inProject': 'in {project}',
+  'project.manager': '{manager}',
+  'project.workspace': '{manager} · monorepo, {n} packages',
+  'drawer.variants': 'Inside this monorepo',
+  'drawer.variantsNote':
+    'Its packages use different versions. The cell shows the most at-risk one.',
   'drawer.emptyTitle': 'Details',
   'drawer.emptyBody':
     'Select a cell to see its versions, known vulnerabilities, and the exact update command. Arrow keys and Enter work too.',
@@ -110,6 +115,8 @@ const en = {
   'update.button': 'Update to {version}',
   'update.buttonMajor': 'Update to {version}…',
   'update.running': 'Updating…',
+  'update.workspace':
+    'This is a monorepo. Updating its packages from DepBoard comes in a later version: run your package manager’s update in the package that declares it.',
   'update.unsupported':
     'Updating {manager} projects from DepBoard comes in a later version. You can run this in the project folder:',
   'update.confirmTitle': 'Update {name} from {from} to {to}?',

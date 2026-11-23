@@ -60,7 +60,8 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
   const [confirming, setConfirming] = useState(false);
   const [starting, setStarting] = useState(false);
   const latest = row.latest ?? '';
-  const supported = project.manager === 'npm';
+  const workspace = project.workspacePackages !== undefined;
+  const supported = project.manager === 'npm' && !workspace;
 
   // Ask the server for the exact command it would run. Nothing runs here.
   useEffect(() => {
@@ -78,6 +79,10 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
       current = false;
     };
   }, [api, row.name, latest, project.id, supported, cell.version]);
+
+  if (workspace) {
+    return <p className="text-sm text-text-muted">{t('update.workspace')}</p>;
+  }
 
   if (!supported) {
     return (

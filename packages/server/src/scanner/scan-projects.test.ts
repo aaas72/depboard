@@ -75,7 +75,7 @@ describe('scanProjects', () => {
     expect(projects.find((p) => p.name === '@mono/server')?.manager).toBe('pnpm');
   });
 
-  it('reads versions hoisted to the workspace root node_modules', async () => {
+  it('shows a monorepo as one project, reading versions hoisted to its root', async () => {
     const root = await makeTree({
       'mono/package.json': { name: 'mono', workspaces: ['packages/*'] },
       'mono/package-lock.json': '{}',
@@ -83,7 +83,17 @@ describe('scanProjects', () => {
       'mono/packages/web/package.json': { name: 'web', dependencies: { react: '^19.0.0' } },
     });
     const { projects } = await scanProjects([root]);
-    expect(projects.find((p) => p.name === 'web')?.dependencies[0]?.installed).toBe('19.1.0');
+    expect(projects.map((p) => p.name)).toEqual(['mono']);
+    expect(projects[0]?.workspacePackages).toBe(2);
+    expect(projects[0]?.dependencies).toEqual([
+      {
+        name: 'react',
+        declared: '^19.0.0',
+        installed: '19.1.0',
+        depType: 'dependencies',
+        member: 'web',
+      },
+    ]);
   });
 
   it('never looks above the scan root for lock files or installed versions', async () => {

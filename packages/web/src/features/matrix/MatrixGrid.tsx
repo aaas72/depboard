@@ -402,7 +402,14 @@ export function MatrixGrid({ rows, projects, onOpenCell, openCell, nameWidth }: 
                 >
                   {project.name}
                 </a>
-                <span className="text-xs text-text-muted">{project.manager}</span>
+                <span className="truncate text-xs text-text-muted">
+                  {project.workspacePackages === undefined
+                    ? t('project.manager', { manager: project.manager })
+                    : t('project.workspace', {
+                        manager: project.manager,
+                        n: project.workspacePackages,
+                      })}
+                </span>
               </div>
             );
           })}

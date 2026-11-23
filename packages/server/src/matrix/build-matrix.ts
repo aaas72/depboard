@@ -9,7 +9,8 @@ import {
 import { computeInsights } from '../insights/compute-insights.js';
 import type { AdvisoryLookup, PackageLookup } from '../registry/registry-client.js';
 import { versionKey } from '../registry/registry-client.js';
-import type { ScannedProject } from '../scanner/scan-projects.js';
+import semver from 'semver';
+import type { ScannedDependency, ScannedProject } from '../scanner/scan-projects.js';
 import { classifyUpdate, comparableVersion, isRegistryRange } from '../versions/classify.js';
 
 export interface MatrixInputs {
@@ -45,13 +46,54 @@ function cellVulnerability(
   return vulnerability;
 }
 
+const SEVERITY_RISK = { critical: 4, high: 3, moderate: 2, low: 1 } as const;
+const UPDATE_RISK = { major: 3, minor: 2, patch: 1, prerelease: 0, none: 0, unknown: 0 } as const;
+
+/**
+ * In a monorepo, packages can use one dependency at different versions. The cell shows the most
+ * at-risk one: the worst vulnerability, then the furthest behind, then the oldest version.
+ */
+function mostAtRisk(cells: readonly MatrixCell[]): MatrixCell {
+  const risk = (cell: MatrixCell) => {
+    const v = cell.vulnerability;
+    return [
+      v !== null && v !== 'unknown' ? SEVERITY_RISK[v.severity] : 0,
+      UPDATE_RISK[cell.updateType],
+    ] as const;
+  };
+  return cells.reduce((worst, cell) => {
+    const [ws, wu] = risk(worst);
+    const [cs, cu] = risk(cell);
+    if (cs !== ws) return cs > ws ? cell : worst;
+    if (cu !== wu) return cu > wu ? cell : worst;
+    if (
+      cell.version !== null &&
+      worst.version !== null &&
+      semver.valid(cell.version) &&
+      semver.valid(worst.version)
+    ) {
+      return semver.lt(cell.version, worst.version) ? cell : worst;
+    }
+    return worst;
+  });
+}
+
 /** Joins scan results with registry data into the packages × projects matrix. Pure: no I/O. */
 export function buildMatrix(inputs: MatrixInputs): Matrix {
   const rows = new Map<string, MatrixRow>();
 
   for (const project of inputs.projects) {
+    // A monorepo can declare one dependency in several of its packages.
+    const byName = new Map<string, ScannedDependency[]>();
     for (const dep of project.dependencies) {
-      let row = rows.get(dep.name);
+      const same = byName.get(dep.name);
+      if (same) same.push(dep);
+      else byName.set(dep.name, [dep]);
+    }
+    for (const [name, deps] of byName) {
+      const dep = deps[0];
+      if (dep === undefined) continue;
+      let row = rows.get(name);
       if (!row) {
         const lookup = inputs.packages.get(dep.name);
         row = {
@@ -64,30 +106,50 @@ export function buildMatrix(inputs: MatrixInputs): Matrix {
         rows.set(dep.name, row);
       }
 
-      const { version, source } = comparableVersion(dep.installed, dep.declared);
-      row.cells[project.id] = {
-        projectId: project.id,
-        declared: dep.declared,
-        installed: dep.installed,
-        version,
-        versionSource: source,
-        updateType:
-          isRegistryRange(dep.declared) || dep.installed !== null
-            ? classifyUpdate(version, row.latest)
-            : 'unknown',
-        depType: dep.depType,
-        vulnerability: cellVulnerability(dep.name, version, source, inputs.advisories),
-      };
+      const latest = row.latest;
+      const cells = deps.map((d): MatrixCell => {
+        const { version, source } = comparableVersion(d.installed, d.declared);
+        return {
+          projectId: project.id,
+          declared: d.declared,
+          installed: d.installed,
+          version,
+          versionSource: source,
+          updateType:
+            isRegistryRange(d.declared) || d.installed !== null
+              ? classifyUpdate(version, latest)
+              : 'unknown',
+          depType: d.depType,
+          vulnerability: cellVulnerability(name, version, source, inputs.advisories),
+        };
+      });
+      const cell = mostAtRisk(cells);
+      const distinct = new Set(deps.map((d) => `${d.declared} ${d.installed ?? ''}`));
+      if (distinct.size > 1) {
+        cell.variants = deps.map((d) => ({
+          member: d.member ?? project.name,
+          declared: d.declared,
+          installed: d.installed,
+        }));
+      }
+      row.cells[project.id] = cell;
     }
   }
 
   for (const row of rows.values()) {
     const byId = new Map<number, Advisory>();
     for (const cell of Object.values(row.cells)) {
-      if (cell.version === null || cell.versionSource !== 'installed') continue;
-      for (const advisory of inputs.advisories.byVersion.get(versionKey(row.name, cell.version)) ??
-        []) {
-        byId.set(advisory.id, advisory);
+      // Every installed version counts, a monorepo's other variants included.
+      const versions = new Set<string>();
+      if (cell.version !== null && cell.versionSource === 'installed') versions.add(cell.version);
+      for (const variant of cell.variants ?? []) {
+        if (variant.installed !== null) versions.add(variant.installed);
+      }
+      for (const version of versions) {
+        for (const advisory of inputs.advisories.byVersion.get(versionKey(row.name, version)) ??
+          []) {
+          byId.set(advisory.id, advisory);
+        }
       }
     }
     row.advisories = [...byId.values()].sort(
@@ -95,11 +157,12 @@ export function buildMatrix(inputs: MatrixInputs): Matrix {
     );
   }
 
-  const projects = inputs.projects.map(({ id, name, path, manager }) => ({
+  const projects = inputs.projects.map(({ id, name, path, manager, workspacePackages }) => ({
     id,
     name,
     path,
     manager,
+    ...(workspacePackages === undefined ? {} : { workspacePackages }),
   }));
   const sortedRows = [...rows.values()].sort((a, b) => a.name.localeCompare(b.name));
   return {

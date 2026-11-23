@@ -35,6 +35,7 @@ function matrix(): Matrix {
       project('a'),
       project('b', 'pnpm'),
       { ...project('c'), path: path.resolve('/elsewhere/c') },
+      { ...project('m'), workspacePackages: 3 },
     ],
     rows: [
       {
@@ -42,7 +43,12 @@ function matrix(): Matrix {
         latest: '19.1.0',
         lookup: 'ok',
         advisories: [],
-        cells: { a: cell('a', '18.3.1'), b: cell('b', '18.3.1'), c: cell('c', '18.3.1') },
+        cells: {
+          a: cell('a', '18.3.1'),
+          b: cell('b', '18.3.1'),
+          c: cell('c', '18.3.1'),
+          m: cell('m', '18.3.1'),
+        },
       },
       {
         name: 'vitest',
@@ -140,6 +146,7 @@ describe('planUpdate', () => {
     [{ package: 'local-lib', version: '1.0.1' }, 'NOT_UPDATABLE'],
     [{ projectIds: ['b'], confirmMajor: true }, 'MANAGER_NOT_SUPPORTED'],
     [{ projectIds: ['c'], confirmMajor: true }, 'FORBIDDEN_PATH'],
+    [{ projectIds: ['m'], confirmMajor: true }, 'WORKSPACE_NOT_SUPPORTED'],
   ];
   it.each(refusals)('refuses %j with %s', (request, code) => {
     expect(() => plan(request)).toThrow(expect.objectContaining({ code }));

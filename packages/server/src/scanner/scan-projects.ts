@@ -7,6 +7,7 @@ import { mapWithConcurrency } from '../lib/concurrency.js';
 import { isSafePackageName } from '../lib/package-name.js';
 import { pathKey } from '../lib/paths.js';
 import { ancestorsWithin, detectManager } from './detect-manager.js';
+import { groupWorkspaces, readPnpmWorkspaceGlobs, type ProjectWithGlobs } from './workspaces.js';
 import { parsePackageJson } from './package-json.js';
 
 export const DEFAULT_SCAN_DEPTH = 6;
@@ -36,11 +37,15 @@ export interface ScannedDependency {
   declared: string;
   installed: string | null;
   depType: DependencyType;
+  /** In a monorepo: the workspace package that declares it. */
+  member?: string;
 }
 
 export interface ScannedProject extends Project {
   dependencies: ScannedDependency[];
 }
+
+type Scanned = { project: ScannedProject; globs: string[] | null } | { issue: ScanIssue };
 
 export type { ScanIssue };
 
@@ -108,10 +113,7 @@ async function readInstalledVersion(
   return null;
 }
 
-async function scanProject(
-  file: string,
-  root: string,
-): Promise<{ project: ScannedProject } | { issue: ScanIssue }> {
+async function scanProject(file: string, root: string): Promise<Scanned> {
   let text: string;
   try {
     text = await fs.readFile(file, 'utf8');
@@ -131,6 +133,8 @@ async function scanProject(
   );
 
   return {
+    // A monorepo root: its workspace globs, from package.json or pnpm-workspace.yaml.
+    globs: parsed.value.workspaces ?? (await readPnpmWorkspaceGlobs(dir)),
     project: {
       id: projectId(dir),
       name: parsed.value.name ?? path.basename(dir),
@@ -165,12 +169,14 @@ export async function scanProjects(
     scanProject(file, root),
   );
 
-  const projects: ScannedProject[] = [];
+  const scanned: ProjectWithGlobs[] = [];
   const issues: ScanIssue[] = [];
   for (const result of results) {
-    if ('project' in result) projects.push(result.project);
+    if ('project' in result) scanned.push(result);
     else issues.push(result.issue);
   }
+  // A monorepo becomes one project instead of one per workspace package.
+  const projects = await groupWorkspaces(scanned);
 
   projects.sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path));
   return { projects, issues };

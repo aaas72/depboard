@@ -16,6 +16,7 @@ export const ERROR_CODES = [
   'NOT_UPDATABLE',
   'REGISTRY_UNAVAILABLE',
   'PORT_IN_USE',
+  'WORKSPACE_NOT_SUPPORTED',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 

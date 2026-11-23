@@ -14,6 +14,11 @@ export interface Project {
   name: string;
   path: string;
   manager: PackageManagerId;
+  /**
+   * Set for a monorepo shown as one project: how many package.json files (the root and its
+   * workspace packages) it brings together.
+   */
+  workspacePackages?: number;
 }
 
 export interface Advisory {
@@ -54,6 +59,19 @@ export interface MatrixCell {
    * 'unknown' = can't tell: the lookup failed, or the exact version isn't known (not installed).
    */
   vulnerability: CellVulnerability | null | 'unknown';
+  /**
+   * In a monorepo, when several of its packages use this dependency at different versions:
+   * each one. The cell itself shows the most at-risk of them.
+   */
+  variants?: CellVariant[];
+}
+
+/** One workspace package's use of a dependency, inside a monorepo cell. */
+export interface CellVariant {
+  /** The workspace package's name. */
+  member: string;
+  declared: string;
+  installed: string | null;
 }
 
 export interface MatrixRow {
