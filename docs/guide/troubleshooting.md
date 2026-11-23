@@ -32,10 +32,14 @@ registry show no badge at all: there is no public version to compare against.
 - Symbolic links are never followed.
 - A `package.json` that can't be read is skipped and listed in a notice at the top of the screen.
 
-## A monorepo shows each package as its own project
+## How does DepBoard show a monorepo?
 
-That is expected in this version: workspace packages appear as separate columns. Full workspace
-support is on the [roadmap](../roadmap.md).
+As one project, the way you think of it. A folder with a `workspaces` field in its `package.json`
+(npm, yarn, bun) or a `pnpm-workspace.yaml` (pnpm) becomes one column, whose header says how many
+packages it brings together (`pnpm · monorepo, 5 packages`). Dependencies between its own packages
+are left out. When its packages use one dependency at different versions, the cell shows the most
+at-risk one and the details panel lists each package's version. Updating from DepBoard inside a
+monorepo comes in a later version.
 
 ## Why can't I update a pnpm, yarn, or bun project?
 

@@ -202,10 +202,12 @@ Every screen of DepBoard, in the order you meet them. Click an image to see it f
   and a second confirmation for major updates. Live output, and the matrix refreshes when done.
 - **A terminal summary** with `--summary`, for scripts and CI.
 - **Fast:** about 5 seconds for 30 projects; CI fails the build if it ever exceeds 10.
+- **Monorepos as one project:** npm, yarn, bun, and pnpm workspaces show as one column, with each
+  package's version in the details.
 - **Works everywhere:** Windows, macOS, and Linux; projects managed by npm, pnpm, yarn, and bun.
 
-**Planned:** exact versions from lock files for projects that were never installed, workspaces,
-transitive vulnerabilities, and updates for pnpm, yarn, and bun. See the [roadmap](https://github.com/aaas72/depboard/blob/main/docs/roadmap.md).
+**Planned:** exact versions from lock files for projects that were never installed, transitive
+vulnerabilities, and updates for pnpm, yarn, bun, and inside monorepos. See the [roadmap](https://github.com/aaas72/depboard/blob/main/docs/roadmap.md).
 
 ## Why DepBoard?
 

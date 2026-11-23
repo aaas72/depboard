@@ -44,7 +44,8 @@ Ordered by how much each makes the picture clearer:
 1. **Exact versions from lock files** for projects that were never installed, turning estimates and
    "unknown" vulnerability cells into real answers. Old, never-installed projects are exactly who
    DepBoard is for.
-2. **Workspaces (monorepos)**, each package as its own column.
+2. **Updates inside monorepos.** Monorepos already show as one project; updating the right
+   package inside one comes next.
 3. **Remembered folders** and an "Add folder" action in the UI.
 4. **Vulnerabilities in transitive dependencies,** read from the lock file.
 5. **Updates for pnpm, yarn, and bun projects.**

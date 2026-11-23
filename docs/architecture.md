@@ -50,7 +50,9 @@ The repository is a pnpm workspace. Only `cli` is published; it bundles the othe
 2. **Scan.** Finds every `package.json` below the roots (max depth 6), skipping `node_modules`,
    build output, virtualenvs, vendored code, and every hidden folder. Symlinks are never followed.
    For each dependency it records the declared range and the installed version from `node_modules`
-   (walking up like Node does, never above the root).
+   (walking up like Node does, never above the root). A monorepo (a `workspaces` field, or a
+   `pnpm-workspace.yaml`) is folded into one project: its root plus the packages its globs select,
+   without the links between them (`scanner/workspaces.ts`).
 3. **Registry.** For each unique package, one request for its `latest` manifest (3 KB, never the
    full metadata, which can be 25 MB). Then one bulk request to the npm advisory endpoint for every
    installed version at once, the same endpoint `npm audit` uses. 16 requests in flight, 15 s

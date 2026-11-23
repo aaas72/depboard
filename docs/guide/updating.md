@@ -43,3 +43,10 @@ DepBoard reads projects of every package manager, but in this version it updates
 only. For the others, the details panel shows the command to run yourself in the project folder.
 Running `npm install` inside a pnpm or yarn workspace could damage it, so DepBoard doesn't try.
 Updates for pnpm, yarn, and bun are on the [roadmap](../roadmap.md).
+
+## Monorepos
+
+A monorepo shows as one project. Updating a dependency inside it depends on which of its packages
+declares it, and the wrong command can damage the workspace, so DepBoard doesn't offer an update
+there yet. The details panel shows which packages use which version; update it in that package
+with your package manager.
