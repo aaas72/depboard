@@ -1,0 +1,79 @@
+version: '{build}'
+
+branches:
+  only:
+    - main
+
+skip_tags: true
+
+pull_requests:
+  do_not_increment_build_number: true
+
+image:
+  - Ubuntu2204
+  - Visual Studio 2022
+  - macos-sonoma
+
+build: off
+
+test_script:
+  # Windows: Node 22 full check + package check + perf budget + Node 20.19 runtime smoke test.
+  - ps: |
+      if ($env:OS -eq 'Windows_NT') {
+        Install-Product node 22 x64
+        if ([version](node -p "process.versions.node") -lt [version]"22.12.0") {
+          Install-Product node 22.14.0 x64
+        }
+      }
+  - cmd: node --version
+  - cmd: npm install --global pnpm@10.34.6
+  - cmd: pnpm install --frozen-lockfile
+  - cmd: pnpm format:check
+  - cmd: pnpm lint
+  - cmd: pnpm typecheck
+  - cmd: pnpm test
+  - cmd: pnpm build
+  - cmd: pnpm check:package
+  - cmd: pnpm perf
+  - ps: if ($env:OS -eq 'Windows_NT') { Install-Product node 20.19.0 x64 }
+  - cmd: node --version
+  - cmd: node packages/cli/dist/index.js --version
+  - cmd: node packages/cli/dist/index.js --help
+  - cmd: node -e "const fs=require('fs'),os=require('os'),p=require('path'),cp=require('child_process');const d=fs.mkdtempSync(p.join(os.tmpdir(),'depboard-'));fs.mkdirSync(p.join(d,'a'));fs.mkdirSync(p.join(d,'b'));fs.writeFileSync(p.join(d,'a','package.json'),JSON.stringify({name:'a',dependencies:{react:'^18.0.0'}}));fs.writeFileSync(p.join(d,'b','package.json'),JSON.stringify({name:'b',dependencies:{react:'^19.0.0'}}));const out=cp.execFileSync(process.execPath,['packages/cli/dist/index.js',d,'--summary'],{encoding:'utf8'});if(!out.includes('2 projects'))process.exit(1);cp.execFileSync(process.execPath,['.github/scripts/smoke-server.mjs','packages/cli/dist/index.js',d],{stdio:'inherit'});"
+
+  # Linux and macOS: Node 22 full check + package check + perf budget + Node 20.19 runtime smoke test.
+  - sh: |
+      set -eo pipefail
+      export NVM_DIR="$HOME/.nvm"
+      mkdir -p "$NVM_DIR"
+      if [ -s "$NVM_DIR/nvm.sh" ]; then
+        . "$NVM_DIR/nvm.sh"
+      elif [ -s "/opt/homebrew/opt/nvm/nvm.sh" ]; then
+        . "/opt/homebrew/opt/nvm/nvm.sh"
+      elif [ -s "/usr/local/opt/nvm/nvm.sh" ]; then
+        . "/usr/local/opt/nvm/nvm.sh"
+      fi
+      nvm install 22
+      nvm use 22
+      node --version
+      npm install --global pnpm@10.34.6
+      pnpm install --frozen-lockfile
+      pnpm format:check
+      pnpm lint
+      pnpm typecheck
+      pnpm test
+      pnpm build
+      pnpm check:package
+      pnpm perf
+
+      nvm install 20.19
+      nvm use 20.19
+      node --version
+      node packages/cli/dist/index.js --version
+      node packages/cli/dist/index.js --help >/dev/null
+      SMOKE_DIR="$(mktemp -d)"
+      mkdir -p "$SMOKE_DIR/a" "$SMOKE_DIR/b"
+      echo '{"name":"a","dependencies":{"react":"^18.0.0"}}' > "$SMOKE_DIR/a/package.json"
+      echo '{"name":"b","dependencies":{"react":"^19.0.0"}}' > "$SMOKE_DIR/b/package.json"
+      node packages/cli/dist/index.js "$SMOKE_DIR" --summary | grep -q "2 projects"
+      node .github/scripts/smoke-server.mjs packages/cli/dist/index.js "$SMOKE_DIR"
