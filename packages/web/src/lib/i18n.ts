@@ -154,17 +154,59 @@ const en = {
 } as const;
 
 export type MessageKey = keyof typeof en;
-type Vars = Record<string, string | number>;
+export type Vars = Record<string, string | number>;
+
+const CATEGORY_RE = /^(zero|one|two|few|many|other):\s?(.*)$/s;
+const pluralRulesByLocale = new Map<string, Intl.PluralRules>();
+
+function pluralRulesFor(locale: string): Intl.PluralRules {
+  let rules = pluralRulesByLocale.get(locale);
+  if (!rules) {
+    rules = new Intl.PluralRules(locale);
+    pluralRulesByLocale.set(locale, rules);
+  }
+  return rules;
+}
+
+function selectPluralForm(template: string, n: unknown, locale: string): string {
+  if (!template.includes('|')) return template;
+  const parts = template.split('|');
+  const count = typeof n === 'number' && Number.isFinite(n) ? n : undefined;
+
+  const tagged = new Map<string, string>();
+  let allTagged = true;
+  for (const part of parts) {
+    const match = CATEGORY_RE.exec(part);
+    if (!match || match[1] === undefined || match[2] === undefined) {
+      allTagged = false;
+      break;
+    }
+    tagged.set(match[1], match[2]);
+  }
+
+  if (allTagged) {
+    const category = count !== undefined ? pluralRulesFor(locale).select(count) : 'other';
+    return tagged.get(category) ?? tagged.get('other') ?? template;
+  }
+
+  if (count === undefined) return parts[0] ?? template;
+  const category = pluralRulesFor(locale).select(count);
+  return category === 'one' ? (parts[0] ?? template) : (parts[1] ?? parts[0] ?? template);
+}
 
 /**
- * Looks up a message. `{name}` placeholders are filled from `vars`. A message with `|` has a
- * singular and a plural form, picked by `vars.n` (enough for English; Intl.PluralRules later).
+ * Formats a message template for `locale`, picking plural forms via `Intl.PluralRules` when
+ * `vars.n` is a finite number. Supports both `one|other` shorthand and explicit CLDR category tags
+ * (`zero: …|one: …|two: …|few: …|many: …|other: …`).
  */
-export function t(key: MessageKey, vars: Vars = {}): string {
-  const message: string = en[key];
-  const forms = message.split('|');
-  const form = forms.length > 1 && vars['n'] !== 1 ? (forms[1] ?? message) : (forms[0] ?? message);
+export function formatMessage(template: string, vars: Vars = {}, locale = 'en'): string {
+  const form = selectPluralForm(template, vars['n'], locale);
   return form.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in vars ? String(vars[name]) : match,
   );
+}
+
+/** Looks up an English UI message and fills `{name}` placeholders from `vars`. */
+export function t(key: MessageKey, vars: Vars = {}): string {
+  return formatMessage(en[key], vars, 'en');
 }

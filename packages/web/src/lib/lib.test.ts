@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TOKEN_HEADER } from '@depboard/shared';
 import { ApiError, createApiClient, takeToken, type FetchLike } from './api.js';
-import { t } from './i18n.js';
+import { formatMessage, t } from './i18n.js';
 import { shortenPath } from './paths.js';
 
 const TOKEN = 'a'.repeat(64);
@@ -103,11 +103,37 @@ describe('t', () => {
     expect(t('header.projects', { n: 1 })).toBe('1 project');
     expect(t('header.projects', { n: 0 })).toBe('0 projects');
     expect(t('header.projects', { n: 12 })).toBe('12 projects');
+    expect(t('activity.count', { n: 1 })).toBe('1 update');
+    expect(t('activity.count', { n: 2 })).toBe('2 updates');
+    expect(t('activity.running', { n: 0 })).toBe('0 updates running');
+    expect(t('activity.running', { n: 1 })).toBe('1 update running');
     expect(t('drift.allAgree', { n: 3 })).toBe('All 3 projects agree on every shared package. 🎉');
   });
 
-  it('leaves unknown placeholders visible instead of printing "undefined"', () => {
+  it('selects CLDR plural categories with Intl.PluralRules across locales', () => {
+    const ar =
+      'zero: لا مشاريع|one: مشروع واحد|two: مشروعان|few: {n} مشاريع|many: {n} مشروعًا|other: {n} مشروع';
+    expect(formatMessage(ar, { n: 0 }, 'ar')).toBe('لا مشاريع');
+    expect(formatMessage(ar, { n: 1 }, 'ar')).toBe('مشروع واحد');
+    expect(formatMessage(ar, { n: 2 }, 'ar')).toBe('مشروعان');
+    expect(formatMessage(ar, { n: 3 }, 'ar')).toBe('3 مشاريع');
+    expect(formatMessage(ar, { n: 11 }, 'ar')).toBe('11 مشروعًا');
+    expect(formatMessage(ar, { n: 100 }, 'ar')).toBe('100 مشروع');
+
+    // Falls back to `other` when a category is omitted or n is missing.
+    expect(formatMessage('one: {n} item|other: {n} items', { n: 5 }, 'ar')).toBe('5 items');
+    expect(formatMessage('one: single|other: fallback')).toBe('fallback');
+
+    // In French, 0 belongs to the `one` category under CLDR rules.
+    expect(formatMessage('{n} projet|{n} projets', { n: 0 }, 'fr')).toBe('0 projet');
+    expect(formatMessage('{n} projet|{n} projets', { n: 2 }, 'fr')).toBe('2 projets');
+  });
+
+  it('replaces 0 and empty-string placeholders and keeps missing ones visible', () => {
     expect(t('drawer.inProject')).toBe('in {project}');
+    expect(t('drawer.inProject', { project: '' })).toBe('in ');
+    expect(t('activity.duration', { s: 0 })).toBe('0 s');
+    expect(formatMessage('{a}|unused', { a: 'only' })).toBe('only');
   });
 });
 
