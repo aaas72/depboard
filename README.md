@@ -14,6 +14,10 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A520.19-525252" alt="Node 20.19 or newer">
 </p>
 
+<p align="center">
+  <strong>English</strong> · <a href="README.ar.md">العربية</a>
+</p>
+
 ```bash
 npx depboard ~/projects
 ```
