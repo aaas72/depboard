@@ -6,8 +6,8 @@ import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import {
   createRegistryClient,
-  DEFAULT_REGISTRY_URL,
   ensurePortFree,
+  resolveUserRegistries,
   startServer,
 } from '@depboard/server';
 import { openBrowser } from './open-browser.js';
@@ -63,6 +63,8 @@ async function serve(options: ServeOptions): Promise<{ url: string }> {
 }
 
 const version = readVersion();
+const homedir = os.homedir();
+const userRegistries = resolveUserRegistries(homedir, process.env);
 
 process.exitCode = await run(process.argv.slice(2), {
   stdout: (line) => {
@@ -72,12 +74,11 @@ process.exitCode = await run(process.argv.slice(2), {
     console.error(line);
   },
   cwd: process.cwd(),
-  homedir: os.homedir(),
+  homedir,
   version,
   confirm: process.stdin.isTTY && process.stderr.isTTY ? confirm : null,
   registry: createRegistryClient({
-    // Overridable for e2e tests against a local fake registry. Honoring .npmrc comes later.
-    registryUrl: process.env['DEPBOARD_REGISTRY_URL'] ?? DEFAULT_REGISTRY_URL,
+    ...userRegistries,
     userAgent: `depboard/${version}`,
   }),
   startServer: serve,
