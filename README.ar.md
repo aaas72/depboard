@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/depboard"><img src="https://img.shields.io/npm/v/depboard?color=CA3E47&label=npm" alt="npm version"></a>
+  <a href="https://ci.appveyor.com/project/aaas72/depboard/branch/main"><img src="https://img.shields.io/appveyor/build/aaas72/depboard/main?label=build" alt="Build status"></a>
   <a href="https://github.com/aaas72/depboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-525252" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A520.19-525252" alt="Node 20.19 or newer">
 </p>
@@ -248,7 +249,7 @@ npx depboard ~/projects --summary
 
 ## المساهمة
 
-نرحّب بالقضايا وطلبات الدمج. راجع [دليل المساهمة](https://github.com/aaas72/depboard/blob/main/.github/CONTRIBUTING.md) لمعرفة خطوات إعداد البيئة واختيار القضايا ومعايير المراجعة والقبول.
+نرحّب بالقضايا وطلبات الدمج. تصفّح قضايا [`good first issue`](https://github.com/aaas72/depboard/labels/good%20first%20issue) و[`help wanted`](https://github.com/aaas72/depboard/labels/help%20wanted)، وعلّق على القضية التي ترغب بالعمل عليها وانتظر حتى يتم إسنادها إليك قبل البدء. يوضّح [دليل المساهمة](https://github.com/aaas72/depboard/blob/main/.github/CONTRIBUTING.md) كامل المسار من عمل Fork وإعداد البيئة حتى فحوصات AppVeyor والمراجعة والدمج.
 
 ## الترخيص
 
