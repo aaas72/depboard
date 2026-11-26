@@ -4,6 +4,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DepboardError } from '@depboard/shared';
 import { createRegistryClient, type RegistryClient } from '@depboard/server';
+import type { JsonReport } from './json-report.js';
 import {
   EXIT_OK,
   EXIT_RUNTIME_ERROR,
@@ -278,6 +279,86 @@ describe('run', () => {
       await run(['--summary'], t.value);
       expect(t.served).toEqual([]);
       expect(t.opened).toEqual([]);
+    });
+
+    it('prints structured JSON to stdout with --json and starts nothing', async () => {
+      const home = await tree({
+        'projects/web/package.json': {
+          name: 'web',
+          dependencies: { react: '^18.0.0', lodash: '^4.0.0' },
+        },
+        'projects/web/node_modules/react/package.json': { version: '18.3.1' },
+        'projects/web/node_modules/lodash/package.json': { version: '4.17.15' },
+        'projects/api/package.json': { name: 'api', dependencies: { lodash: '^4.0.0' } },
+        'projects/api/node_modules/lodash/package.json': { version: '4.17.15' },
+      });
+      const registry = stubRegistry(
+        { react: '19.1.0', lodash: '4.17.21' },
+        {
+          lodash: [
+            { id: 1, title: 't', url: 'u', severity: 'high', vulnerable_versions: '<4.17.21' },
+          ],
+        },
+      );
+      const checked: number[] = [];
+      const t = io({
+        cwd: path.join(home, 'projects'),
+        homedir: home,
+        registry,
+        staticDir: '/ui',
+        checkPort: (port) => {
+          checked.push(port);
+          return Promise.resolve();
+        },
+      });
+      expect(await run(['--json', '--port', '5000'], t.value)).toBe(EXIT_OK);
+      expect(t.served).toEqual([]);
+      expect(t.opened).toEqual([]);
+      expect(checked).toEqual([]);
+
+      const parsed = JSON.parse(t.out.join('\n')) as JsonReport;
+      expect(parsed.schemaVersion).toBe(1);
+      expect(parsed.roots).toEqual([`~${path.sep}projects`]);
+      expect(parsed.summary).toEqual({
+        projects: 2,
+        packages: 2,
+        outdated: { total: 2, major: 1, minor: 0, patch: 1 },
+        vulnerable: 1,
+      });
+      expect(parsed.findings).toEqual([
+        expect.objectContaining({
+          kind: 'vulnerable-spread',
+          package: 'lodash',
+          message: 'lodash has a high vulnerability in 2 projects',
+          projects: ['api', 'web'],
+        }),
+      ]);
+      expect(parsed.projects.map((p) => p.path)).toEqual([
+        `~${path.sep}projects${path.sep}api`,
+        `~${path.sep}projects${path.sep}web`,
+      ]);
+    });
+
+    it('keeps stdout valid JSON when no projects are found or the registry is down', async () => {
+      const empty = await tree({});
+      const emptyIo = io({ cwd: empty });
+      expect(await run(['--json'], emptyIo.value)).toBe(EXIT_OK);
+      const emptyReport = JSON.parse(emptyIo.out.join('\n')) as JsonReport;
+      expect(emptyReport.summary.projects).toBe(0);
+      expect(emptyIo.err.join('\n')).toContain('No projects found');
+
+      const offlineRoot = await tree({
+        'web/package.json': { name: 'web', dependencies: { react: '^18.0.0' } },
+        'web/node_modules/react/package.json': { version: '18.3.1' },
+      });
+      const offline = createRegistryClient({
+        fetch: () => Promise.reject(new TypeError('offline')),
+      });
+      const offlineIo = io({ cwd: offlineRoot, registry: offline });
+      expect(await run(['--json'], offlineIo.value)).toBe(EXIT_OK);
+      const offlineReport = JSON.parse(offlineIo.out.join('\n')) as JsonReport;
+      expect(offlineReport.warnings.failedLookups).toEqual(['react']);
+      expect(offlineReport.warnings.advisoriesIncomplete).toBe(true);
     });
 
     it('starts nothing when no projects were found', async () => {

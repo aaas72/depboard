@@ -13,6 +13,7 @@ depboard [paths...] [options]
 | `--port <n>`      | a random free port | Port for the local server, 1–65535                          |
 | `--no-open`       |                    | Print the link instead of opening the browser               |
 | `--summary`       |                    | Print the findings and exit: no server, no browser          |
+| `--json`          |                    | Print machine-readable JSON and exit: no server, no browser |
 | `--depth <n>`     | `6`                | How many folders deep to look for projects, 1–32            |
 | `-y`, `--yes`     |                    | Skip confirmations, such as scanning your whole home folder |
 | `--debug`         |                    | Detailed logs and stack traces on stderr                    |
@@ -46,10 +47,13 @@ npx depboard ~/projects --port 4400   # a fixed port
 
 ## In scripts and CI
 
-`--summary` scans, prints the findings, and exits without starting a server:
+`--summary` scans, prints the findings, and exits without starting a server. `--json` prints the
+same scan as structured JSON (`schemaVersion: 1`) on **stdout**, keeping any warnings on **stderr**
+so pipes like `jq` always receive valid JSON:
 
 ```bash
 npx depboard ~/projects --summary
+npx depboard ~/projects --json | jq .summary
 ```
 
 Without a terminal (in CI or a pipe), DepBoard never waits for an answer: anything that needs
