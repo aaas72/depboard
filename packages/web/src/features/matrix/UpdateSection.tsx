@@ -61,7 +61,7 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
   const [starting, setStarting] = useState(false);
   const latest = row.latest ?? '';
   const workspace = project.workspacePackages !== undefined;
-  const supported = project.manager === 'npm' && !workspace;
+  const supported = (project.manager === 'npm' || project.manager === 'pnpm') && !workspace;
 
   // Ask the server for the exact command it would run. Nothing runs here.
   useEffect(() => {

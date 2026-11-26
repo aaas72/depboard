@@ -7,6 +7,7 @@ import {
   type UpdateType,
 } from '@depboard/shared';
 import { buildInstallCommand, type InstallCommand } from '../adapters/npm.js';
+import { buildPnpmInstallCommand } from '../adapters/pnpm.js';
 import { isSafePackageName } from '../lib/package-name.js';
 import { isInside } from '../lib/paths.js';
 import { classifyUpdate } from '../versions/classify.js';
@@ -69,7 +70,7 @@ export function planUpdate(
       'Updating packages inside a monorepo from DepBoard comes in a later version.',
     );
   }
-  if (project.manager !== 'npm') {
+  if (project.manager !== 'npm' && project.manager !== 'pnpm') {
     throw new DepboardError(
       'MANAGER_NOT_SUPPORTED',
       `Updating ${project.manager} projects from DepBoard comes in a later version.`,
@@ -84,10 +85,11 @@ export function planUpdate(
     });
   }
 
+  const buildCommand = project.manager === 'pnpm' ? buildPnpmInstallCommand : buildInstallCommand;
   return {
     project,
     version,
     updateType,
-    command: buildInstallCommand({ name: row.name, version, depType: cell.depType }),
+    command: buildCommand({ name: row.name, version, depType: cell.depType }),
   };
 }
