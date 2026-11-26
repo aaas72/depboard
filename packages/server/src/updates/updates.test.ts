@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { JobEvent, Matrix, MatrixCell, Project, UpdateRequest } from '@depboard/shared';
+import { buildBunInstallCommand } from '../adapters/bun.js';
 import { buildInstallCommand } from '../adapters/npm.js';
 import { buildPnpmInstallCommand } from '../adapters/pnpm.js';
 import { createJobManager } from './jobs.js';
@@ -36,6 +37,7 @@ function matrix(): Matrix {
       project('a'),
       project('b', 'pnpm'),
       project('y', 'yarn'),
+      project('u', 'bun'),
       { ...project('c'), path: path.resolve('/elsewhere/c') },
       { ...project('m'), workspacePackages: 3 },
     ],
@@ -49,6 +51,7 @@ function matrix(): Matrix {
           a: cell('a', '18.3.1'),
           b: cell('b', '18.3.1'),
           y: cell('y', '18.3.1'),
+          u: cell('u', '18.3.1'),
           c: cell('c', '18.3.1'),
           m: cell('m', '18.3.1'),
         },
@@ -154,6 +157,50 @@ describe('buildPnpmInstallCommand', () => {
   );
 });
 
+describe('buildBunInstallCommand', () => {
+  it('builds a bun add argument array with the exact version', () => {
+    expect(
+      buildBunInstallCommand({ name: 'react', version: '19.1.0', depType: 'dependencies' }),
+    ).toEqual({
+      file: 'bun',
+      args: ['add', 'react@19.1.0'],
+      display: 'bun add react@19.1.0',
+    });
+  });
+
+  it('keeps a devDependency in devDependencies with --dev', () => {
+    expect(
+      buildBunInstallCommand({
+        name: '@types/node',
+        version: '24.0.0',
+        depType: 'devDependencies',
+      }),
+    ).toEqual({
+      file: 'bun',
+      args: ['add', '@types/node@24.0.0', '--dev'],
+      display: 'bun add @types/node@24.0.0 --dev',
+    });
+  });
+
+  it.each(['react; rm -rf ~', '--registry=evil', '-D', '../../x', 'a b', ''])(
+    'refuses the name %j',
+    (name) => {
+      expect(() =>
+        buildBunInstallCommand({ name, version: '1.0.0', depType: 'dependencies' }),
+      ).toThrow(expect.objectContaining({ code: 'INVALID_PACKAGE_NAME' }));
+    },
+  );
+
+  it.each(['^1.0.0', 'latest', '1.0', 'github:x/y', 'file:../x', '1.0.0 --force', ' 1.0.0'])(
+    'refuses the version %j',
+    (version) => {
+      expect(() =>
+        buildBunInstallCommand({ name: 'react', version, depType: 'dependencies' }),
+      ).toThrow(expect.objectContaining({ code: 'INVALID_VERSION' }));
+    },
+  );
+});
+
 describe('planUpdate', () => {
   const plan = (request: Partial<Parameters<typeof planUpdate>[2]>) =>
     planUpdate(matrix(), [ROOT], {
@@ -190,6 +237,16 @@ describe('planUpdate', () => {
       file: 'pnpm',
       args: ['add', 'react@19.1.0'],
       display: 'pnpm add react@19.1.0',
+    });
+  });
+
+  it('plans a bun add command for standalone bun projects', () => {
+    const result = plan({ projectIds: ['u'], confirmMajor: true });
+    expect(result.project.path).toBe(path.join(ROOT, 'u'));
+    expect(result.command).toEqual({
+      file: 'bun',
+      args: ['add', 'react@19.1.0'],
+      display: 'bun add react@19.1.0',
     });
   });
 
