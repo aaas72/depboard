@@ -30,19 +30,20 @@ update**. The dialog's focus starts on **Cancel**.
 
 ## What DepBoard will and won't do
 
-- It runs `npm` directly, never through a shell, so a package name can never become a command.
+- It runs `npm` or `pnpm` directly, never through a shell, so a package name can never become a
+  command.
 - It updates only a package the project already declares, to an exact version.
 - It runs one update per project at a time.
 - It never touches other projects, and never runs anything you didn't confirm.
 - If the command fails, the Activity panel shows its exit code and output, and the matrix stays as it
   was.
 
-## pnpm, yarn, and bun projects
+## yarn and bun projects
 
-DepBoard reads projects of every package manager, but in this version it updates **npm** projects
-only. For the others, the details panel shows the command to run yourself in the project folder.
-Running `npm install` inside a pnpm or yarn workspace could damage it, so DepBoard doesn't try.
-Updates for pnpm, yarn, and bun are on the [roadmap](../roadmap.md).
+DepBoard reads projects of every package manager, and in this version it updates standalone **npm**
+and **pnpm** projects. For **yarn** and **bun**, the details panel shows the command to run yourself
+in the project folder. Running the wrong package manager inside a project could damage its lock file,
+so DepBoard never guesses. Updates for yarn and bun are on the [roadmap](../roadmap.md).
 
 ## Monorepos
 
