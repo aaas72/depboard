@@ -10,8 +10,13 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/depboard"><img src="https://img.shields.io/npm/v/depboard?color=CA3E47&label=npm" alt="npm version"></a>
+  <a href="https://ci.appveyor.com/project/aaas72/depboard/branch/main"><img src="https://img.shields.io/appveyor/build/aaas72/depboard/main?label=build" alt="Build status"></a>
   <a href="https://github.com/aaas72/depboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-525252" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/node-%E2%89%A520.19-525252" alt="Node 20.19 or newer">
+</p>
+
+<p align="center">
+  <strong>English</strong> · <a href="README.ar.md">العربية</a>
 </p>
 
 ```bash
@@ -255,9 +260,12 @@ displays it. The [architecture](https://github.com/aaas72/depboard/blob/main/doc
 
 ## Contributing
 
-Issues and pull requests are welcome. The [contributing guide](https://github.com/aaas72/depboard/blob/main/.github/CONTRIBUTING.md) takes you from clone
-to a passing test run and explains what a pull request needs to merge. Adding updates for pnpm, yarn,
-or bun is a great first larger contribution.
+Issues and pull requests are welcome. Browse
+[`good first issue`](https://github.com/aaas72/depboard/labels/good%20first%20issue) and
+[`help wanted`](https://github.com/aaas72/depboard/labels/help%20wanted), comment on the issue you'd
+like to take, and wait for it to be assigned before starting. The
+[contributing guide](https://github.com/aaas72/depboard/blob/main/.github/CONTRIBUTING.md) walks you
+from fork and setup to AppVeyor CI checks, review, and squash merge.
 
 ## License
 
