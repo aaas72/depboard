@@ -18,13 +18,7 @@ build: off
 
 test_script:
   # Windows: Node 22 full check + package check + perf budget + Node 20.19 runtime smoke test.
-  - ps: |
-      if ($env:OS -eq 'Windows_NT') {
-        Install-Product node 22 x64
-        if ([version](node -p "process.versions.node") -lt [version]"22.12.0") {
-          Install-Product node 22.14.0 x64
-        }
-      }
+  - ps: if ($env:OS -eq 'Windows_NT') { Install-Product node 22 x64 }
   - cmd: node --version
   - cmd: npm install --global pnpm@10.34.6
   - cmd: pnpm install --frozen-lockfile
@@ -35,7 +29,7 @@ test_script:
   - cmd: pnpm build
   - cmd: pnpm check:package
   - cmd: pnpm perf
-  - ps: if ($env:OS -eq 'Windows_NT') { Install-Product node 20.19.0 x64 }
+  - ps: if ($env:OS -eq 'Windows_NT') { Install-Product node 20 x64 }
   - cmd: node --version
   - cmd: node packages/cli/dist/index.js --version
   - cmd: node packages/cli/dist/index.js --help
