@@ -33,7 +33,7 @@ export interface PackageInfo {
   latest: string | null;
   /** The deprecation message of the latest version, when the author deprecated it. */
   deprecated: string | null;
-  changelogUrl?: string | null;
+  changelogUrl?: string;
 }
 
 export type PackageLookup =
@@ -168,13 +168,14 @@ export function createRegistryClient(options: RegistryClientOptions = {}): Regis
       });
       const parsed = latestManifestSchema.safeParse(json);
       if (!parsed.success) return { status: 'failed', reason: 'unexpected registry response' };
+      const changelogUrl = extractChangelogUrl(parsed.data);
       return {
         status: 'ok',
         info: {
           name,
           latest: semver.valid(parsed.data.version) ? parsed.data.version : null,
           deprecated: parsed.data.deprecated ?? null,
-          changelogUrl: extractChangelogUrl(parsed.data),
+          ...(changelogUrl !== null ? { changelogUrl } : {}),
         },
       };
     } catch (error) {
