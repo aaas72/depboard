@@ -177,7 +177,7 @@ export function pickPluralForm(message: string, n: number, locale = 'en'): strin
     const colon = form.indexOf(':');
     const prefix = colon > 0 ? form.slice(0, colon).trim() : '';
     if (PLURAL_CATEGORIES.includes(prefix)) {
-      keyed.push({ category: prefix, text: form.slice(colon + 1) });
+      keyed.push({ category: prefix, text: form.slice(colon + 1).trim() });
     } else {
       allKeyed = false;
     }
