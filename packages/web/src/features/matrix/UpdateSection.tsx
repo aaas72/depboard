@@ -145,6 +145,19 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
             >
               {t('update.whatsNew')} ↗
             </a>
+            {row.changelogUrl !== undefined && (
+              <>
+                {' · '}
+                <a
+                  href={row.changelogUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="link"
+                >
+                  {t('update.releaseNotes')} ↗
+                </a>
+              </>
+            )}
           </p>
         </ConfirmDialog>
       )}
