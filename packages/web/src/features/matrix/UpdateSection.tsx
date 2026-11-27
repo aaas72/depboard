@@ -2,17 +2,9 @@ import { useEffect, useState } from 'react';
 import type { MatrixCell, MatrixRow, Project, UpdatePreview } from '@depboard/shared';
 import { Button } from '../../components/ui/Button.js';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog.js';
-import { CopyCommand } from '../../components/ui/CopyCommand.js';
 import type { ApiClient } from '../../lib/api.js';
 import { t } from '../../lib/i18n.js';
 import type { Activity } from '../activity/useActivity.js';
-
-/** What users of other package managers can run themselves until DepBoard updates them (Phase 2). */
-function manualCommand(manager: Project['manager'], name: string, version: string, dev: boolean) {
-  const spec = `${name}@${version}`;
-  const add = { npm: 'npm install', pnpm: 'pnpm add', yarn: 'yarn add', bun: 'bun add' }[manager];
-  return `${add} ${spec}${dev ? ' -D' : ''}`;
-}
 
 /**
  * A shell command that wraps only between arguments: a flag like `--no-fund` never splits at
@@ -61,16 +53,9 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
   const [starting, setStarting] = useState(false);
   const latest = row.latest ?? '';
   const workspace = project.workspacePackages !== undefined;
-  const supported =
-    (project.manager === 'npm' ||
-      project.manager === 'pnpm' ||
-      project.manager === 'yarn' ||
-      project.manager === 'bun') &&
-    !workspace;
-
   // Ask the server for the exact command it would run. Nothing runs here.
   useEffect(() => {
-    if (!supported) return;
+    if (workspace) return;
     let current = true;
     api.previewUpdate({ package: row.name, version: latest, projectIds: [project.id] }).then(
       (result) => {
@@ -83,26 +68,10 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
     return () => {
       current = false;
     };
-  }, [api, row.name, latest, project.id, supported, cell.version]);
+  }, [api, row.name, latest, project.id, workspace, cell.version]);
 
   if (workspace) {
     return <p className="text-sm text-text-muted">{t('update.workspace')}</p>;
-  }
-
-  if (!supported) {
-    return (
-      <div className="space-y-2 text-sm">
-        <p className="text-text-muted">{t('update.unsupported', { manager: project.manager })}</p>
-        <CopyCommand
-          command={manualCommand(
-            project.manager,
-            row.name,
-            latest,
-            cell.depType === 'devDependencies',
-          )}
-        />
-      </div>
-    );
   }
 
   const busy = activity.isBusy(project.id);
