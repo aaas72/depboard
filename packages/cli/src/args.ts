@@ -7,6 +7,7 @@ export interface CliOptions {
   open: boolean;
   yes: boolean;
   summary: boolean;
+  json: boolean;
   depth: number;
   debug: boolean;
   help: boolean;
@@ -24,6 +25,7 @@ Options:
   --port <n>      Port to use (default: random free port)
   --no-open       Don't open the browser
   --summary       Print the summary and exit (no server, no browser): for CI and scripts
+  --json          Print machine-readable JSON and exit (no server, no browser)
   -y, --yes       Skip confirmations (non-interactive use)
   --depth <n>     Max folder depth (default: ${DEFAULT_DEPTH})
   --debug         Verbose logs to stderr
@@ -63,6 +65,7 @@ export function parseCliArgs(argv: readonly string[]): CliOptions {
         open: { type: 'boolean', default: true },
         yes: { type: 'boolean', short: 'y', default: false },
         summary: { type: 'boolean', default: false },
+        json: { type: 'boolean', default: false },
         depth: { type: 'string' },
         debug: { type: 'boolean', default: false },
         version: { type: 'boolean', short: 'v', default: false },
@@ -81,6 +84,7 @@ export function parseCliArgs(argv: readonly string[]): CliOptions {
     open: values.open,
     yes: values.yes,
     summary: values.summary,
+    json: values.json,
     depth: parsePositiveInt('depth', values.depth, 32) ?? DEFAULT_DEPTH,
     debug: values.debug,
     help: values.help,
