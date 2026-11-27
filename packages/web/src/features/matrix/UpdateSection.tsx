@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { MatrixCell, MatrixRow, Project, UpdatePreview } from '@depboard/shared';
 import { Button } from '../../components/ui/Button.js';
+import { CopyButton } from '../../components/ui/CopyCommand.js';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog.js';
 import type { ApiClient } from '../../lib/api.js';
 import { t } from '../../lib/i18n.js';
@@ -98,6 +99,10 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
         <div className="text-sm">
           <p className="mb-1 text-text-muted">{t('update.willRun')}</p>
           <CommandText command={command} />
+          <CopyButton
+            command={command}
+            className="mt-1 rounded-md border border-border px-2 py-1 text-xs text-text-muted hover:bg-surface-raised hover:text-text focus-visible:outline-2 focus-visible:outline-focus"
+          />
         </div>
       )}
       <Button
