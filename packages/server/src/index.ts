@@ -30,6 +30,12 @@ export {
   type RegistryClientOptions,
   type FetchLike,
 } from './registry/registry-client.js';
+export {
+  normalizeRegistryUrl,
+  parseNpmrcRegistries,
+  resolveUserRegistries,
+  type UserRegistries,
+} from './registry/npmrc.js';
 export { analyze, type AnalyzeResult } from './analyze.js';
 export { buildMatrix } from './matrix/build-matrix.js';
 export { classifyUpdate } from './versions/classify.js';

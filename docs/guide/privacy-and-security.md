@@ -5,14 +5,17 @@ doesn't do.
 
 ## What leaves your machine
 
-Two kinds of requests, both to the public npm registry (`registry.npmjs.org`):
+Two kinds of requests, to the public npm registry (`registry.npmjs.org`) or the HTTPS registry URLs
+configured in your `~/.npmrc` (including `@scope:registry` mappings):
 
 1. **The latest version of each package,** by name.
 2. **Known vulnerabilities for the installed versions,** as package names and version numbers, in one
-   request. This is the same database `npm audit` uses.
+   request per registry. This is the same database `npm audit` uses.
 
 That is all. **Never** your file paths, project names, folder layout, or file contents. No
-telemetry, no account, no analytics.
+telemetry, no account, no analytics. Scoped packages mapped in `~/.npmrc` are sent only to their
+configured registry, never to `registry.npmjs.org`, and `.npmrc` files inside scanned projects (as
+well as auth tokens) are ignored so untrusted repositories cannot redirect requests.
 
 Dependencies that point somewhere private (`workspace:`, `file:`, `link:`, git URLs, `npm:` aliases,
 `catalog:`) are never looked up on the public registry, so internal package names don't leak.
