@@ -206,7 +206,34 @@ describe('getAdvisories', () => {
 });
 
 describe('createRegistryClient', () => {
-  it('rejects a registry URL that is not http(s)', () => {
+  it('rejects a registry URL that is not https (or loopback http)', () => {
     expect(() => createRegistryClient({ registryUrl: 'file:///etc' })).toThrow();
+    expect(() => createRegistryClient({ registryUrl: 'http://remote.example.com' })).toThrow();
+  });
+
+  it('routes scoped packages and advisories to their configured registry without leaking to default', async () => {
+    const calls: { url: string; body: unknown }[] = [];
+    const client = createRegistryClient({
+      scopedRegistries: { '@corp': 'https://corp.example.com/npm/' },
+      fetch: (url, init) => {
+        const body: unknown = typeof init?.body === 'string' ? JSON.parse(init.body) : null;
+        calls.push({ url, body });
+        if (init?.method === 'POST') return Promise.resolve(Response.json({}));
+        return Promise.resolve(Response.json({ version: '2.0.0' }));
+      },
+    });
+
+    await client.getPackage('@corp/ui');
+    await client.getPackage('react');
+    await client.getAdvisories(versions({ '@corp/ui': ['1.0.0'], react: ['19.1.0'] }));
+
+    expect(calls.map((c) => c.url)).toEqual([
+      'https://corp.example.com/npm/@corp%2Fui/latest',
+      'https://registry.npmjs.org/react/latest',
+      'https://corp.example.com/npm/-/npm/v1/security/advisories/bulk',
+      'https://registry.npmjs.org/-/npm/v1/security/advisories/bulk',
+    ]);
+    expect(calls[2]?.body).toEqual({ '@corp/ui': ['1.0.0'] });
+    expect(calls[3]?.body).toEqual({ react: ['19.1.0'] });
   });
 });

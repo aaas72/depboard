@@ -62,7 +62,10 @@ export function UpdateSection({ row, cell, project, api, activity }: UpdateSecti
   const latest = row.latest ?? '';
   const workspace = project.workspacePackages !== undefined;
   const supported =
-    (project.manager === 'npm' || project.manager === 'pnpm' || project.manager === 'bun') &&
+    (project.manager === 'npm' ||
+      project.manager === 'pnpm' ||
+      project.manager === 'yarn' ||
+      project.manager === 'bun') &&
     !workspace;
 
   // Ask the server for the exact command it would run. Nothing runs here.

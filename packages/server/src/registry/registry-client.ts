@@ -3,6 +3,7 @@ import * as z from 'zod/mini';
 import { SEVERITIES, type Advisory } from '@depboard/shared';
 import { createLimiter } from '../lib/concurrency.js';
 import { isSafePackageName } from '../lib/package-name.js';
+import { normalizeRegistryUrl } from './npmrc.js';
 
 export const DEFAULT_REGISTRY_URL = 'https://registry.npmjs.org';
 export const DEFAULT_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -16,6 +17,8 @@ export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
 export interface RegistryClientOptions {
   fetch?: FetchLike;
   registryUrl?: string;
+  /** Map of `@scope` to registry base URL, so scoped packages never leak to the default registry. */
+  scopedRegistries?: Readonly<Record<string, string>>;
   cacheTtlMs?: number;
   concurrency?: number;
   timeoutMs?: number;
@@ -86,14 +89,34 @@ function latestUrl(base: string, name: string): string {
 
 export function createRegistryClient(options: RegistryClientOptions = {}): RegistryClient {
   const doFetch = options.fetch ?? ((url, init) => fetch(url, init));
-  const base = (options.registryUrl ?? DEFAULT_REGISTRY_URL).replace(/\/+$/, '');
+  const rawBase = options.registryUrl ?? DEFAULT_REGISTRY_URL;
+  const normalizedBase = normalizeRegistryUrl(rawBase);
+  if (normalizedBase === null) throw new Error(`Invalid registry URL: ${rawBase}`);
+  const base: string = normalizedBase;
+
+  const scoped = new Map<string, string>();
+  for (const [scope, url] of Object.entries(options.scopedRegistries ?? {})) {
+    const normalized = normalizeRegistryUrl(url);
+    if (normalized === null) throw new Error(`Invalid scoped registry URL for ${scope}: ${url}`);
+    scoped.set(scope, normalized);
+  }
+
+  function baseFor(name: string): string {
+    if (name.startsWith('@')) {
+      const slash = name.indexOf('/');
+      if (slash > 1) {
+        const scopeBase = scoped.get(name.slice(0, slash));
+        if (scopeBase !== undefined) return scopeBase;
+      }
+    }
+    return base;
+  }
+
   const ttl = options.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const now = options.now ?? Date.now;
   const limit = createLimiter(options.concurrency ?? DEFAULT_CONCURRENCY);
   const headers = { 'user-agent': options.userAgent ?? 'depboard' };
-
-  if (!/^https?:\/\//.test(base)) throw new Error(`Invalid registry URL: ${base}`);
 
   /** One retry with a short pause, for network errors, timeouts, 429, and 5xx. */
   async function request(
@@ -125,7 +148,7 @@ export function createRegistryClient(options: RegistryClientOptions = {}): Regis
 
   async function fetchPackage(name: string): Promise<PackageLookup> {
     try {
-      const json = await request(latestUrl(base, name), {
+      const json = await request(latestUrl(baseFor(name), name), {
         headers: { accept: 'application/json' },
       });
       const parsed = latestManifestSchema.safeParse(json);
@@ -177,18 +200,27 @@ export function createRegistryClient(options: RegistryClientOptions = {}): Regis
       }
     }
 
-    const names = [...pending.keys()];
-    const chunks: string[][] = [];
-    for (let i = 0; i < names.length; i += ADVISORY_CHUNK_SIZE) {
-      chunks.push(names.slice(i, i + ADVISORY_CHUNK_SIZE));
+    const byRegistry = new Map<string, string[]>();
+    for (const name of pending.keys()) {
+      const reg = baseFor(name);
+      const list = byRegistry.get(reg);
+      if (list) list.push(name);
+      else byRegistry.set(reg, [name]);
+    }
+
+    const batches: { reg: string; chunk: string[] }[] = [];
+    for (const [reg, names] of byRegistry) {
+      for (let i = 0; i < names.length; i += ADVISORY_CHUNK_SIZE) {
+        batches.push({ reg, chunk: names.slice(i, i + ADVISORY_CHUNK_SIZE) });
+      }
     }
 
     await Promise.all(
-      chunks.map(async (chunk) => {
+      batches.map(async ({ reg, chunk }) => {
         const body = Object.fromEntries(chunk.map((name) => [name, pending.get(name) ?? []]));
         let json: unknown;
         try {
-          json = await request(`${base}/-/npm/v1/security/advisories/bulk`, {
+          json = await request(`${reg}/-/npm/v1/security/advisories/bulk`, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(body),

@@ -9,6 +9,7 @@ import {
   type RegistryClient,
 } from '@depboard/server';
 import { HELP_TEXT, parseCliArgs } from './args.js';
+import { buildJsonReport, countMatrixSummary } from './json-report.js';
 
 export const EXIT_OK = 0;
 export const EXIT_RUNTIME_ERROR = 1;
@@ -77,25 +78,12 @@ function reportMatrix(matrix: Matrix, io: CliIO): void {
     if (more > 0) io.stdout(`  + ${plural(more, 'more finding')}`);
   }
 
-  const outdated = { major: 0, minor: 0, patch: 0 };
-  let vulnerable = 0;
-  let estimated = 0;
-  for (const row of matrix.rows) {
-    const cells = Object.values(row.cells);
-    const types = new Set(cells.map((c) => c.updateType));
-    if (types.has('major')) outdated.major++;
-    else if (types.has('minor')) outdated.minor++;
-    else if (types.has('patch')) outdated.patch++;
-    if (cells.some((c) => c.vulnerability !== null && c.vulnerability !== 'unknown')) vulnerable++;
-    estimated += cells.filter((c) => c.versionSource === 'declared' && row.lookup === 'ok').length;
-  }
-
-  const totalOutdated = outdated.major + outdated.minor + outdated.patch;
+  const { outdated, vulnerable, estimated } = countMatrixSummary(matrix);
   io.stdout('');
   io.stdout(
-    totalOutdated === 0
+    outdated.total === 0
       ? '  Every package is up to date'
-      : `  ${plural(totalOutdated, 'package')} outdated: ${outdated.major} major · ${outdated.minor} minor · ${outdated.patch} patch`,
+      : `  ${plural(outdated.total, 'package')} outdated: ${outdated.major} major · ${outdated.minor} minor · ${outdated.patch} patch`,
   );
   io.stdout(`  ${plural(vulnerable, 'package')} with known vulnerabilities`);
 
@@ -156,24 +144,34 @@ export async function run(argv: readonly string[], io: CliIO): Promise<number> {
     }
 
     // A taken --port would only fail after the scan: say so before spending seconds on it.
-    if (!options.summary && options.port !== undefined) await io.checkPort(options.port);
+    if (!options.summary && !options.json && options.port !== undefined) {
+      await io.checkPort(options.port);
+    }
 
     const result = await analyze(roots, io.registry, { depth: options.depth });
     const { matrix } = result;
     const shownRoots = roots.map((r) => displayPath(r, io.homedir)).join(', ');
 
-    if (matrix.projects.length === 0) {
-      await reportEmpty(roots, io);
-      return EXIT_OK;
-    }
+    if (options.json) {
+      io.stdout(JSON.stringify(buildJsonReport(result, roots, io.homedir), null, 2));
+      if (matrix.projects.length === 0) {
+        await reportEmpty(roots, io);
+        return EXIT_OK;
+      }
+    } else {
+      if (matrix.projects.length === 0) {
+        await reportEmpty(roots, io);
+        return EXIT_OK;
+      }
 
-    io.stdout(
-      `Scanned ${shownRoots} · ${plural(matrix.projects.length, 'project')} · ${plural(
-        matrix.rows.length,
-        'package',
-      )}`,
-    );
-    reportMatrix(matrix, io);
+      io.stdout(
+        `Scanned ${shownRoots} · ${plural(matrix.projects.length, 'project')} · ${plural(
+          matrix.rows.length,
+          'package',
+        )}`,
+      );
+      reportMatrix(matrix, io);
+    }
 
     for (const issue of result.issues) {
       io.stderr(`⚠ Skipped ${displayPath(issue.path, io.homedir)}: ${issue.reason}`);
@@ -188,10 +186,10 @@ export async function run(argv: readonly string[], io: CliIO): Promise<number> {
         "⚠ Couldn't check every version for vulnerabilities. Unchecked ones are shown as unknown, not safe.",
       );
     }
-    if (matrix.projects.length === 1) {
+    if (!options.json && matrix.projects.length === 1) {
       io.stderr('Found 1 project. To compare projects, run: npx depboard ..');
     }
-    if (options.summary) return EXIT_OK;
+    if (options.summary || options.json) return EXIT_OK;
 
     const server = await io.startServer({
       roots,

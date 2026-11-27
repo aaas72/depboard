@@ -4,6 +4,7 @@ import type { JobEvent, Matrix, MatrixCell, Project, UpdateRequest } from '@depb
 import { buildBunInstallCommand } from '../adapters/bun.js';
 import { buildInstallCommand } from '../adapters/npm.js';
 import { buildPnpmInstallCommand } from '../adapters/pnpm.js';
+import { buildYarnInstallCommand } from '../adapters/yarn.js';
 import { createJobManager } from './jobs.js';
 import { planUpdate } from './plan-update.js';
 import type { Runner } from './runner.js';
@@ -157,6 +158,50 @@ describe('buildPnpmInstallCommand', () => {
   );
 });
 
+describe('buildYarnInstallCommand', () => {
+  it('builds a yarn add argument array with the exact version', () => {
+    expect(
+      buildYarnInstallCommand({ name: 'react', version: '19.1.0', depType: 'dependencies' }),
+    ).toEqual({
+      file: 'yarn',
+      args: ['add', 'react@19.1.0'],
+      display: 'yarn add react@19.1.0',
+    });
+  });
+
+  it('keeps a devDependency in devDependencies with --dev', () => {
+    expect(
+      buildYarnInstallCommand({
+        name: '@types/node',
+        version: '24.0.0',
+        depType: 'devDependencies',
+      }),
+    ).toEqual({
+      file: 'yarn',
+      args: ['add', '@types/node@24.0.0', '--dev'],
+      display: 'yarn add @types/node@24.0.0 --dev',
+    });
+  });
+
+  it.each(['react; rm -rf ~', '--registry=evil', '-D', '../../x', 'a b', ''])(
+    'refuses the name %j',
+    (name) => {
+      expect(() =>
+        buildYarnInstallCommand({ name, version: '1.0.0', depType: 'dependencies' }),
+      ).toThrow(expect.objectContaining({ code: 'INVALID_PACKAGE_NAME' }));
+    },
+  );
+
+  it.each(['^1.0.0', 'latest', '1.0', 'github:x/y', 'file:../x', '1.0.0 --force', ' 1.0.0'])(
+    'refuses the version %j',
+    (version) => {
+      expect(() =>
+        buildYarnInstallCommand({ name: 'react', version, depType: 'dependencies' }),
+      ).toThrow(expect.objectContaining({ code: 'INVALID_VERSION' }));
+    },
+  );
+});
+
 describe('buildBunInstallCommand', () => {
   it('builds a bun add argument array with the exact version', () => {
     expect(
@@ -240,6 +285,16 @@ describe('planUpdate', () => {
     });
   });
 
+  it('plans a yarn add command for standalone yarn projects', () => {
+    const result = plan({ projectIds: ['y'], confirmMajor: true });
+    expect(result.project.path).toBe(path.join(ROOT, 'y'));
+    expect(result.command).toEqual({
+      file: 'yarn',
+      args: ['add', 'react@19.1.0'],
+      display: 'yarn add react@19.1.0',
+    });
+  });
+
   it('plans a bun add command for standalone bun projects', () => {
     const result = plan({ projectIds: ['u'], confirmMajor: true });
     expect(result.project.path).toBe(path.join(ROOT, 'u'));
@@ -258,7 +313,6 @@ describe('planUpdate', () => {
     [{ package: 'lodash' }, 'NOT_FOUND'],
     [{ version: '^19.0.0' }, 'INVALID_VERSION'],
     [{ package: 'local-lib', version: '1.0.1' }, 'NOT_UPDATABLE'],
-    [{ projectIds: ['y'], confirmMajor: true }, 'MANAGER_NOT_SUPPORTED'],
     [{ projectIds: ['c'], confirmMajor: true }, 'FORBIDDEN_PATH'],
     [{ projectIds: ['m'], confirmMajor: true }, 'WORKSPACE_NOT_SUPPORTED'],
   ];

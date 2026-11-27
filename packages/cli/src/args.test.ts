@@ -10,6 +10,7 @@ describe('parseCliArgs', () => {
       open: true,
       yes: false,
       summary: false,
+      json: false,
       depth: DEFAULT_DEPTH,
       debug: false,
       help: false,
@@ -22,8 +23,9 @@ describe('parseCliArgs', () => {
     expect(options.paths).toEqual(['~/work', 'C:\\My Projects', '/home/me/مشاريع']);
   });
 
-  it('parses --summary', () => {
+  it('parses --summary and --json', () => {
     expect(parseCliArgs(['--summary']).summary).toBe(true);
+    expect(parseCliArgs(['--json']).json).toBe(true);
   });
 
   it('parses flags', () => {
