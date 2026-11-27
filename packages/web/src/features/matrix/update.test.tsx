@@ -96,6 +96,20 @@ describe('updating one package in one project', () => {
     expect(getMatrix.mock.calls.length).toBe(readsBefore + 1);
   });
 
+  it('copies the exact previewed command with the Copy button', async () => {
+    const { api, startUpdate } = controllableApi();
+    const { user, drawer } = await openCell(api, /^zod in api/);
+    const shown = 'npm install zod@3.23.0 --no-audit --no-fund';
+    expect(await within(drawer).findByText(command(shown))).toBeTruthy();
+
+    await user.click(within(drawer).getByRole('button', { name: 'Copy' }));
+
+    expect(await navigator.clipboard.readText()).toBe(shown);
+    expect(within(drawer).getByRole('button', { name: 'Copied' })).toBeTruthy();
+    // Copying never runs the update.
+    expect(startUpdate).not.toHaveBeenCalled();
+  });
+
   it('asks before a major update, with Cancel focused, and Esc only closes the question', async () => {
     const { api, startUpdate } = controllableApi(sampleMatrix(), {
       previewUpdate: (request) =>

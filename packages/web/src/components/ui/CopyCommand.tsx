@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { t } from '../../lib/i18n.js';
 
-/** A command shown in monospace with a copy button. */
-export function CopyCommand({ command }: { command: string }) {
+/** A button that copies `command` to the clipboard and says so for a moment. */
+export function CopyButton({ command, className }: { command: string; className?: string }) {
   const [copied, setCopied] = useState(false);
 
   const copy = () => {
@@ -20,15 +20,25 @@ export function CopyCommand({ command }: { command: string }) {
   };
 
   return (
+    <button
+      type="button"
+      onClick={copy}
+      className={
+        className ??
+        'rounded-e-md px-2 py-1 font-sans text-xs text-text-muted hover:bg-surface-raised hover:text-text focus-visible:outline-2 focus-visible:outline-focus'
+      }
+    >
+      <span aria-live="polite">{copied ? t('action.copied') : t('action.copy')}</span>
+    </button>
+  );
+}
+
+/** A command shown in monospace with a copy button. */
+export function CopyCommand({ command }: { command: string }) {
+  return (
     <span className="inline-flex max-w-full items-center gap-1 rounded-md border border-border bg-surface-sunken ps-2 font-mono text-sm">
       <code className="truncate select-all">{command}</code>
-      <button
-        type="button"
-        onClick={copy}
-        className="rounded-e-md px-2 py-1 font-sans text-xs text-text-muted hover:bg-surface-raised hover:text-text focus-visible:outline-2 focus-visible:outline-focus"
-      >
-        <span aria-live="polite">{copied ? t('action.copied') : t('action.copy')}</span>
-      </button>
+      <CopyButton command={command} />
     </span>
   );
 }
