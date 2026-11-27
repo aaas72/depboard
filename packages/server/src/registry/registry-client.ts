@@ -4,6 +4,7 @@ import { SEVERITIES, type Advisory } from '@depboard/shared';
 import { createLimiter } from '../lib/concurrency.js';
 import { isSafePackageName } from '../lib/package-name.js';
 import { normalizeRegistryUrl } from './npmrc.js';
+import { extractChangelogUrl } from './repository-url.js';
 
 export const DEFAULT_REGISTRY_URL = 'https://registry.npmjs.org';
 export const DEFAULT_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -32,6 +33,7 @@ export interface PackageInfo {
   latest: string | null;
   /** The deprecation message of the latest version, when the author deprecated it. */
   deprecated: string | null;
+  changelogUrl?: string | null;
 }
 
 export type PackageLookup =
@@ -56,6 +58,19 @@ export const versionKey = (name: string, version: string) => `${name}@${version}
 const latestManifestSchema = z.object({
   version: z.string(),
   deprecated: z.catch(z.optional(z.string()), undefined),
+  repository: z.catch(
+    z.optional(
+      z.union([
+        z.string(),
+        z.object({
+          url: z.catch(z.optional(z.string()), undefined),
+          directory: z.catch(z.optional(z.string()), undefined),
+        }),
+      ]),
+    ),
+    undefined,
+  ),
+  homepage: z.catch(z.optional(z.string()), undefined),
 });
 
 const advisorySchema = z.object({
@@ -159,6 +174,7 @@ export function createRegistryClient(options: RegistryClientOptions = {}): Regis
           name,
           latest: semver.valid(parsed.data.version) ? parsed.data.version : null,
           deprecated: parsed.data.deprecated ?? null,
+          changelogUrl: extractChangelogUrl(parsed.data),
         },
       };
     } catch (error) {

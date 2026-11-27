@@ -96,12 +96,15 @@ export function buildMatrix(inputs: MatrixInputs): Matrix {
       let row = rows.get(name);
       if (!row) {
         const lookup = inputs.packages.get(dep.name);
+        const changelogUrl =
+          lookup?.status === 'ok' ? (lookup.info.changelogUrl ?? undefined) : undefined;
         row = {
           name: dep.name,
           latest: lookup?.status === 'ok' ? lookup.info.latest : null,
           lookup: lookup === undefined ? 'skipped' : lookup.status === 'ok' ? 'ok' : lookup.status,
           cells: {},
           advisories: [],
+          ...(changelogUrl !== undefined ? { changelogUrl } : {}),
         };
         rows.set(dep.name, row);
       }

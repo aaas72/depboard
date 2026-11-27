@@ -82,6 +82,8 @@ export interface MatrixRow {
   cells: Record<string, MatrixCell>;
   /** Every advisory affecting at least one version used in this row. */
   advisories: Advisory[];
+  /** Safe HTTPS link to GitHub Releases or repository changelog, when known. */
+  changelogUrl?: string;
 }
 
 export interface Matrix {

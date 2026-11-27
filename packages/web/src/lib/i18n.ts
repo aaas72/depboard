@@ -109,6 +109,7 @@ const en = {
   'drawer.noAdvisories': 'No known vulnerabilities for this version.',
   'drawer.affected': 'Affected versions: {range}',
   'drawer.npm': 'View on npm',
+  'drawer.changelog': 'Release notes',
   'drawer.update': 'Update',
 
   'update.willRun': 'DepBoard will run, in this project’s folder:',
@@ -125,6 +126,7 @@ const en = {
   'update.confirm': 'Run the update',
   'update.cancel': 'Cancel',
   'update.whatsNew': 'See what changed on npm',
+  'update.releaseNotes': 'See release notes',
 
   'project.back': 'Back to the matrix',
   'project.notFound': 'That project isn’t in this scan anymore.',

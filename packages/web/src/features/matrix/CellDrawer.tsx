@@ -204,14 +204,26 @@ export function CellDrawer({ row, project, projects, api, activity, onClose }: C
         )}
 
         {row.lookup === 'ok' && (
-          <a
-            href={`https://www.npmjs.com/package/${row.name}`}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="link mt-5 inline-block text-sm"
-          >
-            {t('drawer.npm')} ↗
-          </a>
+          <div className="mt-5 flex flex-wrap gap-4 text-sm">
+            <a
+              href={`https://www.npmjs.com/package/${row.name}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="link inline-block"
+            >
+              {t('drawer.npm')} ↗
+            </a>
+            {row.changelogUrl !== undefined && (
+              <a
+                href={row.changelogUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="link inline-block"
+              >
+                {t('drawer.changelog')} ↗
+              </a>
+            )}
+          </div>
         )}
       </div>
     </aside>
