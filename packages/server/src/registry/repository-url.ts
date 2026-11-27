@@ -31,7 +31,10 @@ function normalizeHttpsUrl(raw: string): string | null {
   if (parsed.protocol !== 'https:' || !parsed.hostname) return null;
 
   if (parsed.hostname === 'github.com' || parsed.hostname === 'www.github.com') {
-    const parts = parsed.pathname.replace(/\.git$/, '').split('/').filter(Boolean);
+    const parts = parsed.pathname
+      .replace(/\.git$/, '')
+      .split('/')
+      .filter(Boolean);
     if (parts.length >= 2) {
       return `https://github.com/${parts[0]}/${parts[1]}/releases`;
     }
