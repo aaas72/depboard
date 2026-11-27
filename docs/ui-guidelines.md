@@ -82,7 +82,8 @@ so color is never the only signal.
 - **Honest states.** One project found: a hint to include its siblings. Nothing found: suggestions of
   folders that exist. Registry or advisory failures: a notice, never a silent gap. No drift: say so.
 - **Keyboard:** arrows move through the matrix, `Enter` opens a cell, `Home`/`End` and
-  `PageUp`/`PageDown` jump, `/` focuses search, `Esc` closes the drawer and returns focus.
+  `PageUp`/`PageDown` jump, `/` focuses search, `Esc` clears a non-empty search, otherwise closes the drawer and returns
+  focus.
 - **Accessible:** every filled cell has a full spoken label ("react in api: 18.3.1, major update
   available: 18.3.1 → 19.1.0"). Motion stays under 150 ms and respects `prefers-reduced-motion`.
 - **Ready for other languages:** every string goes through `t()`, and layout uses logical properties
