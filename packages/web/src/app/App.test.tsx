@@ -174,6 +174,27 @@ describe('narrowing the matrix', () => {
     expect(screen.getByText('Nothing matches these filters.')).toBeTruthy();
   });
 
+  it('clears a non-empty search with Esc, keeping the open drawer; then Esc closes it', async () => {
+    const { user, grid } = await renderApp();
+    await user.click(within(grid).getByRole('gridcell', { name: /^lodash in web-app/ }));
+    expect(screen.getByRole('dialog', { name: 'lodash' })).toBeTruthy();
+
+    const search = screen.getByRole('searchbox', { name: 'Search packages or projects' });
+    await user.click(search);
+    await user.type(search, 'lod');
+    expect(rowNames(screen.getByRole('grid'))).toEqual(['lodash']);
+
+    await user.keyboard('{Escape}');
+    expect((search as HTMLInputElement).value).toBe('');
+    expect(rowNames(screen.getByRole('grid'))).toHaveLength(4);
+    expect(screen.getByRole('dialog', { name: 'lodash' })).toBeTruthy();
+    expect(document.activeElement).toBe(search);
+
+    // An empty search leaves Esc to the drawer.
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
   it('hides up-to-date packages, saying how many', async () => {
     const { user } = await renderApp();
     await user.click(screen.getByRole('checkbox', { name: 'Hide up-to-date (1)' }));

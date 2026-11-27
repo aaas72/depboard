@@ -166,6 +166,14 @@ export function MatrixScreen({
               onChange={(e) => {
                 setQuery(e.target.value);
               }}
+              onKeyDown={(e) => {
+                // Esc empties a search first; the open drawer only closes on the next Esc.
+                if (e.key === 'Escape' && query !== '') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setQuery('');
+                }
+              }}
               placeholder={t('search.placeholder')}
               className="h-8 w-64 rounded-md border border-border-strong bg-surface ps-3 pe-8 text-sm placeholder:text-text-muted focus-visible:outline-2 focus-visible:outline-focus"
             />

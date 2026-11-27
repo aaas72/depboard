@@ -100,6 +100,7 @@ devDependencies, the most urgent first.
 | Arrow keys               | Move between cells                    |
 | `Enter`                  | Open the selected cell's details      |
 | `Esc`                    | Close the details, back to the matrix |
+| `Esc` in the search box  | Clear the search                      |
 | `Home` / `End`           | First or last cell of the row         |
 | `Ctrl+Home` / `Ctrl+End` | First or last row                     |
 | `PageUp` / `PageDown`    | Jump a screen up or down              |
