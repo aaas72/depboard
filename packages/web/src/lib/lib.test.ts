@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TOKEN_HEADER } from '@depboard/shared';
 import { ApiError, createApiClient, takeToken, type FetchLike } from './api.js';
-import { t } from './i18n.js';
+import { pickPluralForm, t } from './i18n.js';
 import { shortenPath } from './paths.js';
 
 const TOKEN = 'a'.repeat(64);
@@ -108,6 +108,43 @@ describe('t', () => {
 
   it('leaves unknown placeholders visible instead of printing "undefined"', () => {
     expect(t('drawer.inProject')).toBe('in {project}');
+  });
+
+  it('picks singular or plural for 0, 1 and 2 on the existing keys', () => {
+    expect(t('activity.count', { n: 0 })).toBe('0 updates');
+    expect(t('activity.count', { n: 1 })).toBe('1 update');
+    expect(t('activity.count', { n: 2 })).toBe('2 updates');
+    expect(t('activity.running', { n: 1 })).toBe('1 update running');
+    expect(t('activity.running', { n: 2 })).toBe('2 updates running');
+  });
+
+  it('uses Intl.PluralRules categories for a multi-category locale', () => {
+    // Arabic has six categories: zero, one, two, few, many, other.
+    expect(t('activity.count', { n: 0 }, 'ar')).toBe('0 updates');
+    expect(t('activity.count', { n: 1 }, 'ar')).toBe('1 update');
+    expect(t('activity.count', { n: 2 }, 'ar')).toBe('2 updates');
+    expect(t('activity.count', { n: 3 }, 'ar')).toBe('3 updates');
+    expect(t('activity.count', { n: 11 }, 'ar')).toBe('11 updates');
+    expect(t('activity.count', { n: 100 }, 'ar')).toBe('100 updates');
+  });
+
+  it('picks a category-keyed form when the message spells one out', () => {
+    const message =
+      'zero: none|one: {n} update|two: {n} updates (a pair)|few: {n} updates|many: {n} updates|other: {n} updates';
+    expect(pickPluralForm(message, 0, 'ar')).toBe('none');
+    expect(pickPluralForm(message, 1, 'ar')).toBe('{n} update');
+    expect(pickPluralForm(message, 2, 'ar')).toBe('{n} updates (a pair)');
+    expect(pickPluralForm(message, 3, 'ar')).toBe('{n} updates');
+    expect(pickPluralForm(message, 11, 'ar')).toBe('{n} updates');
+    expect(pickPluralForm(message, 100, 'ar')).toBe('{n} updates');
+    expect(pickPluralForm(message, 1, 'en')).toBe('{n} update');
+    expect(pickPluralForm(message, 2, 'en')).toBe('{n} updates');
+    expect(pickPluralForm('one: {n} update|other: {n} updates', 0, 'ar')).toBe('{n} updates');
+  });
+
+  it('fills placeholders for 0 and empty strings instead of leaving them', () => {
+    expect(t('activity.count', { n: 0 })).toBe('0 updates');
+    expect(t('project.open', { name: '' })).toBe('Details for ');
   });
 });
 
