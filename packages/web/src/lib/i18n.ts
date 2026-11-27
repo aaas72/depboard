@@ -206,14 +206,12 @@ export function t(key: MessageKey, vars: Vars = {}, locale = 'en'): string {
   const message: string = en[key];
   const forms = message.split('|');
   const n = vars['n'];
-  let form: string;
-  if (typeof n === 'number') {
-    form = pickPluralForm(message, n, locale);
-  } else if (forms.length > 1 && n !== 1) {
-    form = forms[1] ?? message;
-  } else {
-    form = forms[0] ?? message;
-  }
+  const form =
+    typeof n === 'number'
+      ? pickPluralForm(message, n, locale)
+      : forms.length > 1 && n !== undefined
+        ? (forms[1] ?? message)
+        : (forms[0] ?? message);
   return form.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in vars ? String(vars[name]) : match,
   );
