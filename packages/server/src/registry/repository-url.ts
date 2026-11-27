@@ -1,6 +1,6 @@
 export interface RepositoryInput {
-  repository?: string | { url?: string; directory?: string };
-  homepage?: string;
+  repository?: string | { url?: string | undefined; directory?: string | undefined } | undefined;
+  homepage?: string | undefined;
 }
 
 const GITHUB_SHORTHAND_RE = /^(?:github:)?([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+?)(?:\.git)?$/;
