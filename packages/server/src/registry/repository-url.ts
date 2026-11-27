@@ -1,5 +1,8 @@
 export interface RepositoryInput {
-  repository?: string | { url?: string | undefined; directory?: string | undefined } | undefined;
+  repository?:
+    | string
+    | { url?: string | undefined; directory?: string | undefined }
+    | undefined;
   homepage?: string | undefined;
 }
 
