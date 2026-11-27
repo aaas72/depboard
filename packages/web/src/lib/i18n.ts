@@ -157,13 +157,63 @@ export type MessageKey = keyof typeof en;
 type Vars = Record<string, string | number>;
 
 /**
- * Looks up a message. `{name}` placeholders are filled from `vars`. A message with `|` has a
- * singular and a plural form, picked by `vars.n` (enough for English; Intl.PluralRules later).
+ * Plural categories as returned by `Intl.PluralRules.select`. English only
+ * ever uses `one` and `other`; languages such as Arabic use all six.
  */
-export function t(key: MessageKey, vars: Vars = {}): string {
+const PLURAL_CATEGORIES: string[] = ['zero', 'one', 'two', 'few', 'many', 'other'];
+
+/**
+ * Picks one form from a `|`-separated message for a count `n` in `locale`.
+ * A part can be plain text, or `category: text` (for example `few: {n} updates`).
+ * Plain two-part messages keep the English rule: `one` takes the first part,
+ * every other category takes the second part.
+ */
+export function pickPluralForm(message: string, n: number, locale = 'en'): string {
+  const category = new Intl.PluralRules(locale).select(n);
+  const forms = message.split('|');
+  const keyed: { category: string; text: string }[] = [];
+  let allKeyed = forms.length > 0;
+  for (const form of forms) {
+    const colon = form.indexOf(':');
+    const prefix = colon > 0 ? form.slice(0, colon).trim() : '';
+    if (PLURAL_CATEGORIES.includes(prefix)) {
+      keyed.push({ category: prefix, text: form.slice(colon + 1) });
+    } else {
+      allKeyed = false;
+    }
+  }
+  if (allKeyed && keyed.length > 0) {
+    return (
+      keyed.find((entry) => entry.category === category)?.text ??
+      keyed.find((entry) => entry.category === 'other')?.text ??
+      keyed[0]?.text ??
+      message
+    );
+  }
+  if (forms.length > 1) {
+    return category === 'one' ? (forms[0] ?? message) : (forms[1] ?? message);
+  }
+  return forms[0] ?? message;
+}
+
+/**
+ * Looks up a message. `{name}` placeholders are filled from `vars`. A message with `|`
+ * has a singular and a plural form, picked by `vars.n` with `Intl.PluralRules`
+ * (in `locale`, English by default). A message can also spell out one form per
+ * plural category (`zero: …|one: …|two: …|few: …|many: …|other: …`).
+ */
+export function t(key: MessageKey, vars: Vars = {}, locale = 'en'): string {
   const message: string = en[key];
   const forms = message.split('|');
-  const form = forms.length > 1 && vars['n'] !== 1 ? (forms[1] ?? message) : (forms[0] ?? message);
+  const n = vars['n'];
+  let form: string;
+  if (typeof n === 'number') {
+    form = pickPluralForm(message, n, locale);
+  } else if (forms.length > 1 && n !== 1) {
+    form = forms[1] ?? message;
+  } else {
+    form = forms[0] ?? message;
+  }
   return form.replace(/\{(\w+)\}/g, (match, name: string) =>
     name in vars ? String(vars[name]) : match,
   );
