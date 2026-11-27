@@ -198,18 +198,26 @@ describe('updating one package in one project', () => {
     });
   });
 
-  it('offers the command to run by hand for package managers DepBoard does not update yet', async () => {
+  it('previews and runs bun add for standalone bun projects', async () => {
     const matrix = sampleMatrix();
     matrix.projects = matrix.projects.map((p) => (p.id === 'b' ? { ...p, manager: 'bun' } : p));
-    const previewUpdate = vi.fn();
-    const { api } = controllableApi(matrix, { previewUpdate });
-    const { drawer } = await openCell(api, /^zod in api/);
-    expect(
-      within(drawer).getByText(/Updating bun projects from DepBoard comes in a later version/),
-    ).toBeTruthy();
-    expect(within(drawer).getByText('bun add zod@3.23.0')).toBeTruthy();
-    expect(within(drawer).queryByRole('button', { name: /Update to/ })).toBeNull();
-    expect(previewUpdate).not.toHaveBeenCalled();
+    const { api, startUpdate } = controllableApi(matrix, {
+      previewUpdate: (request) =>
+        Promise.resolve({
+          version: request.version,
+          updateType: 'minor',
+          commands: [{ projectId: 'b', display: `bun add ${request.package}@${request.version}` }],
+        }),
+    });
+    const { user, drawer } = await openCell(api, /^zod in api/);
+    expect(await within(drawer).findByText(command('bun add zod@3.23.0'))).toBeTruthy();
+    await user.click(within(drawer).getByRole('button', { name: 'Update to 3.23.0' }));
+    expect(startUpdate).toHaveBeenCalledWith({
+      package: 'zod',
+      version: '3.23.0',
+      projectIds: ['b'],
+      confirmMajor: false,
+    });
   });
 
   it('offers no update for a package that is already up to date', async () => {

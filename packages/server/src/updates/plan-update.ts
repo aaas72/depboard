@@ -6,6 +6,7 @@ import {
   type UpdateRequest,
   type UpdateType,
 } from '@depboard/shared';
+import { buildBunInstallCommand } from '../adapters/bun.js';
 import { buildInstallCommand, type InstallCommand } from '../adapters/npm.js';
 import { buildPnpmInstallCommand } from '../adapters/pnpm.js';
 import { buildYarnInstallCommand } from '../adapters/yarn.js';
@@ -71,12 +72,6 @@ export function planUpdate(
       'Updating packages inside a monorepo from DepBoard comes in a later version.',
     );
   }
-  if (project.manager !== 'npm' && project.manager !== 'pnpm' && project.manager !== 'yarn') {
-    throw new DepboardError(
-      'MANAGER_NOT_SUPPORTED',
-      `Updating ${project.manager} projects from DepBoard comes in a later version.`,
-    );
-  }
 
   const version = request.version === 'latest' ? row.latest : request.version;
   const updateType = classifyUpdate(cell.version, version);
@@ -86,12 +81,13 @@ export function planUpdate(
     });
   }
 
-  const buildCommand =
-    project.manager === 'pnpm'
-      ? buildPnpmInstallCommand
-      : project.manager === 'yarn'
-        ? buildYarnInstallCommand
-        : buildInstallCommand;
+  const adapters = {
+    npm: buildInstallCommand,
+    pnpm: buildPnpmInstallCommand,
+    yarn: buildYarnInstallCommand,
+    bun: buildBunInstallCommand,
+  } as const;
+  const buildCommand = adapters[project.manager];
   return {
     project,
     version,
